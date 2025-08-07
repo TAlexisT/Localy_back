@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro - Localy</title>
+</head>
+<body>
+
+  <h1>LOCALY</h1>
+  <h2>Registro de usuario</h2>
+
+  <form id="form-registro">
+    <label for="usuario">Nombre de usuario</label><br>
+    <input type="text" id="usuario" name="usuario" required><br><br>
+
+    <label for="contrasena">Contraseña</label><br>
+    <input type="password" id="contrasena" name="contrasena" required><br><br>
+
+    <label for="correo">Correo electrónico</label><br>
+    <input type="email" id="correo" name="correo" required><br><br>
+
+    <button type="submit">Registrarse</button>
+  </form>
+
+  <script>
+    document.getElementById("form-registro").addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      const data = {
+        usuario: document.getElementById("usuario").value,
+        contrasena: document.getElementById("contrasena").value,
+        correo: document.getElementById("correo").value,
+        tipo: "cliente" 
+      };
+
+      try {
+        const res = await fetch("/api/registro", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const response = await res.json();
+
+        if (res.ok) {
+          alert("Registro exitoso. Ahora inicia sesión.");
+          window.location.href = "/login.html";
+        } else {
+          alert(response.error || "Error al registrar.");
+        }
+
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Hubo un error de red.");
+      }
+    });
+  </script>
+
+</body>
+</html>

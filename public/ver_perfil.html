@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil del Restaurante</title>
+</head>
+<body>
+
+  <h1>Perfil del Restaurante</h1>
+  <div id="perfilContainer">
+    Cargando perfil...
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const restauranteId = params.get('restauranteId');
+
+    const container = document.getElementById('perfilContainer');
+
+    if (!restauranteId) {
+      container.innerHTML = '<p style="color:red;">ID de restaurante no proporcionado.</p>';
+    } else {
+      fetch(`/api/restaurante/${restauranteId}`)
+        .then(res => {
+          if (!res.ok) throw new Error("Error al obtener los datos");
+          return res.json();
+        })
+        .then(data => {
+          container.innerHTML = `
+            <h2>${data.nombre || 'Sin nombre'}</h2>
+            <p><strong>Descripción:</strong> ${data.descripcion || 'No especificada'}</p>
+            <p><strong>Teléfono:</strong> ${data.telefono || 'No especificado'}</p>
+
+            <h3>Redes Sociales:</h3>
+            <ul>
+              ${data.redes?.facebook ? '<li>Facebook</li>' : ''}
+              ${data.redes?.instagram ? '<li>Instagram</li>' : ''}
+              ${data.redes?.tiktok ? '<li>TikTok</li>' : ''}
+              ${data.redes?.x ? '<li>X</li>' : ''}
+              ${data.redes?.whatsapp ? '<li>WhatsApp</li>' : ''}
+            </ul>
+
+            <h3>Horario:</h3>
+            <ul>
+              ${Object.entries(data.horario || {}).map(([dia, horas]) => `
+                <li><strong>${dia}:</strong> ${horas.apertura || 'Cerrado'} - ${horas.cierre || 'Cerrado'}</li>
+              `).join('')}
+            </ul>
+
+            <p><strong>Ubicación:</strong> ${data.ubicacion ? `Lat: ${data.ubicacion.lat}, Lng: ${data.ubicacion.lng}` : 'No definida'}</p>
+          `;
+        })
+        .catch(err => {
+          console.error("Error al cargar el perfil:", err);
+          container.innerHTML = '<p style="color:red;">Error al cargar el perfil.</p>';
+        });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Iniciar Sesión - Localy</title>
+  </head>
+  <body>
+    <h1>LOCALY</h1>
+    <h2>Iniciar Sesión</h2>
+
+    <form id="loginForm">
+      <label for="correo">Correo electrónico:</label><br />
+      <input type="email" id="correo" name="correo" required /><br /><br />
+
+      <label for="contrasena">Contraseña:</label><br />
+      <input
+        type="password"
+        id="contrasena"
+        name="contrasena"
+        required
+      /><br /><br />
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <hr />
+
+    <h3>¿Aún no tienes cuenta?</h3>
+    <button onclick="registrarUsuario()">Registrarme como Usuario</button>
+    <button onclick="registrarNegocio()">Registrarme como Negocio</button>
+
+    <script>
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const correo = document.getElementById("correo").value;
+          const contrasena = document.getElementById("contrasena").value;
+
+          try {
+            const res = await fetch("/api/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ correo, contrasena }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+              // Guardar en localStorage
+              localStorage.setItem("usuario", JSON.stringify(data));
+
+              // Redirigir según tipo
+              if (data.tipo === "negocio") {
+                if (data.restauranteId) {
+                  window.location.href = `/perfil.html?restauranteId=${data.restauranteId}`;
+                } else {
+                  alert("No se encontró el restaurante asociado.");
+                }
+              } else {
+                window.location.href = "/index.html";
+              }
+            } else {
+              alert(data.error || "Credenciales incorrectas");
+            }
+          } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            alert("Error de red.");
+          }
+        });
+
+      function registrarUsuario() {
+        window.location.href = "/registro.html";
+      }
+
+      function registrarNegocio() {
+        window.location.href = "/anunciate.html";
+      }
+    </script>
+  </body>
+</html>
