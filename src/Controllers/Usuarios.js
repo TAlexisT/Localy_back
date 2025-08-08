@@ -2,9 +2,18 @@ const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
 
 class Controlador_Usuario {
+  /**
+   * Declaracion de variables secretas (privadas)
+   */
+  #modeloUsuario;
+  #modeloRestaurante;
+
+  /**
+   * Se inicializan todas las instancias de clases subyacentes
+   */
   constructor() {
-    this.modeloUsuario = new Modelo_Usuario();
-    this.modeloRestaurante = new Modelo_Restaurante();
+    this.#modeloUsuario = new Modelo_Usuario();
+    this.#modeloRestaurante = new Modelo_Restaurante();
   }
 
   registro = async (req, res) => {
@@ -15,18 +24,18 @@ class Controlador_Usuario {
     }
 
     try {
-      if (await this.modeloUsuario.correoExiste(correo)) {
+      if (await this.#modeloUsuario.correoExiste(correo)) {
         return res.status(400).json({ error: "El correo ya está registrado." });
       }
 
-      if (await this.modeloUsuario.nombreExiste(usuario)) {
+      if (await this.#modeloUsuario.nombreExiste(usuario)) {
         return res
           .status(400)
           .json({ error: "El nombre de usuario ya existe." });
       }
 
       // Creacion de un nuevo usuario
-      const refID = await this.modeloUsuario.registrarUsuario(
+      const refID = await this.#modeloUsuario.registrarUsuario(
         usuario,
         contrasena,
         correo,
@@ -51,14 +60,14 @@ class Controlador_Usuario {
     }
 
     try {
-      const info = await this.modeloUsuario.usuario(correo, contrasena);
+      const info = await this.#modeloUsuario.usuario(correo, contrasena);
 
       if (info == null) {
         return res.status(401).json({ error: "Credenciales inválidas" });
       }
 
       if (info.usuario.tipo === "negocio") {
-        const restSnap = await this.modeloRestaurante.RestauranteDeUsuario(
+        const restSnap = await this.#modeloRestaurante.restauranteDeUsuario(
           info.usuarioId
         );
 
