@@ -84,7 +84,7 @@ class Controlador_Restaurante {
       const preVista = await consulta.get();
 
       if (preVista.empty)
-        return res.status(200).json({ datos: [], tokenSiguiente: null });
+        return res.status(200).json({ datos: [], ultimoToken: null });
 
       const datos = [];
       preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
@@ -94,7 +94,7 @@ class Controlador_Restaurante {
 
       res.status(200).json({
         datos,
-        tokenSiguiente: ultimoElemento.id
+        ultimoToken: ultimoElemento.id
       });
     } catch (error) {
       console.error(error);
