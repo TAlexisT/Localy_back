@@ -70,9 +70,15 @@ Respuesta:
 **Mostrar restaurantes en paginación**
 ```
 /api/restaurante/mostrar
-/api/restaurante/mostrar?pageSize=5&startAfter=As23sA...
+/api/restaurante/mostrar?pageSize=5&cursor=As23sA...&direction=siguiente
 ```
-Este end-point responde con los restaurantes de forma paginada. Para poder interactuar con la paginación se necesita introducir "query/es" en la URL `ej. pageSize=5`, `ej. startAfter=As23sA...`.
+Este end-point responde con los restaurantes de forma paginada. Para poder interactuar con la paginación se necesita introducir parámetros en la URL `ej. pageSize=5`, `ej. cursor=As23sA...`, `ej. direction=siguiente`.
+Los parámetros sirven para dar instrucciones de comportamiento a la API.
+
+* `pageSize`: Sirve para establecer el largo del arreglo de datos (número de los registros deseados, por defecto, en 5).
+* `cursor`: Sirve para referenciar el registro desde el cual se ejecutará la consulta (id del restaurante cursor).
+* `direction`: Sirve para establecer la dirección en la cual se ejecutará la consulta (siguiente/previo).
+  
 ```
 Respuesta:
 {
@@ -91,7 +97,12 @@ Respuesta:
         },
         ...
     ],
-    "ultimoToken": String            // Id del último restaurante seleccionado
+    "primerToken": String,          // Primer id en la lista de restaurantes
+    "ultimoToken": String,          // Ultimo id en la lista de restaurantes
+    "paginas": int,                 // Numero de paginas disponibles
+    "paginaActual": int,            // Numero de la pagina actual
+    "existeProx": Boolean,          // Si existe una pagina siguiente
+    "existeAnt": Boolean            // Si existe una pagina anterior
 }
 ```
 ### End-Points tipo POST
