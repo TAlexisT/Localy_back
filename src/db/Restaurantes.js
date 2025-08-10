@@ -25,12 +25,27 @@ class Modelo_Restaurante {
       });
   }
 
-  async tamanoConsulta(tamano){
+  async tamanoConsultaOrdenada(tamano = Int32Array, direccion = String) {
     // Posibilidad de añadir algunos filtros como parametros
     return db
+      .collection("restaurantes")
+      .orderBy("creado", direccion)
+      .limit(tamano);
+  }
+
+  async totalDeRestaurantes() {
+    return (await db.collection("restaurantes").count().get()).data().count;
+  }
+
+  async posicionActual(restauranteId = "", orden = "") {
+    return (
+      await db
         .collection("restaurantes")
-        .orderBy("creado", "desc")
-        .limit(tamano)
+        .orderBy("creado", orden)
+        .endBefore(restauranteId)
+        .count()
+        .get()
+    ).data().count;
   }
 }
 

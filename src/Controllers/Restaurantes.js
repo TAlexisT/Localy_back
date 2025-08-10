@@ -63,38 +63,68 @@ class Controlador_Restaurante {
 
   paginacionRestaurantes = async (req, res) => {
     const tamano = parseInt(req.query.pageSize) || 5;
-    const empezarDespuesDe = req.query.startAfter || null;
-    
-    try {
-      // Se fija el limite para la consulta, sin embargo la consulta todavia no se ha realizado
-      let consulta = await this.#modeloRestaurante.tamanoConsulta(tamano);
+    const cursorId = req.query.cursor || null;
+    const direccion = req.query.direction || "siguiente";
 
-      // En caso de que haya un cursor, se seleccionan solo los registros despues de él
-      if (empezarDespuesDe) {
-        const ultimoDoc = await this.#modeloRestaurante.obtenerRestaurante(
-          empezarDespuesDe
+    try {
+      let consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
+        tamano,
+        "desc"
+      );
+      const paginas = Math.ceil(
+        (await this.#modeloRestaurante.totalDeRestaurantes()) / tamano
+      );
+
+      if (cursorId) {
+        const cursorDoc = await this.#modeloRestaurante.obtenerRestaurante(
+          cursorId
         );
-        // Inicia la consulta despues del cursor seleccionado
-        if (ultimoDoc.exists) {
-          consulta = consulta.startAfter(ultimoDoc);
+        if (cursorDoc.exists) {
+          if (direccion === "siguiente") {
+            consulta = consulta.startAfter(cursorDoc);
+          } else if (direccion === "previo") {
+            // Para navegación hacia atrás, necesitamos invertir el orden temporalmente
+            consulta = consulta.endBefore(cursorDoc);
+          }
         }
       }
 
-      // final mente, se ejecuta la consulta 
       const preVista = await consulta.get();
+      if (preVista.empty) {
+        return res.status(200).json({
+          datos: [],
+          primerToken: null,
+          ultimoToken: null,
+          paginas,
+          paginaActual: 0,
+          existeProx: false,
+          existeAnt: false,
+        });
+      }
 
-      if (preVista.empty)
-        return res.status(200).json({ datos: [], ultimoToken: null });
-
-      const datos = [];
+      let datos = [];
       preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
 
-      // Obtiene el ultimo elemento del arreglo para la siguiente paginación
-      const ultimoElemento = preVista.docs[preVista.docs.length - 1];
+      const primerToken = preVista.docs[0].id;
+      const ultimoToken = preVista.docs[preVista.docs.length - 1].id;
+
+      let paginaActual = 0;
+      if (cursorId) {
+        const index =
+          (await this.#modeloRestaurante.posicionActual(primerToken, "desc")) +
+          1;
+
+        paginaActual = index / tamano + 1;
+      } else paginaActual = 1;
 
       res.status(200).json({
         datos,
-        ultimoToken: ultimoElemento.id
+        primerToken,
+        ultimoToken,
+        paginas,
+        paginaActual,
+        existeProx: paginaActual < paginas,
+        existeAnt: paginaActual > 1,
       });
     } catch (error) {
       console.error(error);

@@ -144,12 +144,12 @@ app.get("/api/restaurante/pago-exitoso", async (req, res) => {
   }
 });
 
-app.put(
-  "/api/restaurante/perfil/:id",
-  controladorRestaurante.actualizarPerfil
-);
+app.put("/api/restaurante/perfil/:id", controladorRestaurante.actualizarPerfil);
 
-app.get("/api/restaurante/perfil/:id", controladorRestaurante.obtenerRestaurante);
+app.get(
+  "/api/restaurante/perfil/:id",
+  controladorRestaurante.obtenerRestaurante
+);
 
 app.get(
   "/api/restaurante/mostrar",
