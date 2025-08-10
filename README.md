@@ -1,7 +1,7 @@
-# LIVELY® Back-End
+# LOCALY® Back-End
 
 ## ¿Qué hace el proyecto?
-Este proyecto es el "Back-end" de la aplicación tanto web como móvil de LIVELY®. 
+Este proyecto es el "Back-end" de la aplicación tanto web como móvil de LOCALY®. 
 El proyecto funcionará como el servidor, en donde se ejecutarán las operaciones correspondientes a los usuarios así como la gestión de los restaurantes y cuál sea la entidad relacionada. Dentro del servidor se podrán ejecutar tanta operación básicas de CRUD, por sus siglas en Inglés (Create, Read, Update, and Delete), como operaciones más complejas, por ejemplo, la ejecución de pagos y membresías de clientes y restaurantes.
 
 ## ¿Por qué el proyecto es útil?
