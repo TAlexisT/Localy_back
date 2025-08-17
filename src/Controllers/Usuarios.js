@@ -17,9 +17,9 @@ class Controlador_Usuario {
   }
 
   registro = async (req, res) => {
-    const { usuario, contrasena, correo, tipo } = req.body;
+    const { usuario, contrasena, correo, tipo, telefono } = req.body;
 
-    if (!usuario || !contrasena || !correo || !tipo) {
+    if (!usuario || !contrasena || !correo || !tipo || !telefono) {
       return res.status(400).json({ error: "Todos los campos son requeridos" });
     }
 
@@ -38,13 +38,18 @@ class Controlador_Usuario {
       const refID = await this.#modeloUsuario.registrarUsuario(
         usuario,
         contrasena,
-        correo,
+        correo, 
         tipo
       );
 
+      if (!refID)
+        return res.status(400).json({
+          mensaje: "El usuario no pudo ser añadido.",
+        });
+
       res.status(201).json({
         message: "Usuario registrado correctamente",
-        usuarioId: refID,
+        usuarioId: refID.id,
       });
     } catch (error) {
       console.error("Error al registrar usuario:", error);

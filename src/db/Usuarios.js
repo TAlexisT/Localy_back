@@ -1,4 +1,4 @@
-const { admin, db } = require("../db/Configuraciones");
+const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Usuario {
   async nombreExiste(usuarioNombre) {
@@ -19,16 +19,17 @@ class Modelo_Usuario {
     return !correoExistente.empty;
   }
 
-  async registrarUsuario(usuario, contrasena, correo, tipo) {
+  async registrarUsuario(usuario, contrasena, correo, tipo, telefono = null) {
     const docRef = await db.collection("usuarios").add({
       usuario,
       contrasena,
       correo,
       tipo,
+      telefono,
       creado: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    return docRef.id;
+    return docRef;
   }
 
   async usuario(correo, contrasena) {

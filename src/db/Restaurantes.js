@@ -1,4 +1,4 @@
-const { admin, db } = require("../db/Configuraciones");
+const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Restaurante {
   async obtenerRestaurante(restauranteId) {
@@ -46,6 +46,19 @@ class Modelo_Restaurante {
         .count()
         .get()
     ).data().count;
+  }
+
+  async crearRestaurante(usuarioId, correo, telefono, tamano ) {
+    const restauranteRef = await db.collection("restaurantes").add({
+      usuarioId,
+      correo,
+      telefono,
+      tamano,
+      activo : true,
+      creado : admin.firestore.Timestamp.now(),
+    });
+
+    return restauranteRef;
   }
 }
 

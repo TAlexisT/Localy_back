@@ -10,4 +10,6 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-module.exports = { admin, db };
+const stripe = require("stripe")(process.env.STRIPE_TEST_KEY);
+
+module.exports = { admin, db, stripe };
