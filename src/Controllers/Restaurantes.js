@@ -71,7 +71,8 @@ class Controlador_Restaurante {
         tamano,
         "desc"
       );
-      const paginas = Math.ceil(
+      const paginas =
+        Math.ceil(
         (await this.#modeloRestaurante.totalDeRestaurantes()) / tamano
       );
 
@@ -114,7 +115,7 @@ class Controlador_Restaurante {
           (await this.#modeloRestaurante.posicionActual(primerToken, "desc")) +
           1;
 
-        paginaActual = index / tamano + 1;
+        paginaActual = Math.ceil(index / tamano);
       } else paginaActual = 1;
 
       res.status(200).json({
