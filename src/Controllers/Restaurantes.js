@@ -1,19 +1,26 @@
+require("dotenv").config();
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
+const Modelo_Tramites_Pendientes = require("../db/tramites_pendientes");
+const Interaccion_Stripe = require("../ThirdParty/stripe");
 
 class Controlador_Restaurante {
   /**
    * Declaracion de variables secretas (privadas)
    */
-  // #modeloUsuario;
+  #modeloUsuario;
   #modeloRestaurante;
+  #modeloTramitesPendientes;
+  #interaccionStripe;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
-    // this.#modeloUsuario = new Modelo_Usuario();
+    this.#modeloUsuario = new Modelo_Usuario();
     this.#modeloRestaurante = new Modelo_Restaurante();
+    this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
+    this.#interaccionStripe = new Interaccion_Stripe();
   }
 
   obtenerRestaurante = async (req, res) => {
@@ -71,8 +78,7 @@ class Controlador_Restaurante {
         tamano,
         "desc"
       );
-      const paginas =
-        Math.ceil(
+      const paginas = Math.ceil(
         (await this.#modeloRestaurante.totalDeRestaurantes()) / tamano
       );
 
@@ -130,6 +136,66 @@ class Controlador_Restaurante {
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Server error" });
+    }
+  };
+
+  negocioRegistro = async (req, res) => {
+    const { price_id, correo, contrasena, telefono, usuario } = req.body;
+
+    if (!price_id | !correo | !contrasena | !telefono | !usuario) {
+      return res.status(400).send({
+        mensaje:
+          "Todos los campos (price_id, correo, contrasena, telefono, usuario) son obligatorios.",
+      });
+    }
+
+    var tramitePendienteRef = null;
+
+    try {
+      if (
+        (await this.#modeloUsuario.nombreExiste(usuario)) ||
+        (await this.#modeloUsuario.correoExiste(correo))
+      )
+        return res.status(403).json({
+          mensaje:
+            "El nombre de usuario o el correo electrónico o ambos ya están en uso.",
+        });
+
+      tramitePendienteRef =
+        await this.#modeloTramitesPendientes.crearTramitePendiente(
+          price_id,
+          correo,
+          contrasena,
+          telefono,
+          usuario,
+          false
+        );
+    } catch (err) {
+      if (tramitePendienteRef.id)
+        this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
+      console.error("Error al crear sesión de Stripe:", err);
+      return res.status(500).json({
+        mensaje: "Se produjo un error al validar o registrar el procedimiento.",
+      });
+    }
+
+    try {
+      const session = await this.#interaccionStripe.crearSession(
+        price_id,
+        { tramiteId: tramitePendienteRef.id },
+        `${process.env.FRONTEND_URL}/pago-exitoso`, // enfoque para "live"
+        `${process.env.FRONTEND_URL}/pago-erroneo`,  // enfoque para "live"
+        true
+      );
+
+      return res.status(202).json({ url: session.url });
+    } catch (err) {
+      console.error("El metodo fallo al crear una nueva sesion: ", err)
+      if (tramitePendienteRef.id)
+        this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
+      return res.status(500).json({
+        mensaje: "No se pudo concretar el tramite." + err.message,
+      });
     }
   };
 }
