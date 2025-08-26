@@ -1,8 +1,16 @@
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Restaurante {
-  async obtenerRestaurante(restauranteId) {
+  async obtenerRestaurante(restauranteId = "") {
     return await db.collection("restaurantes").doc(restauranteId).get();
+  }
+
+  async obtenerRestauranteRK(randomKey = Number) {
+    return await db
+      .collection("restaurantes")
+      .where("randomKey", "==", randomKey)
+      .limit(1)
+      .get();
   }
 
   async restauranteDeUsuario(usuarioId) {
@@ -25,11 +33,11 @@ class Modelo_Restaurante {
       });
   }
 
-  async tamanoConsultaOrdenada(tamano = Int32Array, direccion = String) {
+  async tamanoConsultaOrdenada(tamano = Int32Array, esDesc = true) {
     // Posibilidad de añadir algunos filtros como parametros
     return db
       .collection("restaurantes")
-      .orderBy("creado", direccion)
+      .orderBy("randomKey", esDesc ? "desc" : "asc")
       .limit(tamano);
   }
 
@@ -48,14 +56,15 @@ class Modelo_Restaurante {
     ).data().count;
   }
 
-  async crearRestaurante(usuarioId, correo, telefono, tamano ) {
+  async crearRestaurante(usuarioId, correo, telefono, tamano) {
     const restauranteRef = await db.collection("restaurantes").add({
       usuarioId,
       correo,
       telefono,
       tamano,
-      activo : true,
-      creado : admin.firestore.Timestamp.now(),
+      activo: true,
+      randomKey: Math.random(),
+      creado: admin.firestore.Timestamp.now(),
     });
 
     return restauranteRef;

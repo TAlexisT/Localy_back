@@ -70,68 +70,57 @@ class Controlador_Restaurante {
 
   paginacionRestaurantes = async (req, res) => {
     const tamano = parseInt(req.query.pageSize) || 5;
-    const cursorId = req.query.cursor || null;
+    const seed = parseFloat(req.query.seed || Math.random().toFixed(8));
+    const cursor = parseFloat(req.query.cursor) || null;
     const direccion = req.query.direction || "siguiente";
 
+    // const filtros = {
+    //   tipo: req.body.tipo || null,
+    //   momento: req.body.fecha || null,
+    //   puntuacion: req.body.puntuacion || null,
+    // };
+
     try {
+      const esDesc = cursor == null || cursor < seed;
+
       let consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
-        tamano,
-        "desc"
-      );
-      const paginas = Math.ceil(
-        (await this.#modeloRestaurante.totalDeRestaurantes()) / tamano
+        tamano
       );
 
-      if (cursorId) {
-        const cursorDoc = await this.#modeloRestaurante.obtenerRestaurante(
-          cursorId
-        );
-        if (cursorDoc.exists) {
+      if (cursor) {
           if (direccion === "siguiente") {
-            consulta = consulta.startAfter(cursorDoc);
+          consulta = consulta.where("randomKey", "<", cursor);
+          if (!esDesc) consulta = consulta.where("randomKey", ">", seed);
           } else if (direccion === "previo") {
-            // Para navegación hacia atrás, necesitamos invertir el orden temporalmente
-            consulta = consulta.endBefore(cursorDoc);
+          consulta = consulta.where("randomKey", ">", cursor);
+          if (esDesc) consulta = consulta.where("randomKey", "<", seed);
           }
-        }
+      } else {
+        consulta = consulta.where("randomKey", "<=", seed);
       }
 
-      const preVista = await consulta.get();
-      if (preVista.empty) {
-        return res.status(200).json({
-          datos: [],
-          primerToken: null,
-          ultimoToken: null,
-          paginas,
-          paginaActual: 0,
-          existeProx: false,
-          existeAnt: false,
-        });
-      }
+      var preVista = await consulta.get();
 
-      let datos = [];
+      var datos = [];
       preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
 
-      const primerToken = preVista.docs[0].id;
-      const ultimoToken = preVista.docs[preVista.docs.length - 1].id;
+      if (datos.length < tamano || datos.length == 0) {
+        consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
+          tamano - datos.length,
+          esDesc
+        );
 
-      let paginaActual = 0;
-      if (cursorId) {
-        const index =
-          (await this.#modeloRestaurante.posicionActual(primerToken, "desc")) +
-          1;
+        preVista = await consulta.get();
+        preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
+      }
 
-        paginaActual = Math.ceil(index / tamano);
-      } else paginaActual = 1;
+      const primerToken = datos[0].randomKey;
+      const ultimoToken = datos[datos.length - 1].randomKey;
 
       res.status(200).json({
         datos,
         primerToken,
         ultimoToken,
-        paginas,
-        paginaActual,
-        existeProx: paginaActual < paginas,
-        existeAnt: paginaActual > 1,
       });
     } catch (error) {
       console.error(error);
