@@ -70,61 +70,111 @@ class Controlador_Restaurante {
 
   paginacionRestaurantes = async (req, res) => {
     const tamano = parseInt(req.query.pageSize) || 5;
-    const seed = parseFloat(req.query.seed || Math.random().toFixed(8));
+    const seed =
+      parseFloat(req.query.seed) || parseFloat(Math.random().toFixed(8));
     const cursor = parseFloat(req.query.cursor) || null;
     const direccion = req.query.direction || "siguiente";
 
-    // const filtros = {
-    //   tipo: req.body.tipo || null,
-    //   momento: req.body.fecha || null,
-    //   puntuacion: req.body.puntuacion || null,
-    // };
-
     try {
-      const esDesc = cursor == null || cursor < seed;
+      let consulta;
+      let datos = [];
 
-      let consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
-        tamano
-      );
+      if (!cursor) {
+        // primera pagina
+        var consultaAntes =
+          await this.#modeloRestaurante.tamanoConsultaOrdenada(tamano, true);
+        consultaAntes.where("randomKey", "<=", seed);
 
-      if (cursor) {
-          if (direccion === "siguiente") {
-          consulta = consulta.where("randomKey", "<", cursor);
-          if (!esDesc) consulta = consulta.where("randomKey", ">", seed);
-          } else if (direccion === "previo") {
-          consulta = consulta.where("randomKey", ">", cursor);
-          if (esDesc) consulta = consulta.where("randomKey", "<", seed);
-          }
-      } else {
-        consulta = consulta.where("randomKey", "<=", seed);
-      }
+        var consultaDespues =
+          await this.#modeloRestaurante.tamanoConsultaOrdenada(tamano, false);
+        consultaAntes = consultaAntes.where("randomKey", ">", seed);
 
-      var preVista = await consulta.get();
+        const [snapshotAntes, snapshotDespues] = await Promise.all([
+          consultaAntes.get(),
+          consultaDespues.get(),
+        ]);
 
-      var datos = [];
-      preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-
-      if (datos.length < tamano || datos.length == 0) {
-        consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
-          tamano - datos.length,
-          esDesc
+        // convina los valores aunque prioriza los valores mayores a "seed"
+        snapshotAntes.forEach((doc) =>
+          datos.push({ id: doc.id, ...doc.data() })
+        );
+        snapshotDespues.forEach((doc) =>
+          datos.push({ id: doc.id, ...doc.data() })
         );
 
-        preVista = await consulta.get();
-        preVista.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
+        // Trim to page size
+        datos = datos.slice(0, tamano);
+      } else {
+        const esSup = cursor > seed;
+
+          if (direccion === "siguiente") {
+          // Next page - get records after cursor
+          consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
+            tamano,
+            false
+          );
+          consulta = consulta.where("randomKey", ">", cursor);
+
+          const snapshot = await consulta.get();
+          snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
+
+          // If we don't have enough results, wrap around to beginning
+          if (datos.length < tamano) {
+            const consultaWrap =
+              await this.#modeloRestaurante.tamanoConsultaOrdenada(
+                tamano - datos.length,
+                false
+              );
+
+            const snapshotWrap = await consultaWrap.get();
+            snapshotWrap.forEach((doc) =>
+              datos.push({ id: doc.id, ...doc.data() })
+            );
+          }
+        } else if (direccion === "previo") {
+          // Previous page - get records before cursor
+        consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
+            tamano,
+            true
+          );
+          consulta = consulta.where("randomKey", "<", cursor);
+
+          const snapshot = await consulta.get();
+          snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
+
+          // If we don't have enough results, wrap around to end
+          if (datos.length < tamano) {
+            const consultaWrap =
+              await this.#modeloRestaurante.tamanoConsultaOrdenada(
+          tamano - datos.length,
+                true
+        );
+
+            const snapshotWrap = await consultaWrap.get();
+            // Reverse to maintain chronological order
+            const wrapData = [];
+            snapshotWrap.forEach((doc) =>
+              wrapData.push({ id: doc.id, ...doc.data() })
+            );
+            datos = [...wrapData.reverse(), ...datos].slice(0, tamano);
+          }
+          datos.reverse();
+        }
       }
 
-      const primerToken = datos[0].randomKey;
-      const ultimoToken = datos[datos.length - 1].randomKey;
+      const primerToken = datos.length > 0 ? datos[0].randomKey : null;
+      const ultimoToken =
+        datos.length > 0 ? datos[datos.length - 1].randomKey : null;
 
       res.status(200).json({
         datos,
         primerToken,
         ultimoToken,
+        seed, // Return the seed for consistent pagination
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Server error" });
+      console.error("Error en paginación:", error);
+      res.status(500).json({ error: "Error del servidor" });
     }
   };
 
