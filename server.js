@@ -4,7 +4,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
-const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const os = require("os");
 const path = require("path");
@@ -24,7 +23,8 @@ app.use(express.static("public"));
  */
 const Controlador_Usuario = require("./src/Controllers/Usuarios");
 const Controlador_Restaurante = require("./src/Controllers/Restaurantes");
-const Controlador_Stripe = require("./src/Controllers/stripe");
+const Controlador_Stripe = require("./src/Controllers/Stripe");
+const Controlador_Tramites_Pendientes = require("./src/Controllers/Tramites_Pendientes");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -36,6 +36,7 @@ const Controlador_Stripe = require("./src/Controllers/stripe");
 const controladorUsuario = new Controlador_Usuario();
 const controladorRestaurante = new Controlador_Restaurante();
 const controladorStripe = new Controlador_Stripe();
+const controladorTramitesPendientes = new Controlador_Tramites_Pendientes();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -64,12 +65,6 @@ app.post("/api/usuario/login", controladorUsuario.login);
 // Fin de Subsección: Usuario
 
 // Inicio de Subsección: Restaurante
-app.post(
-  "/api/restaurante/crear-sesion-pago",
-  controladorRestaurante.negocioRegistro
-);
-app.put("/api/restaurante/perfil/:id", controladorRestaurante.actualizarPerfil);
-
 app.get(
   "/api/restaurante/perfil/:id",
   controladorRestaurante.obtenerRestaurante
@@ -78,7 +73,32 @@ app.get(
   "/api/restaurante/mostrar",
   controladorRestaurante.paginacionRestaurantes
 );
+app.get(
+  "/api/restaurantes/perfil/:id/logo",
+  controladorRestaurante.obtenerLogo
+);
+
+app.put("/api/restaurante/perfil/:id", controladorRestaurante.actualizarPerfil);
+
+app.patch(
+  "/api/restaurante/perfil/:id/logo",
+  controladorRestaurante.logoUpload.single("svg"),
+  controladorRestaurante.actualizarLogo
+);
+
+app.post(
+  "/api/restaurante/crear-sesion-pago",
+  controladorRestaurante.negocioRegistro
+);
+// app.post("/api/restaurante/perfil/:id/logo");
 // Fin de Subsección: Restaurante
+
+// Inicio de Subsección: Tramites Pendientes
+app.get(
+  "/api/tramite-pendiente/:id",
+  controladorTramitesPendientes.obtenerTramited
+);
+// Fin de Subsección: Tramites Pendientes
 
 /**
  * Fin de Sección: Enrutamiento

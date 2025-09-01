@@ -1,8 +1,16 @@
 require("dotenv").config();
+const multer = require("multer");
+
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
-const Modelo_Tramites_Pendientes = require("../db/tramites_pendientes");
+const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/stripe");
+
+const {
+  esquemaPropietario,
+  esquemaRestaurante,
+} = require("./Validators/Schemas/Restaurantes");
+const validador = require("./Validators/Validador");
 
 class Controlador_Restaurante {
   /**
@@ -46,11 +54,44 @@ class Controlador_Restaurante {
     }
   };
 
+  obtenerLogo = async (req, res) => {
+    const { id } = req.params;
+
+    if (!id)
+      return res
+        .status(400)
+        .json({ exito: false, mensaje: "El ID no fue proporcionado." });
+
+    try {
+      const restauranteRef = await this.#modeloRestaurante.obtenerRestaurante(
+        id
+      );
+      if (!restauranteRef.exists || !restauranteRef.data().logo)
+        return res.status(404).json({
+          exito: false,
+          mensaje: `Los datos requeridos para el restaurante ${id} no fueron encontrados.`,
+        });
+
+      res.set("Content-Type", "image/svg+xml");
+      return res.status(200).send(restauranteRef.data().logo);
+    } catch (err) {
+      console.log(
+        `Ocurrio un error al obtener el logotipo del restaurante ${id}: ${err.message}`
+      );
+    }
+  };
+
   actualizarPerfil = async (req, res) => {
     const restauranteId = req.params.id;
-    const datos = req.body;
 
-    // ¡¡¡ Necesitamos una validación de los datas para asegurarnos de ningun tipo de brecha de seguridad !!!!
+    const validacion = validador(req.body, esquemaRestaurante);
+
+    if (!validacion.exito) {
+      return res.status(400).send({
+        mensaje: validacion.mensaje,
+        errores: validacion.errores,
+      });
+    }
 
     if (!restauranteId) {
       return res
@@ -59,12 +100,48 @@ class Controlador_Restaurante {
     }
 
     try {
-      await this.#modeloRestaurante.actualizarRestaurante(restauranteId, datos);
+      await this.#modeloRestaurante.actualizarRestaurante(
+        restauranteId,
+        validacion.datos
+      );
 
       res.status(200).json({ message: "Perfil guardado correctamente" });
     } catch (err) {
       console.error("Error al guardar perfil:", err);
       res.status(500).json({ error: "Error al guardar el perfil" });
+    }
+  };
+
+  actualizarLogo = async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      if (!req.file)
+        return res
+          .status(400)
+          .json({ exito: false, mensaje: "El logotipo no fue recibido." });
+
+      const svgContenido = req.file.buffer.toString("utf8");
+
+      if (!svgContenido.includes("<svg") || !svgContenido.includes("</svg>"))
+        return req
+          .status(400)
+          .json({ exito: false, mensaje: "El SVG no es valido." });
+
+      await this.#modeloRestaurante.patchRestaurante(id, {
+        logo: svgContenido,
+      });
+
+      return res.status(200).json({
+        exito: true,
+        mensaje: "El logotipo fue actualizado correctamente",
+      });
+    } catch (err) {
+      console.error("Error updating SVG logo:", err);
+      req.status(500).json({
+        exito: false,
+        mensaje: "Ocurrió un error en el servidor.",
+      });
     }
   };
 
@@ -107,7 +184,7 @@ class Controlador_Restaurante {
       } else {
         const esSup = cursor > seed;
 
-          if (direccion === "siguiente") {
+        if (direccion === "siguiente") {
           // Next page - get records after cursor
           consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
             tamano,
@@ -133,7 +210,7 @@ class Controlador_Restaurante {
           }
         } else if (direccion === "previo") {
           // Previous page - get records before cursor
-        consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
+          consulta = await this.#modeloRestaurante.tamanoConsultaOrdenada(
             tamano,
             true
           );
@@ -146,9 +223,9 @@ class Controlador_Restaurante {
           if (datos.length < tamano) {
             const consultaWrap =
               await this.#modeloRestaurante.tamanoConsultaOrdenada(
-          tamano - datos.length,
+                tamano - datos.length,
                 true
-        );
+              );
 
             const snapshotWrap = await consultaWrap.get();
             // Reverse to maintain chronological order
@@ -179,14 +256,18 @@ class Controlador_Restaurante {
   };
 
   negocioRegistro = async (req, res) => {
-    const { price_id, correo, contrasena, telefono, usuario } = req.body;
+    const validacion = validador(req.body, esquemaPropietario);
 
-    if (!price_id | !correo | !contrasena | !telefono | !usuario) {
+    if (!validacion.exito) {
       return res.status(400).send({
-        mensaje:
-          "Todos los campos (price_id, correo, contrasena, telefono, usuario) son obligatorios.",
+        exito: false,
+        mensaje: validacion.mensaje,
+        errores: validacion.errores,
       });
     }
+
+    const { price_id, correo, contrasena, telefono, usuario } =
+      validacion.datos;
 
     var tramitePendienteRef = null;
 
@@ -222,21 +303,36 @@ class Controlador_Restaurante {
       const session = await this.#interaccionStripe.crearSession(
         price_id,
         { tramiteId: tramitePendienteRef.id },
-        `${process.env.FRONTEND_URL}/pago-exitoso`, // enfoque para "live"
-        `${process.env.FRONTEND_URL}/pago-erroneo`,  // enfoque para "live"
+        `${process.env.FRONTEND_URL}/pago-exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${process.env.FRONTEND_URL}/pago-erroneo`, // enfoque para "live"
         true
       );
 
-      return res.status(202).json({ url: session.url });
+      return res.status(202).json({ exito: true, url: session.url });
     } catch (err) {
-      console.error("El metodo fallo al crear una nueva sesion: ", err)
+      console.error("El metodo fallo al crear una nueva sesion: ", err);
       if (tramitePendienteRef.id)
         this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       return res.status(500).json({
+        exito: false,
         mensaje: "No se pudo concretar el tramite." + err.message,
       });
     }
   };
+
+  logoUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 100 * 1024, // 100KB limit
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === "image/svg+xml") {
+        cb(null, true);
+      } else {
+        cb(new Error("Only SVG files are allowed"), false);
+      }
+    },
+  });
 }
 
 module.exports = Controlador_Restaurante;

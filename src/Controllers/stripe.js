@@ -1,6 +1,6 @@
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
-const Modelo_Tramites_Pendientes = require("../db/tramites_pendientes");
+const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/stripe");
 
 class Controlador_Stripe {
@@ -29,17 +29,17 @@ class Controlador_Stripe {
     try {
       event = this.#interaccionStripe.eventConstructor(req.body, sig);
     } catch (err) {
-      console.error("Webhook verification failed:", err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
+      console.error("Falló la verificación del webhook:", err.message);
+      return res.status(400).send(`Error en el Webhook: ${err.message}`);
     }
-    console.log(`The event was recived:`, event);
 
+    /**
+     * Necesitamos hacer un switch para poder gestionar diferentes escenarios y permitir los pagos periódicos.
+     */
     if (event.type !== "checkout.session.completed") {
-      console.log(
-        "The event was made but the type doesn't actually match to the required one"
-      );
       return res.status(200).json({ received: true });
     }
+
     const session = event.data.object;
     try {
       const tramiteId = session.metadata.tramiteId;
@@ -52,8 +52,6 @@ class Controlador_Stripe {
         return res.status(200).json({ received: true });
       }
 
-      await this.#modeloTramitesPendientes.tramiteConcluido(tramiteId);
-
       const {
         usuario,
         contrasena,
@@ -64,7 +62,10 @@ class Controlador_Stripe {
         tipo,
       } = tramiteSnap.data();
 
-      if (renovacion) return res.json({ received: true });
+      if (renovacion) {
+        await this.#modeloTramitesPendientes.tramiteConcluido(tramiteId);
+        return res.json({ received: true });
+      }
 
       // const hashed = await bcrypt.hash(contrasena, 10);
 
@@ -83,9 +84,8 @@ class Controlador_Stripe {
         price_id
       );
 
-      console.log(
-        "Usuario y restaurante creados:",
-        usuarioRef.id,
+      await this.#modeloTramitesPendientes.procesandoTramite(
+        tramiteId,
         restauranteRef.id
       );
     } catch (err) {
