@@ -1,3 +1,4 @@
+const { number, string } = require("joi");
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Restaurante {
@@ -30,6 +31,13 @@ class Modelo_Restaurante {
       .where("randomKey", "==", randomKey)
       .limit(1)
       .get();
+  }
+
+  async obtenerPropietario(id = string) {
+    const restSnap = await db.collection("restaurantes").doc(id).get();
+
+    if (!restSnap.exists) return null;
+    else return restSnap.data().usuarioId;
   }
 
   async restauranteDeUsuario(usuarioId) {

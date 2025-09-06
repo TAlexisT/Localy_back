@@ -6,10 +6,11 @@ const Modelo_Restaurante = require("../db/Restaurantes");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/stripe");
 
+const servs = require("./Servicios");
 const {
   esquemaPropietario,
   esquemaRestaurante,
-} = require("./Validators/Schemas/Restaurantes");
+} = require("./Schemas/Restaurantes");
 const validador = require("./Validators/Validador");
 
 class Controlador_Restaurante {
@@ -60,7 +61,7 @@ class Controlador_Restaurante {
     if (!id)
       return res
         .status(400)
-        .json({ exito: false, mensaje: "El ID no fue proporcionado." });
+        .json({ exito: false, error: "El ID no fue proporcionado." });
 
     try {
       const restauranteRef = await this.#modeloRestaurante.obtenerRestaurante(
@@ -69,7 +70,7 @@ class Controlador_Restaurante {
       if (!restauranteRef.exists || !restauranteRef.data().logo)
         return res.status(404).json({
           exito: false,
-          mensaje: `Los datos requeridos para el restaurante ${id} no fueron encontrados.`,
+          error: `Los datos requeridos para el restaurante ${id} no fueron encontrados.`,
         });
 
       res.set("Content-Type", "image/svg+xml");
@@ -83,11 +84,13 @@ class Controlador_Restaurante {
 
   actualizarPerfil = async (req, res) => {
     const restauranteId = req.params.id;
+    const acceso = req.cookies.token_de_acceso;
 
     const validacion = validador(req.body, esquemaRestaurante);
 
     if (!validacion.exito) {
       return res.status(400).send({
+        exito: validacion.exito,
         mensaje: validacion.mensaje,
         errores: validacion.errores,
       });
@@ -100,6 +103,20 @@ class Controlador_Restaurante {
     }
 
     try {
+      const propietario = await this.#modeloRestaurante.obtenerPropietario(
+        restauranteId
+      );
+
+      if (propietario == null)
+        return res.status(400).json({
+          exito: false,
+          error: "El propietario del restaurante no fue encontrado.",
+        });
+
+      const esValido = servs.accessTokenValidation(acceso, propietario);
+
+      if (!esValido.exito) return res.status(401).json(esValido);
+
       await this.#modeloRestaurante.actualizarRestaurante(
         restauranteId,
         validacion.datos
@@ -113,20 +130,33 @@ class Controlador_Restaurante {
   };
 
   actualizarLogo = async (req, res) => {
+    const { id } = req.params;
+    const acceso = req.cookies.token_de_acceso;
+
     try {
-      const { id } = req.params;
+      const propietario = await this.#modeloRestaurante.obtenerPropietario(id);
+
+      if (propietario == null)
+        return res.status(400).json({
+          exito: false,
+          error: "El propietario del restaurante no fue encontrado.",
+        });
+
+      const esValido = servs.accessTokenValidation(acceso, propietario);
+
+      if (!esValido.exito) return res.status(401).json(esValido);
 
       if (!req.file)
         return res
           .status(400)
-          .json({ exito: false, mensaje: "El logotipo no fue recibido." });
+          .json({ exito: false, error: "El logotipo no fue recibido." });
 
       const svgContenido = req.file.buffer.toString("utf8");
 
       if (!svgContenido.includes("<svg") || !svgContenido.includes("</svg>"))
         return req
           .status(400)
-          .json({ exito: false, mensaje: "El SVG no es valido." });
+          .json({ exito: false, error: "El SVG no es valido." });
 
       await this.#modeloRestaurante.patchRestaurante(id, {
         logo: svgContenido,
@@ -140,7 +170,7 @@ class Controlador_Restaurante {
       console.error("Error updating SVG logo:", err);
       req.status(500).json({
         exito: false,
-        mensaje: "Ocurrió un error en el servidor.",
+        error: "Ocurrió un error en el servidor.",
       });
     }
   };
@@ -277,7 +307,7 @@ class Controlador_Restaurante {
         (await this.#modeloUsuario.correoExiste(correo))
       )
         return res.status(403).json({
-          mensaje:
+          error:
             "El nombre de usuario o el correo electrónico o ambos ya están en uso.",
         });
 
@@ -295,7 +325,7 @@ class Controlador_Restaurante {
         this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       console.error("Error al crear sesión de Stripe:", err);
       return res.status(500).json({
-        mensaje: "Se produjo un error al validar o registrar el procedimiento.",
+        error: "Se produjo un error al validar o registrar el procedimiento.",
       });
     }
 
@@ -315,7 +345,7 @@ class Controlador_Restaurante {
         this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       return res.status(500).json({
         exito: false,
-        mensaje: "No se pudo concretar el tramite." + err.message,
+        error: "No se pudo concretar el tramite." + err.message,
       });
     }
   };

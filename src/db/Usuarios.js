@@ -32,17 +32,15 @@ class Modelo_Usuario {
     return docRef;
   }
 
-  async usuario(correo, contrasena) {
+  async usuario(correo) {
     const snapshot = await db
       .collection("usuarios")
       .where("correo", "==", correo)
-      .where("contrasena", "==", contrasena)
       .limit(1)
       .get();
 
     return !snapshot.empty
       ? {
-          userDoc: snapshot.docs[0],
           usuario: snapshot.docs[0].data(),
           usuarioId: snapshot.docs[0].id,
         }

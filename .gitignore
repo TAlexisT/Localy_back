@@ -60,3 +60,7 @@ build/
 
 # Mac system files
 .DS_Store
+
+# Views and Publics
+/views/*
+/public/*

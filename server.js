@@ -2,19 +2,20 @@ require("dotenv").config();
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
+
+const { corsConfigs } = require("./Configuraciones");
+
 const app = express();
-const { v4: uuidv4 } = require("uuid");
-const os = require("os");
-const path = require("path");
-const fs = require("fs");
 
 /**
  * ¡¡Puerto en el cual se ejecutará el server!!
  */
 const PORT = 3000;
 
-app.use(cors());
+app.use(cors(corsConfigs));
+app.use(cookieParser());
 app.use(express.static("public"));
 
 /**
@@ -62,6 +63,7 @@ app.use(bodyParser.json()); // No colocar antes de la subsección "Stripe"
 // Inicio de Subsección: Usuario
 app.post("/api/usuario/registro", controladorUsuario.registro);
 app.post("/api/usuario/login", controladorUsuario.login);
+app.post("/api/usuario/logout", controladorUsuario.logout);
 // Fin de Subsección: Usuario
 
 // Inicio de Subsección: Restaurante

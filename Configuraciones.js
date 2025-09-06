@@ -10,6 +10,13 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-const stripe = require("stripe")(process.env.STRIPE_TEST_KEY);
+const stripe = require("stripe")(process.env.TEST_SECRET_KEY);
 
-module.exports = { admin, db, stripe };
+const hashSaltRounds = process.env.CURRENT_ENV === "produccion" ? 15 : 3;
+
+const corsConfigs = {
+  origin: process.env.FRONTEND_URL,
+  credentials: true,
+};
+
+module.exports = { admin, db, stripe, hashSaltRounds, corsConfigs };
