@@ -100,7 +100,7 @@ app.post(
 // Inicio de Subsección: Tramites Pendientes
 app.get(
   "/api/tramite-pendiente/:id",
-  controladorTramitesPendientes.obtenerTramited
+  controladorTramitesPendientes.obtenerTramite
 );
 // Fin de Subsección: Tramites Pendientes
 
