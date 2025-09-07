@@ -13,7 +13,7 @@ class Controlador_Tramites_Pendientes {
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
   }
 
-  obtenerTramited = async (req, res) => {
+  obtenerTramite = async (req, res) => {
     const { id } = req.params;
 
     try {

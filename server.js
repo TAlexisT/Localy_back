@@ -87,12 +87,14 @@ app.patch(
   controladorRestaurante.logoUpload.single("svg"),
   controladorRestaurante.actualizarLogo
 );
-
 app.post(
   "/api/restaurante/crear-sesion-pago",
   controladorRestaurante.negocioRegistro
 );
-// app.post("/api/restaurante/perfil/:id/logo");
+app.post(
+  "/api/restaurante/perfil/reactivar-sesion-pago/:id",
+  controladorRestaurante.negocioRenovacion
+);
 // Fin de Subsección: Restaurante
 
 // Inicio de Subsección: Tramites Pendientes

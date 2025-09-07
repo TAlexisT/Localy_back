@@ -2,7 +2,26 @@ const jwt = require("jsonwebtoken");
 
 class servicios {
   static jwt_accessToken(datos = {}) {
-    return jwt.sign(datos, process.env.JWT_SECRET_KEY_D, {
+    var secreta;
+
+    switch (key) {
+      case "produccion":
+        secreta = process.env.JWT_SECRET_KEY_P;
+        break;
+
+      case "desarrollo":
+        secreta = process.env.JWT_SECRET_KEY_D;
+        break;
+
+      case "test":
+        secreta = process.env.JWT_SECRET_KEY_T;
+        break;
+
+      default:
+        break;
+    }
+
+    return jwt.sign(datos, secreta, {
       expiresIn: "1h",
     });
   }
