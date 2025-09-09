@@ -3,10 +3,6 @@ const Modelo_Restaurante = require("../db/Restaurantes");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
-const bcrypt = require("bcrypt");
-
-const { hashSaltRounds } = require("../../Configuraciones");
-
 class Controlador_Stripe {
   /**
    * Declaracion de variables secretas (privadas)
@@ -34,7 +30,7 @@ class Controlador_Stripe {
       event = this.#interaccionStripe.eventConstructor(req.body, sig);
     } catch (err) {
       console.error("Falló la verificación del webhook:", err.message);
-      return res.status(400).send(`Error en el Webhook: ${err.message}`);
+      return res.status(400).json({ received: true });
     }
 
     /**
@@ -73,7 +69,7 @@ class Controlador_Stripe {
 
       const usuarioRef = await this.#modeloUsuario.registrarUsuario(
         usuario,
-        await bcrypt.hash(contrasena, hashSaltRounds),
+        contrasena,
         correo,
         tipo,
         telefono

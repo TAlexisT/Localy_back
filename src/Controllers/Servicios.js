@@ -1,29 +1,26 @@
 const jwt = require("jsonwebtoken");
 
+const { jwtSecreta } = require("../../Configuraciones");
+const { string } = require("joi");
+
 class servicios {
   static jwt_accessToken(datos = {}) {
-    var secreta;
-
-    switch (key) {
-      case "produccion":
-        secreta = process.env.JWT_SECRET_KEY_P;
-        break;
-
-      case "desarrollo":
-        secreta = process.env.JWT_SECRET_KEY_D;
-        break;
-
-      case "test":
-        secreta = process.env.JWT_SECRET_KEY_T;
-        break;
-
-      default:
-        break;
-    }
-
-    return jwt.sign(datos, secreta, {
+    return jwt.sign(datos, jwtSecreta, {
       expiresIn: "1h",
     });
+  }
+
+  static jwt_dataExtraction(token = string) {
+    try {
+      const datos = jwt.verify(token, jwtSecreta);
+      return { exito: true, datos: datos };
+    } catch (err) {
+      console.error(
+        `Ocurrió un error al verificar los datos de la cookie: ${err.message}`
+      );
+
+      return { exito: false, error: "El contenido del token es inexacto" };
+    }
   }
 
   static cookieParser_AccessTokenConfigs() {

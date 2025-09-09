@@ -1,13 +1,12 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
 
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
 
-const { esquemaUsuario } = require("./Schemas/Usuarios");
-const validador = require("./Validators/Validador");
+const { esquemaUsuario } = require("../Schemas/Usuarios");
+const validador = require("../Validators/Validador");
 const servs = require("./Servicios");
 
 const { hashSaltRounds } = require("../../Configuraciones");
@@ -105,22 +104,11 @@ class Controlador_Usuario {
     const acceso = req.cookies.token_de_acceso;
 
     if (acceso) {
-      try {
-        const datos = jwt.verify(acceso, process.env.JWT_SECRET_KEY_D);
-        return res.status(200).json({ exito: true, datos: datos });
-      } catch (err) {
-        console.error(
-          `Ocurrió un error al verificar los datos de la cookie: ${err.message}`
-        );
-
-        return res
-          .status(500)
-          .json({ exito: false, error: "El contenido del token es inexacto" });
-      }
+      const extraccion = servs.jwt_dataExtraction(acceso);
+      return res.status(extraccion.exito ? 200 : 400).json(extraccion);
     }
 
-    const correo = req.body?.correo;
-    const contrasena = req.body?.contrasena;
+    const { correo, contrasena } = req.body;
 
     if (!correo || !contrasena) {
       return res.status(400).json({ error: "Correo y contraseña requeridos" });

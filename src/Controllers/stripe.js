@@ -1,7 +1,7 @@
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../ThirdParty/stripe");
+const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
 class Controlador_Stripe {
   /**
@@ -30,7 +30,7 @@ class Controlador_Stripe {
       event = this.#interaccionStripe.eventConstructor(req.body, sig);
     } catch (err) {
       console.error("Falló la verificación del webhook:", err.message);
-      return res.status(400).send(`Error en el Webhook: ${err.message}`);
+      return res.status(400).json({ received: true });
     }
 
     /**
@@ -67,11 +67,9 @@ class Controlador_Stripe {
         return res.json({ received: true });
       }
 
-      // const hashed = await bcrypt.hash(contrasena, 10);
-
       const usuarioRef = await this.#modeloUsuario.registrarUsuario(
         usuario,
-        contrasena, // : hashed,
+        contrasena,
         correo,
         tipo,
         telefono

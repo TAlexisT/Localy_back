@@ -1,17 +1,20 @@
-require("dotenv").config();
 const multer = require("multer");
 
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Restaurante = require("../db/Restaurantes");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../ThirdParty/stripe");
+const Interaccion_Stripe = require("../ThirdParty/Stripe");
+
+const bcrypt = require("bcrypt");
 
 const servs = require("./Servicios");
 const {
   esquemaPropietario,
   esquemaRestaurante,
-} = require("./Schemas/Restaurantes");
-const validador = require("./Validators/Validador");
+} = require("../Schemas/Restaurantes");
+const validador = require("../Validators/Validador");
+
+const { front_URL, hashSaltRounds } = require("../../Configuraciones");
 
 class Controlador_Restaurante {
   /**
@@ -32,7 +35,7 @@ class Controlador_Restaurante {
     this.#interaccionStripe = new Interaccion_Stripe();
   }
 
-  obtenerRestaurante = async (req, res) => {
+  obtenerNegocio = async (req, res) => {
     const { id } = req.params;
 
     if (!id)
@@ -42,7 +45,7 @@ class Controlador_Restaurante {
       });
 
     try {
-      const doc = await this.#modeloRestaurante.obtenerRestaurante(id);
+      const doc = await this.#modeloRestaurante.obtenerNegocio(id);
 
       if (!doc.exists) {
         return res.status(404).json({ error: "Restaurante no encontrado" });
@@ -64,7 +67,7 @@ class Controlador_Restaurante {
         .json({ exito: false, error: "El ID no fue proporcionado." });
 
     try {
-      const restauranteRef = await this.#modeloRestaurante.obtenerRestaurante(
+      const restauranteRef = await this.#modeloRestaurante.obtenerNegocio(
         id
       );
       if (!restauranteRef.exists || !restauranteRef.data().logo)
@@ -175,12 +178,12 @@ class Controlador_Restaurante {
     }
   };
 
-  paginacionRestaurantes = async (req, res) => {
+  paginacionNegocios = async (req, res) => {
     const tamano = parseInt(req.query.pageSize) || 5;
     const seed =
       parseFloat(req.query.seed) || parseFloat(Math.random().toFixed(8));
     const cursor = parseFloat(req.query.cursor) || null;
-    const direccion = req.query.direction || "siguiente";
+    const direccion = req.query.direction || "siguiente"; // previo
 
     try {
       let consulta;
@@ -304,37 +307,29 @@ class Controlador_Restaurante {
     try {
       if (
         (await this.#modeloUsuario.nombreExiste(usuario)) ||
-        (await this.#modeloUsuario.correoExiste(correo))
+        (await this.#modeloUsuario.correoExiste(correo)) ||
+        (await this.#modeloTramitesPendientes.existeTramiteUsuario(usuario))
       )
         return res.status(403).json({
+          exito: false,
           error:
             "El nombre de usuario o el correo electrónico o ambos ya están en uso.",
         });
-
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendiente(
           price_id,
           correo,
-          contrasena,
+          await bcrypt.hash(contrasena, hashSaltRounds),
           telefono,
           usuario,
           false
         );
-    } catch (err) {
-      if (tramitePendienteRef.id)
-        this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
-      console.error("Error al crear sesión de Stripe:", err);
-      return res.status(500).json({
-        error: "Se produjo un error al validar o registrar el procedimiento.",
-      });
-    }
 
-    try {
       const session = await this.#interaccionStripe.crearSession(
         price_id,
         { tramiteId: tramitePendienteRef.id },
-        `${process.env.FRONTEND_URL}/pago-exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
-        `${process.env.FRONTEND_URL}/pago-erroneo`, // enfoque para "live"
+        `${front_URL}/pago-exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${front_URL}/pago-erroneo`, // enfoque para "live"
         true
       );
 
@@ -345,9 +340,27 @@ class Controlador_Restaurante {
         this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       return res.status(500).json({
         exito: false,
-        error: "No se pudo concretar el tramite." + err.message,
+        error: "No se pudo concretar el tramite.",
       });
     }
+  };
+
+  negocioPriceRenovacion = async (req, res) => {
+    const { id } = req.params;
+    const acceso = req.cookies.token_de_acceso;
+
+    if (!acceso)
+      return res
+        .status(401)
+        .json({ exito: false, error: "La sesión no fue encontrada." });
+    if (!id)
+      return res.status(400).json({
+        exito: false,
+        error: "El ID del negocio es requerido en los parametros de la URL.",
+      });
+
+    try {
+    } catch (error) {}
   };
 
   logoUpload = multer({

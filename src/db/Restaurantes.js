@@ -10,7 +10,7 @@ class Modelo_Restaurante {
    *          Una promesa que se resuelve con el snapshot del documento.
    *          Usa `doc.exists` para verificar si el documento fue encontrado.
    */
-  async obtenerRestaurante(restauranteId) {
+  async obtenerNegocio(restauranteId) {
     return await db.collection("restaurantes").doc(restauranteId).get();
   }
 
@@ -25,7 +25,7 @@ class Modelo_Restaurante {
    *          Una promesa que se resuelve con un snapshot de la consulta,
    *          que contendrá como máximo un documento.
    */
-  async obtenerRestauranteRK(randomKey = Number) {
+  async obtenerNegocioRK(randomKey = Number) {
     return await db
       .collection("restaurantes")
       .where("randomKey", "==", randomKey)

@@ -14,9 +14,31 @@ const stripe = require("stripe")(process.env.TEST_SECRET_KEY);
 
 const hashSaltRounds = process.env.CURRENT_ENV === "produccion" ? 15 : 3;
 
+const jwtSecreta =
+  process.env.CURRENT_ENV === "produccion"
+    ? process.env.JWT_SECRET_KEY_P
+    : process.env.CURRENT_ENV === "test"
+    ? process.env.JWT_SECRET_KEY_T
+    : process.env.JWT_SECRET_KEY_D;
+
+const front_URL =
+  process.env.CURRENT_ENV === "produccion"
+    ? process.env.FRONTEND_URL_P
+    : process.env.CURRENT_ENV === "test"
+    ? process.env.FRONTEND_URL_T
+    : process.env.FRONTEND_URL_D;
+
 const corsConfigs = {
-  origin: process.env.FRONTEND_URL,
+  origin: front_URL,
   credentials: true,
 };
 
-module.exports = { admin, db, stripe, hashSaltRounds, corsConfigs };
+module.exports = {
+  admin,
+  db,
+  stripe,
+  hashSaltRounds,
+  jwtSecreta,
+  corsConfigs,
+  front_URL
+};
