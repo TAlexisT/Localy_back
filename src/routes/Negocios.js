@@ -5,7 +5,7 @@ var router = express.Router();
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Restaurante = require("../Controllers/Restaurantes");
+const Controlador_Restaurante = require("../Controllers/Negocios");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */

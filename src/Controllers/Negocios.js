@@ -67,9 +67,7 @@ class Controlador_Restaurante {
         .json({ exito: false, error: "El ID no fue proporcionado." });
 
     try {
-      const restauranteRef = await this.#modeloRestaurante.obtenerNegocio(
-        id
-      );
+      const restauranteRef = await this.#modeloRestaurante.obtenerNegocio(id);
       if (!restauranteRef.exists || !restauranteRef.data().logo)
         return res.status(404).json({
           exito: false,
