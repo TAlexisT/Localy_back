@@ -31,14 +31,14 @@ class Modelo_Tramites_Pendientes {
     return docRef.exists ? docRef : null;
   }
 
-  async procesandoTramite(tramite_id, restauranteId) {
+  async procesandoTramite(tramite_id, negocioId) {
     const refDoc = db.collection("tramites_pendientes").doc(tramite_id);
 
     await refDoc.update({
       contrasena: admin.firestore.FieldValue.delete(),
       correo: admin.firestore.FieldValue.delete(),
       usuario: admin.firestore.FieldValue.delete(),
-      restaurante_id: restauranteId,
+      negocio_id: negocioId,
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
