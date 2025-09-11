@@ -1,9 +1,8 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 
 const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Restaurante = require("../db/Restaurantes");
+const Modelo_Negocio = require("../db/Negocios");
 
 const { esquemaUsuario } = require("../Schemas/Usuarios");
 const validador = require("../Validators/Validador");
@@ -16,14 +15,14 @@ class Controlador_Usuario {
    * Declaracion de variables secretas (privadas)
    */
   #modeloUsuario;
-  #modeloRestaurante;
+  #modeloNegocio;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
     this.#modeloUsuario = new Modelo_Usuario();
-    this.#modeloRestaurante = new Modelo_Restaurante();
+    this.#modeloNegocio = new Modelo_Negocio();
   }
 
   registro = async (req, res) => {
@@ -71,7 +70,7 @@ class Controlador_Usuario {
         usuario: usuario,
         correo: correo,
         tipo: "usuario",
-        restauranteId: null,
+        negocioId: null,
       });
 
       return res
@@ -89,7 +88,7 @@ class Controlador_Usuario {
             usuario: usuario,
             correo: correo,
             tipo: "usuario",
-            restauranteId: null,
+            negocioId: null,
           },
         });
     } catch (error) {
@@ -135,19 +134,19 @@ class Controlador_Usuario {
         });
 
       if (info.usuario.tipo === "negocio") {
-        const restSnap = await this.#modeloRestaurante.restauranteDeUsuario(
+        const restSnap = await this.#modeloNegocio.negocioDeUsuario(
           info.usuarioId
         );
 
-        info.restauranteId = !restSnap.empty ? restSnap.docs[0].id : null;
-      } else info.restauranteId = null;
+        info.negocioId = !restSnap.empty ? restSnap.docs[0].id : null;
+      } else info.negocioId = null;
 
       const token = servs.jwt_accessToken({
         id: info.usuarioId,
         usuario: info.usuario.usuario,
         correo: info.usuario.correo,
         tipo: info.usuario.tipo,
-        restauranteId: info.restauranteId,
+        negocioId: info.negocioId,
       });
 
       const atConfigs = servs.cookieParser_AccessTokenConfigs();
@@ -162,7 +161,7 @@ class Controlador_Usuario {
             usuario: info.usuario.usuario,
             correo: info.usuario.correo,
             tipo: info.usuario.tipo,
-            restauranteId: info.restauranteId,
+            negocioId: info.negocioId,
           },
         });
     } catch (err) {

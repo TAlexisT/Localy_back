@@ -7,7 +7,7 @@ class Interaccion_Stripe {
     metadata = {},
     success_url,
     cancel_url,
-    recurrent = false
+    recurrent
   ) {
     return await stripe.checkout.sessions.create({
       mode: recurrent ? "subscription" : "payment",

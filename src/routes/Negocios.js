@@ -5,7 +5,7 @@ var router = express.Router();
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Restaurante = require("../Controllers/Negocios");
+const Controlador_Negocio = require("../Controllers/Negocios");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -14,26 +14,24 @@ const Controlador_Restaurante = require("../Controllers/Negocios");
  * {Inicio de Sección: Inisialización}
  * Inicialización de las clases subyacentes, así como variables de control
  */
-const controladorRestaurante = new Controlador_Restaurante();
+const controladorNegocio = new Controlador_Negocio();
 /**
  * {Fin de Sección: Inisialización}
  */
 
-router.get("/perfil/:id", controladorRestaurante.obtenerNegocio);
-router.get("/mostrar", controladorRestaurante.paginacionNegocios);
-router.get("/perfil/:id/logo", controladorRestaurante.obtenerLogo);
+router.get("/perfil/:id", controladorNegocio.obtenerNegocio);
+router.get("/mostrar", controladorNegocio.paginacionNegocios);
 
-router.put("/perfil/:id", controladorRestaurante.actualizarPerfil);
-
-router.patch(
-  "/perfil/:id/logo",
-  controladorRestaurante.logoUpload.single("svg"),
-  controladorRestaurante.actualizarLogo
+router.put(
+  "/perfil/:id",
+  controladorNegocio.logoUpload.single("svg"),
+  controladorNegocio.actualizarPerfil
 );
-router.post("/crear-sesion-pago", controladorRestaurante.negocioRegistro);
+
+router.post("/crear-sesion-pago", controladorNegocio.negocioRegistro);
 router.post(
   "/reactivar-sesion-pago/:id",
-  controladorRestaurante.negocioPriceRenovacion
+  controladorNegocio.negocioPriceRenovacion
 );
 
 module.exports = router;

@@ -1,5 +1,5 @@
 const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Restaurante = require("../db/Restaurantes");
+const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
@@ -8,7 +8,7 @@ class Controlador_Stripe {
    * Declaracion de variables secretas (privadas)
    */
   #modeloUsuario;
-  #modeloRestaurante;
+  #modeloNegocio;
   #modeloTramitesPendientes;
   #interaccionStripe;
 
@@ -17,7 +17,7 @@ class Controlador_Stripe {
    */
   constructor() {
     this.#modeloUsuario = new Modelo_Usuario();
-    this.#modeloRestaurante = new Modelo_Restaurante();
+    this.#modeloNegocio = new Modelo_Negocio();
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
     this.#interaccionStripe = new Interaccion_Stripe();
   }
@@ -75,7 +75,7 @@ class Controlador_Stripe {
         telefono
       );
 
-      const restauranteRef = await this.#modeloRestaurante.crearRestaurante(
+      const negocioRef = await this.#modeloNegocio.crearNegocio(
         usuarioRef.id,
         correo,
         telefono,
@@ -84,7 +84,7 @@ class Controlador_Stripe {
 
       await this.#modeloTramitesPendientes.procesandoTramite(
         tramiteId,
-        restauranteRef.id
+        negocioRef.id
       );
     } catch (err) {
       console.error("Error en webhook:", err);

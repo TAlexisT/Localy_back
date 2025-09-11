@@ -2,7 +2,7 @@
 
 ## ¿Qué hace el proyecto?
 Este proyecto es el "Back-end" de la aplicación tanto web como móvil de LOCALY®. 
-El proyecto funcionará como el servidor, en donde se ejecutarán las operaciones correspondientes a los usuarios así como la gestión de los restaurantes y cuál sea la entidad relacionada. Dentro del servidor se podrán ejecutar tanta operación básicas de CRUD, por sus siglas en Inglés (Create, Read, Update, and Delete), como operaciones más complejas, por ejemplo, la ejecución de pagos y membresías de clientes y restaurantes.
+El proyecto funcionará como el servidor, en donde se ejecutarán las operaciones correspondientes a los usuarios así como la gestión de los negocios y cuál sea la entidad relacionada. Dentro del servidor se podrán ejecutar tanta operación básicas de CRUD, por sus siglas en Inglés (Create, Read, Update, and Delete), como operaciones más complejas, por ejemplo, la ejecución de pagos y membresías de clientes y negocios.
 
 ## ¿Por qué el proyecto es útil?
 Este proyecto provee una solución simple y modular para el desarrollo de la aplicación, pues permite ampliar, actualizar, mejorar y en general mantener el proyecto a largo plazo. Adicionalmente, la arquitectura cliente-servidor, la cual se está utilizando en este proyecto, provee mejor manejo y flexibilidad en el desarrollo.
@@ -45,12 +45,12 @@ La explicación de todos los "End-Points" no ha sido completada. Además de los 
 ***
 
 ### End-Points tipo GET
-#### Restaurantes:
-**Obtener un restaurante por id**
+#### Negocios:
+**Obtener un negocio por id**
 ```
-/api/restaurante/perfil/<id>
+/api/negocio/perfil/<id>
 ```
-El parametro 'id' representa el identificador unico del restaurante `ej. As23sA...`
+El parametro 'id' representa el identificador unico del negocio `ej. As23sA...`
 ```
 Respuesta:
 {
@@ -67,22 +67,22 @@ Respuesta:
 }
 ```
 
-**Mostrar restaurantes en paginación**
+**Mostrar negocios en paginación**
 ```
-/api/restaurante/mostrar
-/api/restaurante/mostrar?pageSize=5&cursor=As23sA...&direction=siguiente
+/api/negocio/mostrar
+/api/negocio/mostrar?pageSize=5&cursor=As23sA...&direction=siguiente
 ```
-Este end-point responde con los restaurantes de forma paginada. Para poder interactuar con la paginación se necesita introducir parámetros en la URL `ej. pageSize=5`, `ej. cursor=As23sA...`, `ej. direction=siguiente`.
+Este end-point responde con los negocios de forma paginada. Para poder interactuar con la paginación se necesita introducir parámetros en la URL `ej. pageSize=5`, `ej. cursor=As23sA...`, `ej. direction=siguiente`.
 Los parámetros sirven para dar instrucciones de comportamiento a la API.
 
 * `pageSize`: Sirve para establecer el largo del arreglo de datos (número de los registros deseados, por defecto, en 5).
-* `cursor`: Sirve para referenciar el registro desde el cual se ejecutará la consulta (id del restaurante cursor).
+* `cursor`: Sirve para referenciar el registro desde el cual se ejecutará la consulta (id del negocio cursor).
 * `direction`: Sirve para establecer la dirección en la cual se ejecutará la consulta (siguiente/previo).
   
 ```
 Respuesta:
 {
-    "datos": [                      // Lista de restaurantes seleccionados
+    "datos": [                      // Lista de negocios seleccionados
         {
             "descripcion": String,
             "correo": String,
@@ -97,8 +97,8 @@ Respuesta:
         },
         ...
     ],
-    "primerToken": String,          // Primer id en la lista de restaurantes
-    "ultimoToken": String,          // Ultimo id en la lista de restaurantes
+    "primerToken": String,          // Primer id en la lista de negocios
+    "ultimoToken": String,          // Ultimo id en la lista de negocios
     "paginas": int,                 // Numero de paginas disponibles
     "paginaActual": int,            // Numero de la pagina actual
     "existeProx": Boolean,          // Si existe una pagina siguiente
@@ -148,7 +148,7 @@ Status: 202,
     "usuario": String,
     "correo": String,
     "tipo": String,
-    "restauranteId": String,
+    "negocioId": String,
 }
 ```
 En caso de una petición errónea

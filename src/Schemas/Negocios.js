@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const esquemaRestaurante = Joi.object({
+const esquemaNegocio = Joi.object({
   nombre: Joi.string().min(1).max(100).required(),
 
   descripcion: Joi.string().max(500).allow("", null),
@@ -75,7 +75,7 @@ const esquemaRestaurante = Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
         .required(),
-        
+
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
         .required(),
@@ -85,15 +85,15 @@ const esquemaRestaurante = Joi.object({
   redes: Joi.object({
     WhatsApp: Joi.string()
       .pattern(/^\+?[1-9]\d{1,14}$/)
-      .allow(null),
+      .allow(null, ""),
 
-    X: Joi.string().allow(null),
+    X: Joi.string().allow(null, ""),
 
-    Facebook: Joi.string().uri().allow(null),
+    Facebook: Joi.string().uri().allow(null, ""),
 
-    Instagram: Joi.string().uri().allow(null),
+    Instagram: Joi.string().uri().allow(null, ""),
 
-    TikTok: Joi.string().uri().allow(null),
+    TikTok: Joi.string().uri().allow(null, ""),
   }).required(),
 });
 
@@ -148,4 +148,4 @@ const esquemaPropietario = Joi.object({
     }),
 });
 
-module.exports = { esquemaRestaurante, esquemaPropietario };
+module.exports = { esquemaNegocio, esquemaPropietario };

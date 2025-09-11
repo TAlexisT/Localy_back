@@ -1,5 +1,5 @@
 var express = require("express");
-var router = express.Router();
+var   router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
