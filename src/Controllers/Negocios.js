@@ -7,7 +7,7 @@ const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
 const bcrypt = require("bcrypt");
 
-const servs = require("./Servicios");
+const servs = require("./Servicios/ServiciosGenerales");
 const { esquemaPropietario, esquemaNegocio } = require("../Schemas/Negocios");
 const validador = require("../Validators/Validador");
 
@@ -267,8 +267,8 @@ class Controlador_Negocio {
       const session = await this.#interaccionStripe.crearSession(
         price_id,
         { tramiteId: tramitePendienteRef.id },
-        `${front_URL}/pago-exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
-        `${front_URL}/pago-erroneo`, // enfoque para "live"
+        `${front_URL}/pago-exito?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${front_URL}/pago-error`, // enfoque para "live"
         recurrente ?? false
       );
 
@@ -288,10 +288,12 @@ class Controlador_Negocio {
     const { id } = req.params;
     const acceso = req.cookies.token_de_acceso;
 
-    if (!acceso)
-      return res
-        .status(401)
-        .json({ exito: false, error: "La sesión no fue encontrada." });
+    if (!acceso) // mejorar la validacion
+      return res.status(401).json({
+        exito: false,
+        error:
+          "La sesión necesita estar activa para poder renovar la suscripción.",
+      });
     if (!id)
       return res.status(400).json({
         exito: false,
@@ -299,7 +301,26 @@ class Controlador_Negocio {
       });
 
     try {
-    } catch (error) {}
+      tramitePendienteRef =
+        await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
+          id
+        );
+
+      const session = await this.#interaccionStripe.crearSession(
+        price_id,
+        { tramiteId: tramitePendienteRef.id },
+        `${front_URL}/renovacion-exito?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${front_URL}/renovacion-error`, // enfoque para "live"
+        recurrente ?? false
+      );
+
+      return res.status(202).json({ exito: true, url: session.url });
+    } catch (err) {
+      console.error("Error al renovar la subscripcion:", err);
+      res
+        .status(500)
+        .json({ exito: false, error: "Error al renovar la subscripcion" });
+    }
   };
 
   logoUpload = multer({

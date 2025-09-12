@@ -14,25 +14,6 @@ class Modelo_Negocio {
     return await db.collection("negocios").doc(negocioId).get();
   }
 
-  /**
-   * Obtiene un negocio a partir de su `randomKey`.
-   *
-   * ⚠️ Nota: este método devuelve un `QuerySnapshot` que puede estar vacío
-   *          si no existe ningún negocio con la clave indicada.
-   *
-   * @param {number} randomKey - Valor de la clave aleatoria asociada al negocio.
-   * @returns {Promise<FirebaseFirestore.QuerySnapshot>}
-   *          Una promesa que se resuelve con un snapshot de la consulta,
-   *          que contendrá como máximo un documento.
-   */
-  async obtenerNegocioRK(randomKey = Number) {
-    return await db
-      .collection("negocios")
-      .where("randomKey", "==", randomKey)
-      .limit(1)
-      .get();
-  }
-
   async obtenerPropietario(id = string) {
     const restSnap = await db.collection("negocios").doc(id).get();
 
@@ -84,17 +65,17 @@ class Modelo_Negocio {
       .doc(negocioId)
       .update({
         ...datos,
-        actualizado: admin.firestore.FieldValue.serverTimestamp(),
+        actualizado: admin.firestore.Timestamp.now(),
       });
   }
 
-  async reactivarNegocio(negocioId) {
-    await db.collection("negocios").doc(negocioId).update({
-      pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
-      actualizado: admin.firestore.FieldValue.serverTimestamp(),
-    });
-  }
-
+  /**
+   * Recupera un número limitado de documentos de la colección "negocios", ordenados por el campo "randomKey".
+   *
+   * @param {number} [tamano=Int32Array] - El número máximo de documentos a recuperar.
+   * @param {boolean} [esDesc=true] - Si ordenar los resultados en orden descendente (verdadero) o ascendente (falso).
+   * @returns {Promise<Query>} Una promesa que resuelve la consulta con el orden especificado y el límite aplicado.
+   */
   async tamanoConsultaOrdenada(tamano = Int32Array, esDesc = true) {
     // Posibilidad de añadir algunos filtros como parametros
     return db
@@ -103,33 +84,70 @@ class Modelo_Negocio {
       .limit(tamano);
   }
 
-  async totalDeNegocios() {
-    return (await db.collection("negocios").count().get()).data().count;
+  async renovarSubscripcion(negocioId, price_id, subscriptionId, customerId) {
+    await db.collection("negocios").doc(negocioId).update({
+      activo: true,
+      stripe: {
+        subscriptionId,
+        customerId,
+        price_id,
+      },
+      pago_fecha: admin.firestore.Timestamp.now(),
+      actualizado: admin.firestore.Timestamp.now(),
+    });
   }
 
-  async posicionActual(negocioId = "", orden = "") {
-    return (
-      await db
-        .collection("negocios")
-        .orderBy("creado", orden)
-        .endBefore(negocioId)
-        .count()
-        .get()
-    ).data().count;
+  async refrescarSubscripcion(subscripcionId) {
+    const negocioSnap = await db
+      .collection("negocios")
+      .where("stripe.subscriptionId", "==", subscripcionId)
+      .limit(1)
+      .get();
+    if (negocioSnap.empty) return;
+    const negocioRef = negocioSnap.docs[0].ref;
+    await negocioRef.update({
+      activo: true,
+      pago_fecha: admin.firestore.Timestamp.now(),
+      actualizado: admin.firestore.Timestamp.now(),
+    });
   }
 
-  async crearNegocio(usuarioId, correo, telefono, tamano) {
-    const negocioRef = await db.collection("negocios").add({
+  async desactivarSubscripcion(subscripcionId) {
+    const negocioSnap = await db
+      .collection("negocios")
+      .where("stripe.subscriptionId", "==", subscripcionId)
+      .limit(1)
+      .get();
+    if (negocioSnap.empty) return;
+    const negocioRef = negocioSnap.docs[0].ref;
+    await negocioRef.update({
+      activo: false,
+      actualizado: admin.firestore.Timestamp.now(),
+    });
+  }
+
+  async crearNegocio(
+    usuarioId,
+    correo,
+    telefono,
+    price_id,
+    subscriptionId,
+    customerId
+  ) {
+    return await db.collection("negocios").add({
       usuarioId,
       correo,
       telefono,
-      tamano,
       activo: true,
+      stripe: {
+        subscriptionId,
+        customerId,
+        price_id,
+      },
       randomKey: Math.random(),
+      pago_fecha: admin.firestore.Timestamp.now(),
       creado: admin.firestore.Timestamp.now(),
     });
-
-    return negocioRef;
   }
 }
 

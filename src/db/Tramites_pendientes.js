@@ -22,6 +22,14 @@ class Modelo_Tramites_Pendientes {
     });
   }
 
+  async crearTramitePendiente_Renovacion(negocio_id, price_id) {
+    return await db.collection("tramites_pendientes").add({
+      negocio_id,
+      price_id,
+      renovacion: true,
+    });
+  }
+
   async obtenerTramitePendiente(tramite_id) {
     const docRef = await db
       .collection("tramites_pendientes")

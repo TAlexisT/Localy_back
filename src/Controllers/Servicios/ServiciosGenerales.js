@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 
-const { jwtSecreta } = require("../../Configuraciones");
+const { jwtSecreta } = require("../../../Configuraciones");
 const { string } = require("joi");
 
-class servicios {
+class ServiciosGenerales {
   static jwt_accessToken(datos = {}) {
     return jwt.sign(datos, jwtSecreta, {
       expiresIn: "1h",
@@ -48,4 +48,4 @@ class servicios {
   }
 }
 
-module.exports = servicios;
+module.exports = ServiciosGenerales;

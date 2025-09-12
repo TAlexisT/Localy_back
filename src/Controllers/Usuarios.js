@@ -6,7 +6,7 @@ const Modelo_Negocio = require("../db/Negocios");
 
 const { esquemaUsuario } = require("../Schemas/Usuarios");
 const validador = require("../Validators/Validador");
-const servs = require("./Servicios");
+const servs = require("./Servicios/ServiciosGenerales");
 
 const { hashSaltRounds } = require("../../Configuraciones");
 
