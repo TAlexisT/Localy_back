@@ -120,8 +120,8 @@ class Controlador_Negocio {
     const direccion = req.query.direction || "siguiente"; // previo
 
     try {
-      let consulta;
-      let datos = [];
+      var consulta;
+      var datos = [];
 
       if (!cursor) {
         // primera pagina
@@ -129,7 +129,7 @@ class Controlador_Negocio {
           tamano,
           true
         );
-        consultaAntes.where("randomKey", "<=", seed);
+        consultaAntes = consultaAntes.where("randomKey", "<=", seed);
 
         var consultaDespues = await this.#modeloNegocio.tamanoConsultaOrdenada(
           tamano,
@@ -153,8 +153,6 @@ class Controlador_Negocio {
         // Trim to page size
         datos = datos.slice(0, tamano);
       } else {
-        const esSup = cursor > seed;
-
         if (direccion === "siguiente") {
           // Next page - get records after cursor
           consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
@@ -168,11 +166,11 @@ class Controlador_Negocio {
 
           // If we don't have enough results, wrap around to beginning
           if (datos.length < tamano) {
-            const consultaWrap =
-              await this.#modeloNegocio.tamanoConsultaOrdenada(
-                tamano - datos.length,
-                false
-              );
+            var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
+              tamano - datos.length,
+              false
+            );
+            consultaWrap = consultaWrap.where("randomKey", "<", seed);
 
             const snapshotWrap = await consultaWrap.get();
             snapshotWrap.forEach((doc) =>
@@ -192,11 +190,13 @@ class Controlador_Negocio {
 
           // If we don't have enough results, wrap around to end
           if (datos.length < tamano) {
-            const consultaWrap =
+            var consultaWrap =
               await this.#modeloNegocio.tamanoConsultaOrdenada(
                 tamano - datos.length,
                 true
               );
+
+              consultaWrap = consultaWrap.where("randomKey", ">", seed);
 
             const snapshotWrap = await consultaWrap.get();
             // Reverse to maintain chronological order
@@ -288,7 +288,8 @@ class Controlador_Negocio {
     const { id } = req.params;
     const acceso = req.cookies.token_de_acceso;
 
-    if (!acceso) // mejorar la validacion
+    if (!acceso)
+      // mejorar la validacion
       return res.status(401).json({
         exito: false,
         error:

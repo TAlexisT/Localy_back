@@ -42,7 +42,7 @@ class Modelo_Negocio {
           ubicacion.longitude
         ),
         ...demasDatos,
-        actualizado: admin.firestore.FieldValue.serverTimestamp(),
+        actualizado: admin.firestore.Timestamp.now(),
       });
   }
 

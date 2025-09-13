@@ -14,71 +14,71 @@ const esquemaNegocio = Joi.object({
     Lunes: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Martes: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Miercoles: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Jueves: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Viernes: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Sabado: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
 
     Domingo: Joi.object({
       apertura: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
 
       cierre: Joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/)
-        .required(),
+        .allow("", null),
     }).allow("", null),
   }).required(),
 
