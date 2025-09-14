@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { jwtSecreta } = require("../../../Configuraciones");
+const { jwtSecreta } = require("../../Configuraciones");
 const { string } = require("joi");
 
 class ServiciosGenerales {

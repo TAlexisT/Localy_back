@@ -7,7 +7,7 @@ const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
 const bcrypt = require("bcrypt");
 
-const servs = require("./Servicios/ServiciosGenerales");
+const servs = require("../Services/ServiciosGenerales");
 const { esquemaPropietario, esquemaNegocio } = require("../Schemas/Negocios");
 const { validador } = require("../Validators/Validador");
 
