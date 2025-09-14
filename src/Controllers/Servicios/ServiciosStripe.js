@@ -1,7 +1,7 @@
-const Modelo_Usuario = require("../../db/Usuarios");
-const Modelo_Negocio = require("../../db/Negocios");
-const Modelo_Tramites_Pendientes = require("../../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../../ThirdParty/Stripe");
+const Modelo_Usuario = require("../db/Usuarios");
+const Modelo_Negocio = require("../db/Negocios");
+const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
+const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
 class ServiciosStripe {
   /**

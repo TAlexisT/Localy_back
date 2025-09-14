@@ -28,4 +28,4 @@ const validador = (datos, schema) => {
   };
 };
 
-module.exports = validador;
+module.exports = { validador };

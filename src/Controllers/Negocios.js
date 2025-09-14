@@ -9,7 +9,7 @@ const bcrypt = require("bcrypt");
 
 const servs = require("./Servicios/ServiciosGenerales");
 const { esquemaPropietario, esquemaNegocio } = require("../Schemas/Negocios");
-const validador = require("../Validators/Validador");
+const { validador } = require("../Validators/Validador");
 
 const { front_URL, hashSaltRounds } = require("../../Configuraciones");
 
@@ -190,13 +190,12 @@ class Controlador_Negocio {
 
           // If we don't have enough results, wrap around to end
           if (datos.length < tamano) {
-            var consultaWrap =
-              await this.#modeloNegocio.tamanoConsultaOrdenada(
-                tamano - datos.length,
-                true
-              );
+            var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
+              tamano - datos.length,
+              true
+            );
 
-              consultaWrap = consultaWrap.where("randomKey", ">", seed);
+            consultaWrap = consultaWrap.where("randomKey", ">", seed);
 
             const snapshotWrap = await consultaWrap.get();
             // Reverse to maintain chronological order
