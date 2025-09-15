@@ -2,7 +2,14 @@ const { number, string } = require("joi");
 const { admin, db } = require("../../Configuraciones");
 
 class Productos {
-  async crearProducto(nombre, precio, categoria, descripcion, negocio_id) {
+  async crearProducto(
+    nombre,
+    imagenURL,
+    precio,
+    categoria,
+    descripcion,
+    negocio_id
+  ) {
     return db.collection("productos").add({
       nombre,
       precio,
@@ -25,6 +32,16 @@ class Productos {
       descripcion,
       actualizado: admin.firestore.Timestamp.now(),
     });
+  }
+
+  async patchProducto(productoId, datos) {
+    return await db
+      .collection("productos")
+      .doc(productoId)
+      .update({
+        ...datos,
+        actualizado: admin.firestore.Timestamp.now(),
+      });
   }
 
   async eliminarProducto(productoId) {

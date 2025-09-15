@@ -27,6 +27,7 @@ router.post(
   "/crear/:negocio_id",
   productosMiddleware.validarSesion,
   productosMiddleware.validarUsuarioNegocio,
+  productosMiddleware.productoImagen.single("image"),
   controladorProductos.crearProducto
 );
 
@@ -34,6 +35,7 @@ router.put(
   "/actualizar/:negocio_id/:id",
   productosMiddleware.validarSesion,
   productosMiddleware.validarUsuarioNegocio,
+  productosMiddleware.productoImagen.single("image"),
   controladorProductos.actualizarProducto
 );
 
@@ -43,4 +45,5 @@ router.delete(
   productosMiddleware.validarUsuarioNegocio,
   controladorProductos.eliminarProducto
 );
+
 module.exports = router;

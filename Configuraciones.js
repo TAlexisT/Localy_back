@@ -28,7 +28,7 @@ const front_URL =
     ? process.env.FRONTEND_URL_T
     : process.env.FRONTEND_URL_D;
 
-  const corsConfigs = {
+const corsConfigs = {
   origin: front_URL,
   credentials: true,
 };

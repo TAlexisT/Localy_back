@@ -1,5 +1,6 @@
 const Modelo_Productos = require("../db/Productos");
 const Modelo_Negocio = require("../db/Negocios");
+const { bucket } = require("../../Configuraciones");
 
 const { esquemaProductoUpload } = require("../Schemas/Productos");
 const { validador } = require("../Validators/Validador");
@@ -36,14 +37,30 @@ class Controlador_Productos {
       // Creación del producto en la base de datos
       const productoId = await this.#modeloProducto.crearProducto(
         nombre,
+        null, // La URL de la imagen se asignará después de subir la imagen
         precio,
         categoria,
         descripcion,
         req.negocio_id // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
       );
 
+      const estado = await this.#subirImagenProducto(
+        req.file,
+        productoId.id,
+        req.negocio_id,
+        req.usuario.id
+      );
+
+      // Actualizar el producto con la URL de la imagen subida
+      if (estado.exito)
+        await this.#modeloProducto.patchProducto(productoId.id, {
+          imagenURL: estado.url,
+        });
+
       // Respuesta exitosa con el ID del nuevo producto creado
-      return res.status(201).json({ exito: true, data: { id: productoId.id } });
+      return res
+        .status(201)
+        .json({ exito: true, data: { producto_id: productoId.id } });
     } catch (err) {
       // Manejo de errores y respuesta al cliente
       console.error("Error al crear producto:", err);
@@ -103,6 +120,17 @@ class Controlador_Productos {
         categoria,
         descripcion
       );
+
+      const estado = await this.#subirImagenProducto(
+        req.file,
+        id,
+        req.negocio_id,
+        req.usuario.id
+      );
+
+      if (estado.exito)
+        await this.#modeloProducto.patchProducto(id, { imagenURL: estado.url });
+
       return res
         .status(200)
         .json({ exito: true, mensaje: "Producto actualizado correctamente" });
@@ -134,6 +162,49 @@ class Controlador_Productos {
         .status(500)
         .json({ exito: false, mensaje: "Error del servidor." });
     }
+  };
+
+  #subirImagenProducto = async (
+    imagen,
+    producto_id,
+    negocio_id,
+    usuario_id
+  ) => {
+    if (!imagen)
+      return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
+
+    const nombreArchivo = `productos/usuario_${usuario_id}/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${
+      imagen.originalname
+    }`;
+
+    const archivo = bucket.file(nombreArchivo);
+    const stream = archivo.createWriteStream({
+      metadata: {
+        contentType: imagen.mimetype,
+        metadata: { usuario_id, negocio_id, producto_id },
+      },
+      resumable: false,
+    });
+
+    return new Promise((resolve, reject) => {
+      stream.on("error", (err) => {
+        console.log("Error al subir imagen:", err);
+        reject({ exito: false, mensaje: "Error al subir la imagen." });
+      });
+
+      stream.on("finish", async () => {
+        try {
+          await archivo.makePublic();
+          const urlPublica = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
+          resolve({ exito: true, url: urlPublica });
+        } catch (err) {
+          console.log("Error al hacer la imagen pública:", err);
+          reject({ exito: false, mensaje: "Error al procesar la imagen." });
+        }
+      });
+
+      stream.end(imagen.buffer);
+    });
   };
 }
 

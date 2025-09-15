@@ -1,4 +1,5 @@
 const Negocios_Modelo = require("../db/Negocios");
+const multer = require("multer");
 
 const servs = require("../Services/ServiciosGenerales");
 
@@ -6,13 +7,13 @@ class Productos_Middleware {
   /**
    * Declaracion de variables secretas (privadas)
    */
-  #negociosModelo;
+  #modeloNegocio;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
-    this.#negociosModelo = new Negocios_Modelo();
+    this.#modeloNegocio = new Negocios_Modelo();
   }
 
   validarSesion = async (req, res, next) => {
@@ -33,7 +34,7 @@ class Productos_Middleware {
         .status(400)
         .json({ exito: false, mensaje: "ID de negocio no proporcionado." });
     try {
-      const negocio = await this.#negociosModelo.negocioDeUsuario(
+      const negocio = await this.#modeloNegocio.negocioDeUsuario(
         req.usuario.id
       );
       if (negocio.empty || negocio.docs[0].id !== negocio_id)
@@ -52,6 +53,21 @@ class Productos_Middleware {
         .json({ exito: false, mensaje: "Error del servidor." });
     }
   };
+
+  productoImagen = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 3 * 1024 * 1024, // 3 MB
+    },
+    fileFilter: (req, file, cb) => {
+      // Aceptar solo imágenes
+      if (file.mimetype.startsWith("image/")) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only image files are allowed!"), false);
+      }
+    },
+  });
 }
 
 module.exports = Productos_Middleware;

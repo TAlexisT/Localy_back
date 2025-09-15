@@ -1,11 +1,9 @@
 const joi = require("joi");
 
 const esquemaProductoUpload = joi.object({
-  nombre: joi.string().alphanum().min(1).max(100).required().messages({
+  nombre: joi.string().min(1).max(100).required().messages({
     "string.min": "El nombre del producto debe tener al menos 1 caracter",
     "string.max": "El nombre del producto no pued exceder los 100 caracteres",
-    "string.alphanum":
-      "El nombre del producto solo puede contener letras y numeros",
     "any.required": "El nombre del producto es requerido",
   }),
   precio: joi.number().min(0).required().messages({

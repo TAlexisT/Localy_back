@@ -2,7 +2,6 @@ const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
-const ServiciosStripe = require("./Servicios/ServiciosStripe");
 
 class Controlador_Stripe {
   /**
