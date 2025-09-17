@@ -35,7 +35,7 @@ class Controlador_Usuario {
         error: validacion.errores,
       });
 
-    const { usuario, contrasena, correo, telefono } = validacion.datos;
+    const { usuario, contrasena, correo } = validacion.datos;
 
     try {
       if (await this.#modeloUsuario.correoExiste(correo)) {
@@ -56,7 +56,6 @@ class Controlador_Usuario {
         await bcrypt.hash(contrasena, hashSaltRounds),
         correo,
         "usuario",
-        telefono
       );
 
       if (!refID)

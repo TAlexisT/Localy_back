@@ -19,13 +19,12 @@ class Modelo_Usuario {
     return !correoExistente.empty;
   }
 
-  async registrarUsuario(usuario, contrasena, correo, tipo, telefono = null) {
+  async registrarUsuario(usuario, contrasena, correo, tipo) {
     const docRef = await db.collection("usuarios").add({
       usuario,
       contrasena,
       correo,
       tipo,
-      telefono,
       creado: admin.firestore.FieldValue.serverTimestamp(),
     });
 

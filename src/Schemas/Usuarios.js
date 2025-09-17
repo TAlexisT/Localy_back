@@ -35,11 +35,6 @@ const esquemaUsuario = Joi.object({
       "string.email": "Por favor, proporcione una dirección de correo electrónico válida.",
       "any.required": "Se requiere correo electrónico",
     }),
-
-  telefono: Joi.string().pattern(new RegExp("^[+]?[0-9]{8,15}$")).messages({
-    "string.pattern.base":
-      "Proporcione un número de teléfono válido con entre 8 y 15 dígitos.",
-  }),
 });
 
 module.exports = {esquemaUsuario}
