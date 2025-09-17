@@ -148,4 +148,31 @@ const esquemaPropietario = Joi.object({
     }),
 });
 
-module.exports = { esquemaNegocio, esquemaPropietario };
+const paginacionParams = Joi.object({
+  tamano: Joi.number().integer().min(1).max(50).default(20),
+  direccion: Joi.string().valid("siguiente", "anterior").default("siguiente"),
+  seed: Joi.number()
+    .precision(8)
+    .default(() => parseFloat(Math.random().toFixed(8))),
+  cursor: Joi.number().precision(8).allow(null),
+});
+
+const paginacionFiltros = Joi.object({
+  proximidad: Joi.string().valid("DESC", "ASC").allow("", null).messages({
+    "string.valid": "Proximidad debe de ser igual a 'DESC' or 'ASC'",
+  }),
+  general: Joi.string().max(100).allow("", null).messages({
+    "string.max": "El filtro general no debe exceder los 100 caracteres",
+  }),
+  usuario_locacion: Joi.object({
+    latitude: Joi.number().min(-90).max(90).required(),
+    longitude: Joi.number().min(-180).max(180).required(),
+  }).allow(null),
+});
+
+module.exports = {
+  esquemaNegocio,
+  esquemaPropietario,
+  paginacionParams,
+  paginacionFiltros,
+};

@@ -1,14 +1,17 @@
-const multer = require("multer");
-
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
+const Servicios_Negocios = require("../Services/ServiciosNegocios");
 
 const bcrypt = require("bcrypt");
 
-const servs = require("../Services/ServiciosGenerales");
-const { esquemaPropietario, esquemaNegocio } = require("../Schemas/Negocios");
+const {
+  esquemaPropietario,
+  esquemaNegocio,
+  paginacionFiltros,
+  paginacionParams,
+} = require("../Schemas/Negocios");
 const { validador } = require("../Validators/Validador");
 
 const { front_URL, hashSaltRounds } = require("../../Configuraciones");
@@ -21,6 +24,7 @@ class Controlador_Negocio {
   #modeloNegocio;
   #modeloTramitesPendientes;
   #interaccionStripe;
+  #serviciosNegocios;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
@@ -30,6 +34,7 @@ class Controlador_Negocio {
     this.#modeloNegocio = new Modelo_Negocio();
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
     this.#interaccionStripe = new Interaccion_Stripe();
+    this.#serviciosNegocios = new Servicios_Negocios();
   }
 
   obtenerNegocio = async (req, res) => {
@@ -64,8 +69,7 @@ class Controlador_Negocio {
   };
 
   actualizarPerfil = async (req, res) => {
-    const negocioId = req.params.id;
-    const acceso = req.cookies.token_de_acceso;
+    const { negocio_id } = req.params;
 
     const validacion = validador(req.body, esquemaNegocio);
 
@@ -77,31 +81,17 @@ class Controlador_Negocio {
       });
     }
 
-    if (!negocioId) {
+    if (!negocio_id) {
       return res.status(400).json({ error: "ID de negocio no proporcionado." });
     }
 
     try {
-      const propietario = await this.#modeloNegocio.obtenerPropietario(
-        negocioId
-      );
-
-      if (propietario == null)
-        return res.status(400).json({
-          exito: false,
-          error: "El propietario del negocio no fue encontrado.",
-        });
-
-      const esValido = servs.accessTokenValidation(acceso, propietario);
-
-      if (!esValido.exito) return res.status(401).json(esValido);
-
       const svgContenido = req.file.buffer.toString("utf8") ?? "";
 
       if (svgContenido.includes("<svg") && svgContenido.includes("</svg>"))
         validacion.datos.logo = svgContenido;
 
-      await this.#modeloNegocio.actualizarNegocio(negocioId, validacion.datos);
+      await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
 
       res
         .status(200)
@@ -113,111 +103,76 @@ class Controlador_Negocio {
   };
 
   paginacionNegocios = async (req, res) => {
-    const tamano = parseInt(req.query.pageSize) || 5;
-    const seed =
-      parseFloat(req.query.seed) || parseFloat(Math.random().toFixed(8));
-    const cursor = parseFloat(req.query.cursor) || null;
-    const direccion = req.query.direction || "siguiente"; // previo
+    const pagParams = validador(
+      {
+        tamano: req.body.pageSize,
+        seed: req.body.seed,
+        cursor: req.body.cursor,
+        direccion: req.body.direction,
+      },
+      paginacionParams
+    );
+
+    if (!pagParams.exito) return res.status(400).json(pagParams);
+
+    const pagFiltros = validador(
+      {
+        proximidad: req.body.proximidad,
+        general: req.body.general,
+        usuario_locacion: req.body.usuario_locacion,
+      },
+      paginacionFiltros
+    );
+    if (!pagFiltros.exito) return res.status(400).json(pagParams);
+
+    const { usuario_locacion, ...filtros } = pagFiltros.datos;
+    const { tamano, cursor, direccion, seed } = pagParams.datos;
+    var respuesta = {};
+
+    /**
+     * id
+     * nombre,
+     * distancia,
+     * logo
+     */
 
     try {
-      var consulta;
-      var datos = [];
-
-      if (!cursor) {
-        // primera pagina
-        var consultaAntes = await this.#modeloNegocio.tamanoConsultaOrdenada(
+      if (
+        filtros.categoria ||
+        filtros.proximidad ||
+        filtros.precio ||
+        filtros.precio_rango ||
+        filtros.general
+      )
+        respuesta = await this.#serviciosNegocios.paginacionNegocios_filtros(
+          filtros,
+          usuario_locacion,
+          pagParams.datos.tamano,
+          pagParams.datos.cursor,
+          pagParams.datos.direccion
+        );
+      else
+        respuesta = await this.#serviciosNegocios.paginacionNegocios_alazar(
           tamano,
-          true
-        );
-        consultaAntes = consultaAntes.where("randomKey", "<=", seed);
-
-        var consultaDespues = await this.#modeloNegocio.tamanoConsultaOrdenada(
-          tamano,
-          false
-        );
-        consultaAntes = consultaAntes.where("randomKey", ">", seed);
-
-        const [snapshotAntes, snapshotDespues] = await Promise.all([
-          consultaAntes.get(),
-          consultaDespues.get(),
-        ]);
-
-        // convina los valores aunque prioriza los valores mayores a "seed"
-        snapshotAntes.forEach((doc) =>
-          datos.push({ id: doc.id, ...doc.data() })
-        );
-        snapshotDespues.forEach((doc) =>
-          datos.push({ id: doc.id, ...doc.data() })
+          seed,
+          usuario_locacion,
+          cursor,
+          direccion
         );
 
-        // Trim to page size
-        datos = datos.slice(0, tamano);
-      } else {
-        if (direccion === "siguiente") {
-          // Next page - get records after cursor
-          consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
-            tamano,
-            false
-          );
-          consulta = consulta.where("randomKey", ">", cursor);
-
-          const snapshot = await consulta.get();
-          snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-
-          // If we don't have enough results, wrap around to beginning
-          if (datos.length < tamano) {
-            var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
-              tamano - datos.length,
-              false
-            );
-            consultaWrap = consultaWrap.where("randomKey", "<", seed);
-
-            const snapshotWrap = await consultaWrap.get();
-            snapshotWrap.forEach((doc) =>
-              datos.push({ id: doc.id, ...doc.data() })
-            );
-          }
-        } else if (direccion === "previo") {
-          // Previous page - get records before cursor
-          consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
-            tamano,
-            true
-          );
-          consulta = consulta.where("randomKey", "<", cursor);
-
-          const snapshot = await consulta.get();
-          snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-
-          // If we don't have enough results, wrap around to end
-          if (datos.length < tamano) {
-            var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
-              tamano - datos.length,
-              true
-            );
-
-            consultaWrap = consultaWrap.where("randomKey", ">", seed);
-
-            const snapshotWrap = await consultaWrap.get();
-            // Reverse to maintain chronological order
-            const wrapData = [];
-            snapshotWrap.forEach((doc) =>
-              wrapData.push({ id: doc.id, ...doc.data() })
-            );
-            datos = [...wrapData.reverse(), ...datos].slice(0, tamano);
-          }
-          datos.reverse();
-        }
-      }
-
-      const primerToken = datos.length > 0 ? datos[0].randomKey : null;
-      const ultimoToken =
-        datos.length > 0 ? datos[datos.length - 1].randomKey : null;
+      respuesta.datos = respuesta.datos.map((negocio) => {
+        return {
+          negocio_id: negocio.negocio_id ?? null,
+          nombre: negocio.nombre ?? null,
+          distancia: negocio.distancia ?? null,
+          logo: negocio.logo ?? null,
+          descripcion: negocio.descripcion ?? null,
+        };
+      });
 
       res.status(200).json({
-        datos,
-        primerToken,
-        ultimoToken,
         seed, // Return the seed for consistent pagination
+        ...respuesta,
       });
     } catch (error) {
       console.error("Error en paginación:", error);
@@ -284,17 +239,8 @@ class Controlador_Negocio {
   };
 
   negocioPriceRenovacion = async (req, res) => {
-    const { id } = req.params;
-    const acceso = req.cookies.token_de_acceso;
-
-    if (!acceso)
-      // mejorar la validacion
-      return res.status(401).json({
-        exito: false,
-        error:
-          "La sesión necesita estar activa para poder renovar la suscripción.",
-      });
-    if (!id)
+    const { negocio_id } = req.params;
+    if (!negocio_id)
       return res.status(400).json({
         exito: false,
         error: "El ID del negocio es requerido en los parametros de la URL.",
@@ -303,7 +249,7 @@ class Controlador_Negocio {
     try {
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
-          id
+          negocio_id
         );
 
       const session = await this.#interaccionStripe.crearSession(
@@ -322,20 +268,6 @@ class Controlador_Negocio {
         .json({ exito: false, error: "Error al renovar la subscripcion" });
     }
   };
-
-  logoUpload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-      fileSize: 100 * 1024, // 100KB limit
-    },
-    fileFilter: (req, file, cb) => {
-      if (file.mimetype === "image/svg+xml") {
-        cb(null, true);
-      } else {
-        cb(new Error("Only SVG files are allowed"), false);
-      }
-    },
-  });
 }
 
 module.exports = Controlador_Negocio;

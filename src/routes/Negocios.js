@@ -6,6 +6,7 @@ var router = express.Router();
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
 const Controlador_Negocio = require("../Controllers/Negocios");
+const Negocios_Middleware = require("../Middleware/Negocios_Middleware");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -15,22 +16,27 @@ const Controlador_Negocio = require("../Controllers/Negocios");
  * Inicialización de las clases subyacentes, así como variables de control
  */
 const controladorNegocio = new Controlador_Negocio();
+const middlewareNegocio = new Negocios_Middleware();
 /**
  * {Fin de Sección: Inisialización}
  */
 
 router.get("/perfil/:id", controladorNegocio.obtenerNegocio);
-router.get("/mostrar", controladorNegocio.paginacionNegocios);
+router.post("/mostrar", controladorNegocio.paginacionNegocios);
 
 router.put(
-  "/perfil/:id",
-  controladorNegocio.logoUpload.single("svg"),
+  "/perfil/:negocio_id",
+  middlewareNegocio.validarSesion,
+  middlewareNegocio.validarUsuario,
+  middlewareNegocio.logoUpload.single("svg"),
   controladorNegocio.actualizarPerfil
 );
 
 router.post("/crear-sesion-pago", controladorNegocio.negocioRegistro);
 router.post(
-  "/reactivar-sesion-pago/:id",
+  "/reactivar-sesion-pago/:negocio_id",
+  middlewareNegocio.validarSesion,
+  middlewareNegocio.validarUsuario,
   controladorNegocio.negocioPriceRenovacion
 );
 

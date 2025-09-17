@@ -14,11 +14,22 @@ class Modelo_Negocio {
     return await db.collection("negocios").doc(negocioId).get();
   }
 
+  async consultaBase() {
+    return db.collection("negocios");
+  }
+
   async obtenerPropietario(id = string) {
     const restSnap = await db.collection("negocios").doc(id).get();
 
     if (!restSnap.exists) return null;
     else return restSnap.data().usuarioId;
+  }
+
+  async obtenerLista(negocioIds) {
+    return await db
+      .collection("negocios")
+      .where(admin.firestore.FieldPath.documentId(), "in", negocioIds)
+      .get();
   }
 
   async negocioDeUsuario(usuarioId) {
@@ -80,6 +91,7 @@ class Modelo_Negocio {
     // Posibilidad de añadir algunos filtros como parametros
     return db
       .collection("negocios")
+      .where("activo", "==", true)
       .orderBy("randomKey", esDesc ? "desc" : "asc")
       .limit(tamano);
   }
