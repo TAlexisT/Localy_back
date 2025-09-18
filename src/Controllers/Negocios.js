@@ -181,7 +181,6 @@ class Controlador_Negocio {
   };
 
   negocioRegistro = async (req, res) => {
-    const { recurrente } = req.body;
     const validacion = validador(req.body, esquemaPropietario);
 
     if (!validacion.exito) {
@@ -192,7 +191,7 @@ class Controlador_Negocio {
       });
     }
 
-    const { price_id, correo, contrasena, telefono, usuario } =
+    const { price_id, correo, contrasena, telefono, usuario, recurrente } =
       validacion.datos;
 
     var tramitePendienteRef = null;

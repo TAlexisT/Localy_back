@@ -146,6 +146,8 @@ const esquemaPropietario = Joi.object({
         "Price ID must be a valid Stripe price ID format (price_ followed by 24 alphanumeric characters)",
       "any.required": "Price ID is required",
     }),
+
+  recurrente: Joi.boolean(),
 });
 
 const paginacionParams = Joi.object({
