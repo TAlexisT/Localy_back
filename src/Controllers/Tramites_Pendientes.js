@@ -1,5 +1,5 @@
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Modelo_Usuarios = require("../db/Usuarios");
+const Modelo_Negocios = require("../db/Negocios");
 
 const servs = require("../Services/ServiciosGenerales");
 
@@ -8,14 +8,14 @@ class Controlador_Tramites_Pendientes {
    * Declaracion de variables secretas (privadas)
    */
   #modeloTramitesPendientes;
-  #modeloUsuarios;
+  #modeloNegocios;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
-    this.#modeloUsuarios = new Modelo_Usuarios();
+    this.#modeloNegocios = new Modelo_Negocios();
   }
 
   obtenerTramite = async (req, res) => {
@@ -34,9 +34,9 @@ class Controlador_Tramites_Pendientes {
 
       const datosTramite = tramiteRegistro.data();
 
-      const usuarioSnap = (
-        await this.#modeloUsuarios.obtenerUsuario(datosTramite.usuario_id)
-      ).data();
+      const usuarioSnap = await this.#modeloNegocios.obtenerPropietario(
+        datosTramite.negocio_id
+      );
 
       const datos = {
         id: datosTramite.usuario_id,
@@ -57,9 +57,10 @@ class Controlador_Tramites_Pendientes {
         datos: datos,
       });
     } catch (err) {
+      console.log("Error en el servidor", err);
       return res.status(500).json({
         exito: false,
-        mensaje: `Existió un error dentro del servidor: ${err.message}`,
+        mensaje: `Existió un error dentro del servidor`,
         datos: null,
       });
     }
