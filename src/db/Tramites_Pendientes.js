@@ -36,7 +36,7 @@ class Modelo_Tramites_Pendientes {
       .doc(tramite_id)
       .get();
 
-    return docRef.exists ? docRef : null;
+    return docRef;
   }
 
   async procesandoTramite(tramite_id, negocioId, usuarioId) {

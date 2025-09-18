@@ -68,7 +68,7 @@ class Controlador_Stripe {
     const tramiteSnap =
       await this.#modeloTramitesPendientes.obtenerTramitePendiente(tramiteId);
 
-    if (tramiteSnap == null) {
+    if (!tramiteSnap.exists) {
       console.warn("Trámite no encontrado:", tramiteId);
       return;
     }
