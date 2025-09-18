@@ -1,5 +1,5 @@
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Modelo_Negocios = require("../db/Negocios");
+const Modelo_Usuarios = require("../db/Usuarios");
 
 const servs = require("../Services/ServiciosGenerales");
 
@@ -8,14 +8,14 @@ class Controlador_Tramites_Pendientes {
    * Declaracion de variables secretas (privadas)
    */
   #modeloTramitesPendientes;
-  #modeloNegocios;
+  #modeloUsuario;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
-    this.#modeloNegocios = new Modelo_Negocios();
+    this.#modeloUsuario = new Modelo_Usuarios();
   }
 
   obtenerTramite = async (req, res) => {
@@ -34,7 +34,7 @@ class Controlador_Tramites_Pendientes {
 
       const datosTramite = tramiteRegistro.data();
 
-      const usuarioSnap = await this.#modeloNegocios.obtenerPropietario(
+      const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
         datosTramite.negocio_id
       );
 
