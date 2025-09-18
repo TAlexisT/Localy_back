@@ -1,6 +1,10 @@
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Usuario {
+  async obtenerUsuario(usuario_id) {
+    return db.collection("usuarios").doc(usuario_id).get();
+  }
+
   async nombreExiste(usuarioNombre) {
     const usuarioExistente = await db
       .collection("usuarios")

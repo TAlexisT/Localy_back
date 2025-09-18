@@ -18,6 +18,7 @@ class Interaccion_Stripe {
           quantity: 1,
         },
       ],
+      customer_creation: "always",
       metadata,
       success_url,
       cancel_url,

@@ -62,7 +62,6 @@ class Controlador_Stripe {
 
   // Metodos privados
   #pagoInicial = async (session) => {
-    const subscriptionId = session.subscription;
     const customerId = session.customer;
     const tramiteId = session.metadata?.tramiteId;
 
@@ -93,7 +92,6 @@ class Controlador_Stripe {
       await this.#modeloNegocio.renovarSubscripcion(
         negocio_id,
         price_id,
-        subscriptionId,
         customerId
       );
       return;
@@ -112,24 +110,24 @@ class Controlador_Stripe {
       correo,
       telefono,
       price_id,
-      subscriptionId,
       customerId
     );
 
     await this.#modeloTramitesPendientes.procesandoTramite(
       tramiteId,
-      negocioRef.id
+      negocioRef.id,
+      usuarioRef.id
     );
   };
 
   #refrescarSesion = async (session) => {
-    const subscriptionId = session.subscription;
-    await this.#modeloNegocio.refrescarSubscripcion(subscriptionId);
+    const customerId = session.customer;
+    await this.#modeloNegocio.refrescarSubscripcion(customerId);
   };
 
   #desactivarSesion = async (session) => {
-    const subscripcionId = session.subscription;
-    await this.#modeloNegocio.desactivarSubscripcion(subscripcionId);
+    const customerId = session.customer;
+    await this.#modeloNegocio.desactivarSubscripcion(customerId);
   };
 }
 

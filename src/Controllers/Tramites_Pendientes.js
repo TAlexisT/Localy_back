@@ -1,16 +1,21 @@
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
+const Modelo_Usuarios = require("../db/Usuarios");
+
+const servs = require("../Services/ServiciosGenerales");
 
 class Controlador_Tramites_Pendientes {
   /**
    * Declaracion de variables secretas (privadas)
    */
   #modeloTramitesPendientes;
+  #modeloUsuarios;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
+    this.#modeloUsuarios = new Modelo_Usuarios();
   }
 
   obtenerTramite = async (req, res) => {
@@ -20,19 +25,37 @@ class Controlador_Tramites_Pendientes {
       const tramiteRegistro =
         await this.#modeloTramitesPendientes.obtenerTramitePendiente(id);
 
-      return tramiteRegistro.exists
-        ? res.status(200).json({
-            exito: true,
-            mensaje: "Datos obtenidos correctamente.",
-            datos: {
-              ...tramiteRegistro.data(),
-            },
-          })
-        : res.status(404).json({
-            exito: false,
-            mensaje: `El registro especificado con el id: ${id} no fue encontrado dentro de la base de datos.`,
-            datos: null,
-          });
+      if (!tramiteRegistro.exists)
+        res.status(404).json({
+          exito: false,
+          mensaje: `El registro especificado con el id: ${id} no fue encontrado dentro de la base de datos.`,
+          datos: null,
+        });
+
+      const datosTramite = tramiteRegistro.data();
+
+      const usuarioSnap = await this.#modeloUsuarios
+        .obtenerUsuario(datosTramite.usuario_id)
+        .data();
+
+      const datos = {
+        id: datosTramite.usuario_id,
+        usuario: usuarioSnap.usuario,
+        tipo: usuarioSnap.tipo,
+        correo: usuarioSnap.correo,
+        negocioId: datosTramite.negocio_id,
+      };
+
+      const token = servs.jwt_accessToken(datos);
+      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+
+      await this.#modeloTramitesPendientes.tramiteConcluido(id);
+
+      res.cookie("token_de_acceso", token, atConfigs).status(200).json({
+        exito: true,
+        mensaje: "Datos obtenidos correctamente.",
+        datos: datos,
+      });
     } catch (err) {
       return res.status(500).json({
         exito: false,

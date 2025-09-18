@@ -55,7 +55,7 @@ class Controlador_Usuario {
         usuario,
         await bcrypt.hash(contrasena, hashSaltRounds),
         correo,
-        "usuario",
+        "usuario"
       );
 
       if (!refID)
@@ -140,29 +140,21 @@ class Controlador_Usuario {
         info.negocioId = !restSnap.empty ? restSnap.docs[0].id : null;
       } else info.negocioId = null;
 
-      const token = servs.jwt_accessToken({
+      const datos = {
         id: info.usuarioId,
         usuario: info.usuario.usuario,
         correo: info.usuario.correo,
         tipo: info.usuario.tipo,
         negocioId: info.negocioId,
-      });
+      };
 
+      const token = servs.jwt_accessToken(datos);
       const atConfigs = servs.cookieParser_AccessTokenConfigs();
 
-      res
-        .cookie("token_de_acceso", token, atConfigs)
-        .status(202)
-        .json({
-          exito: true,
-          datos: {
-            id: info.usuarioId,
-            usuario: info.usuario.usuario,
-            correo: info.usuario.correo,
-            tipo: info.usuario.tipo,
-            negocioId: info.negocioId,
-          },
-        });
+      res.cookie("token_de_acceso", token, atConfigs).status(202).json({
+        exito: true,
+        datos,
+      });
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       res.status(500).json({ error: "Error del servidor" });
