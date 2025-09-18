@@ -220,8 +220,8 @@ class Controlador_Negocio {
       const session = await this.#interaccionStripe.crearSession(
         price_id,
         { tramiteId: tramitePendienteRef.id },
-        `${front_URL}/pago-exito?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
-        `${front_URL}/pago-error`, // enfoque para "live"
+        `${front_URL}/pago_exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${front_URL}/pago_erroneo`, // enfoque para "live"
         recurrente ?? false
       );
 
