@@ -35,21 +35,23 @@ class Controlador_Tramites_Pendientes {
       const datosTramite = tramiteRegistro.data();
 
       const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
-        datosTramite.negocio_id
+        datosTramite.usuario_id
       );
+
+      const datosUsuario = usuarioSnap.data();
 
       const datos = {
         id: datosTramite.usuario_id,
-        usuario: usuarioSnap.usuario,
-        tipo: usuarioSnap.tipo,
-        correo: usuarioSnap.correo,
+        usuario: datosUsuario.usuario,
+        tipo: datosUsuario.tipo,
+        correo: datosUsuario.correo,
         negocioId: datosTramite.negocio_id,
       };
 
       const token = servs.jwt_accessToken(datos);
       const atConfigs = servs.cookieParser_AccessTokenConfigs();
 
-      await this.#modeloTramitesPendientes.tramiteConcluido(id);
+      // await this.#modeloTramitesPendientes.tramiteConcluido(id);
 
       res.cookie("token_de_acceso", token, atConfigs).status(200).json({
         exito: true,
@@ -57,7 +59,7 @@ class Controlador_Tramites_Pendientes {
         datos: datos,
       });
     } catch (err) {
-      console.log("Error en el servidor", err);
+      console.error("Error en el servidor", err);
       return res.status(500).json({
         exito: false,
         mensaje: `Existió un error dentro del servidor`,

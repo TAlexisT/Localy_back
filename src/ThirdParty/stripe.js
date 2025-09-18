@@ -9,20 +9,26 @@ class Interaccion_Stripe {
     cancel_url,
     recurrent
   ) {
-    return await stripe.checkout.sessions.create({
+    const sessionConfig = {
       mode: recurrent ? "subscription" : "payment",
       payment_method_types: ["card"],
       line_items: [
         {
-          price: price_id, // this must be a recurring price if recurrent=true
+          price: price_id, // must be recurring if recurrent=true
           quantity: 1,
         },
       ],
-      customer_creation: "always",
       metadata,
       success_url,
       cancel_url,
-    });
+    };
+
+    // Only include customer_creation if it's a one-time payment
+    if (!recurrent) {
+      sessionConfig.customer_creation = "always";
+    }
+
+    return await stripe.checkout.sessions.create(sessionConfig);
   }
 
   eventConstructor = (body, sig) => {
