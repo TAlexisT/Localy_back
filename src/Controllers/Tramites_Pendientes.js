@@ -34,9 +34,9 @@ class Controlador_Tramites_Pendientes {
 
       const datosTramite = tramiteRegistro.data();
 
-      const usuarioSnap = await this.#modeloUsuarios
-        .obtenerUsuario(datosTramite.usuario_id)
-        .data();
+      const usuarioSnap = (
+        await this.#modeloUsuarios.obtenerUsuario(datosTramite.usuario_id)
+      ).data();
 
       const datos = {
         id: datosTramite.usuario_id,
