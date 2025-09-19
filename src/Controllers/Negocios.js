@@ -86,7 +86,7 @@ class Controlador_Negocio {
     }
 
     try {
-      const svgContenido = req.file.buffer.toString("utf8") ?? "";
+      const svgContenido = req.file ? req.file.buffer.toString("utf8") : "";
 
       if (svgContenido.includes("<svg") && svgContenido.includes("</svg>"))
         validacion.datos.logo = svgContenido;
