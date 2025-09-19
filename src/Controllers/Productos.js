@@ -164,14 +164,6 @@ class Controlador_Productos {
     }
   };
 
-  /**
-   * id,
-   * nombre,
-   * precio,
-   * restaurante,
-   * imagen
-   */
-
   #subirImagenProducto = async (
     imagen,
     producto_id,

@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+const multer = require("multer");
 
 class ProteccionServer {
   tasaMaxima = () => {
@@ -10,6 +11,20 @@ class ProteccionServer {
       standardHeaders: true, // Devuelve información de limitación en las cabeceras `RateLimit-*`
       legacyHeaders: false, // Deshabilita las cabeceras `X-RateLimit-*`
     });
+  };
+
+  multerError = (error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+      if (error.code === "LIMIT_UNEXPECTED_FILE") {
+        return res
+          .status(400)
+          .json({ message: "Unexpected field in form data" });
+      }
+      if (error.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ message: "File too large" });
+      }
+    }
+    res.status(500).json({ message: error.message });
   };
 }
 

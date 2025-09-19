@@ -1,5 +1,7 @@
 const Modelo_Negocio = require("../db/Negocios");
 
+const { bucket } = require("../../Configuraciones");
+
 class ServiciosNegocios {
   /**
    * Declaracion de variables secretas (privadas)
@@ -197,6 +199,44 @@ class ServiciosNegocios {
       negocios = this.#incluirDistancia(negocios, usuario_locacion);
 
     return { datos: negocios, primerToken, ultimoToken };
+  };
+
+  subirImagenNegocio = async (imagen, negocio_id, usuario_id) => {
+    if (!imagen)
+      return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
+
+    const nombreArchivo = `negocios/usuario_${usuario_id}/negocio_${negocio_id}/${Date.now()}_${
+      imagen.originalname
+    }`;
+
+    const archivo = bucket.file(nombreArchivo);
+    const stream = archivo.createWriteStream({
+      metadata: {
+        contentType: imagen.mimetype,
+        metadata: { usuario_id, negocio_id },
+      },
+      resumable: false,
+    });
+
+    return new Promise((resolve, reject) => {
+      stream.on("error", (err) => {
+        console.log("Error al subir imagen:", err);
+        reject({ exito: false, mensaje: "Error al subir la imagen." });
+      });
+
+      stream.on("finish", async () => {
+        try {
+          await archivo.makePublic();
+          const urlPublica = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
+          resolve({ exito: true, url: urlPublica });
+        } catch (err) {
+          console.log("Error al hacer la imagen pública:", err);
+          reject({ exito: false, mensaje: "Error al procesar la imagen." });
+        }
+      });
+
+      stream.end(imagen.buffer);
+    });
   };
 
   #distanciaAprox = (lat1, lon1, lat2, lon2) => {

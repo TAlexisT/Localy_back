@@ -86,10 +86,18 @@ class Controlador_Negocio {
     }
 
     try {
-      const svgContenido = req.file ? req.file.buffer.toString("utf8") : "";
+      const usuarioId = await this.#modeloNegocio.obtenerPropietario(
+        negocio_id
+      );
 
-      if (svgContenido.includes("<svg") && svgContenido.includes("</svg>"))
-        validacion.datos.logo = svgContenido;
+      const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
+        req.file,
+        negocio_id,
+        usuarioId
+      );
+
+      if (subirImagen.exito) validacion.datos.logo = subirImagen.url;
+      else validacion.datos.logo = "";
 
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
 

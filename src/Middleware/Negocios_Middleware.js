@@ -57,13 +57,14 @@ class Negocios_Middleware {
   logoUpload = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 100 * 1024, // 100KB limit
+      fileSize: 2 * 1024 * 1024, // 2MB limit
     },
     fileFilter: (req, file, cb) => {
-      if (file.mimetype === "image/svg+xml") {
+      const allowedTypes = ["image/jpeg", "image/png", "image/svg+xml"];
+      if (allowedTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {
-        cb(new Error("Only SVG files are allowed"), false);
+        cb(new Error("Only JPG, PNG and SVG files are allowed"), false);
       }
     },
   });

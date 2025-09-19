@@ -6,7 +6,10 @@ admin.initializeApp({
   credential: admin.credential.cert(
     JSON.parse(process.env.FB_SERVICE_ACCOUNT_JSON)
   ),
+  storageBucket: process.env.FB_BUCKET_URL,
 });
+
+const bucket = admin.storage().bucket();
 
 const db = admin.firestore();
 
@@ -36,9 +39,10 @@ const corsConfigs = {
 module.exports = {
   admin,
   db,
+  bucket,
   stripe,
   hashSaltRounds,
   jwtSecreta,
   corsConfigs,
-  front_URL
+  front_URL,
 };

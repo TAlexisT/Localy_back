@@ -7,6 +7,7 @@ var router = express.Router();
  */
 const Controlador_Negocio = require("../Controllers/Negocios");
 const Negocios_Middleware = require("../Middleware/Negocios_Middleware");
+const ProteccionServer = require("../Middleware/ProteccionServer");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -28,7 +29,7 @@ router.put(
   "/perfil/:negocio_id",
   middlewareNegocio.validarSesion,
   middlewareNegocio.validarUsuario,
-  middlewareNegocio.logoUpload.single("svg"),
+  middlewareNegocio.logoUpload.single("imagen"),
   controladorNegocio.actualizarPerfil
 );
 
@@ -39,5 +40,8 @@ router.post(
   middlewareNegocio.validarUsuario,
   controladorNegocio.negocioPriceRenovacion
 );
+
+// Error handling middleware
+router.use(ProteccionServer.multerError);
 
 module.exports = router;

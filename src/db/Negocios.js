@@ -18,8 +18,8 @@ class Modelo_Negocio {
     return db.collection("negocios");
   }
 
-  async obtenerPropietario(id = string) {
-    const restSnap = await db.collection("negocios").doc(id).get();
+  async obtenerPropietario(negocio_id = string) {
+    const restSnap = await db.collection("negocios").doc(negocio_id).get();
 
     if (!restSnap.exists) return null;
     else return restSnap.data().usuarioId;
