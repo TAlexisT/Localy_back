@@ -23,7 +23,6 @@ const middlewareNegocio = new Negocios_Middleware();
  */
 
 router.get("/perfil/:id", controladorNegocio.obtenerNegocio);
-router.post("/mostrar", controladorNegocio.paginacionNegocios);
 
 router.put(
   "/perfil/:negocio_id",
@@ -33,6 +32,7 @@ router.put(
   controladorNegocio.actualizarPerfil
 );
 
+router.post("/mostrar", controladorNegocio.paginacionNegocios);
 router.post("/crear-sesion-pago", controladorNegocio.negocioRegistro);
 router.post(
   "/reactivar-sesion-pago/:negocio_id",

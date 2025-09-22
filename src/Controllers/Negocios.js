@@ -137,13 +137,6 @@ class Controlador_Negocio {
     const { tamano, cursor, direccion, seed } = pagParams.datos;
     var respuesta = {};
 
-    /**
-     * id
-     * nombre,
-     * distancia,
-     * logo
-     */
-
     try {
       if (
         filtros.categoria ||
@@ -174,6 +167,7 @@ class Controlador_Negocio {
           nombre: negocio.nombre ?? null,
           distancia: negocio.distancia ?? null,
           logo: negocio.logo ?? null,
+          random_key: negocio.randomKey,
           descripcion: negocio.descripcion ?? null,
         };
       });
@@ -247,28 +241,45 @@ class Controlador_Negocio {
 
   negocioPriceRenovacion = async (req, res) => {
     const { negocio_id } = req.params;
+    const { recurrente } = req.body;
+
     if (!negocio_id)
       return res.status(400).json({
         exito: false,
         error: "El ID del negocio es requerido en los parametros de la URL.",
       });
 
+    var tramitePendienteRef = null;
+
     try {
+      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+
+      if (!negocioSnap.exists)
+        return res.status(404).json({
+          exito: false,
+          mensaje: "El negocio que se referencio no fue encontrado.",
+        });
+
+      const negocioDatos = negocioSnap.data();
+
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
-          negocio_id
+          negocio_id,
+          negocioDatos.stripe.price_id
         );
 
       const session = await this.#interaccionStripe.crearSession(
-        price_id,
+        negocioDatos.stripe.price_id,
         { tramiteId: tramitePendienteRef.id },
-        `${front_URL}/renovacion-exito?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
-        `${front_URL}/renovacion-error`, // enfoque para "live"
+        `${front_URL}/renovacion_exitosa?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
+        `${front_URL}/renovacion_erronea`, // enfoque para "live"
         recurrente ?? false
       );
 
       return res.status(202).json({ exito: true, url: session.url });
     } catch (err) {
+      if (tramitePendienteRef)
+        this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       console.error("Error al renovar la subscripcion:", err);
       res
         .status(500)

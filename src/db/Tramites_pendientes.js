@@ -27,6 +27,7 @@ class Modelo_Tramites_Pendientes {
       negocio_id,
       price_id,
       renovacion: true,
+      creado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 

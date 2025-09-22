@@ -24,96 +24,57 @@ class ServiciosNegocios {
   ) => {
     var consulta;
     var datos = [];
+    var primerToken;
+    var ultimoToken;
 
-    if (!cursor) {
-      // primera pagina
-      var consultaAntes = await this.#modeloNegocio.tamanoConsultaOrdenada(
-        tamano,
-        true
-      );
-      consultaAntes = consultaAntes.where("randomKey", "<=", seed);
+    if (typeof cursor !== "number") cursor = null;
 
-      var consultaDespues = await this.#modeloNegocio.tamanoConsultaOrdenada(
-        tamano,
-        false
-      );
-      consultaAntes = consultaAntes.where("randomKey", ">", seed);
+    const avanza = direccion == "siguiente" || !cursor;
 
-      const [snapshotAntes, snapshotDespues] = await Promise.all([
-        consultaAntes.get(),
-        consultaDespues.get(),
-      ]);
-
-      // convina los valores aunque prioriza los valores mayores a "seed"
-      snapshotAntes.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-      snapshotDespues.forEach((doc) =>
-        datos.push({ id: doc.id, ...doc.data() })
+    // siguiente pagina - Consigue los registros despues del cursor
+    consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(tamano, avanza);
+    if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
+      consulta = consulta.where(
+        "randomKey",
+        avanza ? "<" : ">",
+        !cursor ? seed : cursor
       );
 
-      // Trim to page size
-      datos = datos.slice(0, tamano);
-    } else {
-      if (direccion === "siguiente") {
-        // siguiente pagina - Consigue los registros despues del cursor
+      const snapshot = await consulta.get();
+
+      datos = this.#activoYactualizado(snapshot);
+
+      if (datos.length < tamano) {
         consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
-          tamano,
-          false
+          tamano - datos.length,
+          avanza
         );
-        consulta = consulta.where("randomKey", ">", cursor);
+        consulta = consulta.where("randomKey", avanza ? ">" : "<", seed);
+        const snapshotDespues = await consulta.get();
 
-        const snapshot = await consulta.get();
-        snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-
-        // Si no tenemos suficientes resultados, envuelve al principio
-        if (datos.length < tamano) {
-          var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
-            tamano - datos.length,
-            false
-          );
-          consultaWrap = consultaWrap.where("randomKey", "<", seed);
-
-          const snapshotWrap = await consultaWrap.get();
-          snapshotWrap.forEach((doc) =>
-            datos.push({ id: doc.id, ...doc.data() })
-          );
-        }
-      } else if (direccion === "previo") {
-        // pagina previa - Consigue los registros antes del cursor
-        consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
-          tamano,
-          true
-        );
-        consulta = consulta.where("randomKey", "<", cursor);
-
-        const snapshot = await consulta.get();
-        snapshot.forEach((doc) => datos.push({ id: doc.id, ...doc.data() }));
-
-        // Si no tenemos suficientes resultados, envuelve al final
-        if (datos.length < tamano) {
-          var consultaWrap = await this.#modeloNegocio.tamanoConsultaOrdenada(
-            tamano - datos.length,
-            true
-          );
-
-          consultaWrap = consultaWrap.where("randomKey", ">", seed);
-
-          const snapshotWrap = await consultaWrap.get();
-          // Revertir el orden para mantener la consistencia
-          const wrapData = [];
-          snapshotWrap.forEach((doc) =>
-            wrapData.push({ id: doc.id, ...doc.data() })
-          );
-          datos = [...wrapData.reverse(), ...datos].slice(0, tamano);
-        }
-        datos.reverse();
+        datos = [...datos, ...this.#activoYactualizado(snapshotDespues)];
       }
+    } else {
+      consulta = consulta
+        .where("randomKey", avanza ? "<" : ">", cursor)
+        .where("randomKey", avanza ? ">" : "<", seed);
+
+      const snapshot = await consulta.get();
+      datos = this.#activoYactualizado(snapshot);
     }
+
+    if (!avanza) datos.reverse();
+
+    primerToken = datos.length ? datos[0].randomKey : null;
+    ultimoToken = datos.length ? datos[datos.length - 1].randomKey : null;
+
     if (usuario_locacion)
       datos = this.#incluirDistancia(datos, usuario_locacion);
+
     return {
       datos,
-      primerToken: datos[0].id,
-      ultimoToken: datos[datos.length - 1].id,
+      primerToken,
+      ultimoToken,
     };
   };
 
@@ -205,7 +166,7 @@ class ServiciosNegocios {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `negocios/usuario_${usuario_id}/negocio_${negocio_id}/${Date.now()}_${
+    const nombreArchivo = `negocios/negocio_${negocio_id}/${Date.now()}_${
       imagen.originalname
     }`;
 
@@ -267,6 +228,17 @@ class ServiciosNegocios {
       }
       return negocio;
     });
+  };
+
+  #activoYactualizado = (snapshot) => {
+    const datos = [];
+    snapshot.forEach((doc) => {
+      const negocioDatos = doc.data();
+      if (negocioDatos.nombre)
+        datos.push({ negocio_id: doc.id, ...doc.data() });
+    });
+
+    return datos;
   };
 }
 

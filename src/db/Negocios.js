@@ -87,11 +87,12 @@ class Modelo_Negocio {
    * @param {boolean} [esDesc=true] - Si ordenar los resultados en orden descendente (verdadero) o ascendente (falso).
    * @returns {Promise<Query>} Una promesa que resuelve la consulta con el orden especificado y el límite aplicado.
    */
-  async tamanoConsultaOrdenada(tamano = Int32Array, esDesc = true) {
+  async tamanoConsultaOrdenada(tamano, esDesc = true) {
     // Posibilidad de añadir algunos filtros como parametros
     return db
       .collection("negocios")
       .where("activo", "==", true)
+      .where("nombre", ">=", " ")
       .orderBy("randomKey", esDesc ? "desc" : "asc")
       .limit(tamano);
   }
@@ -137,14 +138,14 @@ class Modelo_Negocio {
     });
   }
 
-  async crearNegocio(usuarioId, correo, telefono, price_id, customerId) {
+  async crearNegocio(usuarioId, correo, telefono, price_id, customer_id) {
     return await db.collection("negocios").add({
       usuarioId,
       correo,
       telefono,
       activo: true,
       stripe: {
-        customerId,
+        customer_id,
         price_id,
       },
       randomKey: Math.random(),
