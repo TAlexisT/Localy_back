@@ -1,111 +1,111 @@
-const Joi = require("joi");
+const joi = require("joi");
 
-const esquemaNegocio = Joi.object({
-  nombre: Joi.string().min(1).max(100).required(),
+const esquemaNegocio = joi.object({
+  nombre: joi.string().min(1).max(100).required(),
 
-  descripcion: Joi.string().max(500).allow("", null),
+  descripcion: joi.string().max(500).allow("", null),
 
-  ubicacion: Joi.object({
-    latitude: Joi.number().min(-90).max(90).required(),
-    longitude: Joi.number().min(-180).max(180).required(),
+  ubicacion: joi.object({
+    latitude: joi.number().min(-90).max(90).required(),
+    longitude: joi.number().min(-180).max(180).required(),
   }).required(),
 
-  horario: Joi.object({
-    Lunes: Joi.object({
-      apertura: Joi.string()
+  horario: joi.object({
+    Lunes: joi.object({
+      apertura: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
 
-      cierre: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-    }).allow("", null),
-
-    Martes: Joi.object({
-      apertura: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-
-      cierre: Joi.string()
+      cierre: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
     }).allow("", null),
 
-    Miercoles: Joi.object({
-      apertura: Joi.string()
+    Martes: joi.object({
+      apertura: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
 
-      cierre: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-    }).allow("", null),
-
-    Jueves: Joi.object({
-      apertura: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-
-      cierre: Joi.string()
+      cierre: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
     }).allow("", null),
 
-    Viernes: Joi.object({
-      apertura: Joi.string()
+    Miercoles: joi.object({
+      apertura: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
 
-      cierre: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-    }).allow("", null),
-
-    Sabado: Joi.object({
-      apertura: Joi.string()
-        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-        .allow("", null),
-
-      cierre: Joi.string()
+      cierre: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
     }).allow("", null),
 
-    Domingo: Joi.object({
-      apertura: Joi.string()
+    Jueves: joi.object({
+      apertura: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
 
-      cierre: Joi.string()
+      cierre: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+    }).allow("", null),
+
+    Viernes: joi.object({
+      apertura: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+
+      cierre: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+    }).allow("", null),
+
+    Sabado: joi.object({
+      apertura: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+
+      cierre: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+    }).allow("", null),
+
+    Domingo: joi.object({
+      apertura: joi.string()
+        .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
+        .allow("", null),
+
+      cierre: joi.string()
         .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
         .allow("", null),
     }).allow("", null),
   }).required(),
 
-  redes: Joi.object({
-    WhatsApp: Joi.string()
+  redes: joi.object({
+    WhatsApp: joi.string()
       .pattern(/^\+?[1-9]\d{1,14}$/)
       .allow(null, ""),
 
-    X: Joi.string().allow(null, ""),
+    X: joi.string().allow(null, ""),
 
-    Facebook: Joi.string().uri().allow(null, ""),
+    Facebook: joi.string().uri().allow(null, ""),
 
-    Instagram: Joi.string().uri().allow(null, ""),
+    Instagram: joi.string().uri().allow(null, ""),
 
-    TikTok: Joi.string().uri().allow(null, ""),
+    TikTok: joi.string().uri().allow(null, ""),
   }).required(),
 });
 
-const esquemaPropietario = Joi.object({
-  usuario: Joi.string().alphanum().min(3).max(30).required().messages({
+const esquemaPropietario = joi.object({
+  usuario: joi.string().alphanum().min(3).max(30).required().messages({
     "string.alphanum": "Username must only contain alphanumeric characters",
     "string.min": "Username must be at least 3 characters long",
     "string.max": "Username cannot exceed 30 characters",
     "any.required": "Username is required",
   }),
 
-  contrasena: Joi.string()
+  contrasena: joi.string()
     .pattern(
       new RegExp(
         "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]"
@@ -122,7 +122,7 @@ const esquemaPropietario = Joi.object({
       "any.required": "Password is required",
     }),
 
-  correo: Joi.string()
+  correo: joi.string()
     .email({
       minDomainSegments: 2,
       tlds: { allow: ["com", "net", "org", "es"] },
@@ -133,12 +133,12 @@ const esquemaPropietario = Joi.object({
       "any.required": "Email is required",
     }),
 
-  telefono: Joi.string().pattern(new RegExp("^[+]?[0-9]{8,15}$")).messages({
+  telefono: joi.string().pattern(new RegExp("^[+]?[0-9]{8,15}$")).messages({
     "string.pattern.base":
       "Please provide a valid phone number with 8-15 digits",
   }),
 
-  price_id: Joi.string()
+  price_id: joi.string()
     .pattern(/^price_[a-zA-Z0-9]{24}$/)
     .required()
     .messages({
@@ -147,28 +147,28 @@ const esquemaPropietario = Joi.object({
       "any.required": "Price ID is required",
     }),
 
-  recurrente: Joi.boolean(),
+  recurrente: joi.boolean(),
 });
 
-const paginacionParams = Joi.object({
-  tamano: Joi.number().integer().min(1).max(50).default(20),
-  direccion: Joi.string().valid("siguiente", "anterior").default("siguiente"),
-  seed: Joi.number()
+const paginacionParams = joi.object({
+  tamano: joi.number().integer().min(1).max(50).default(20),
+  direccion: joi.string().valid("siguiente", "anterior").default("siguiente"),
+  seed: joi.number()
     .precision(8)
     .default(() => parseFloat(Math.random().toFixed(8))),
-  cursor: Joi.number().precision(8).allow(null),
+  cursor: joi.number().precision(8).allow(null),
 });
 
-const paginacionFiltros = Joi.object({
-  proximidad: Joi.string().valid("DESC", "ASC").allow("", null).messages({
+const paginacionFiltros = joi.object({
+  proximidad: joi.string().valid("DESC", "ASC").allow("", null).messages({
     "string.valid": "Proximidad debe de ser igual a 'DESC' or 'ASC'",
   }),
-  general: Joi.string().max(100).allow("", null).messages({
+  general: joi.string().max(100).allow("", null).messages({
     "string.max": "El filtro general no debe exceder los 100 caracteres",
   }),
-  usuario_locacion: Joi.object({
-    latitude: Joi.number().min(-90).max(90).required(),
-    longitude: Joi.number().min(-180).max(180).required(),
+  usuario_locacion: joi.object({
+    latitude: joi.number().min(-90).max(90).required(),
+    longitude: joi.number().min(-180).max(180).required(),
   }).allow(null),
 });
 

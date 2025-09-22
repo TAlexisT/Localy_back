@@ -57,7 +57,8 @@ class Controlador_Negocio {
         usuarioId,
         creado,
         actualizado,
-        tamano,
+        stripe,
+        pago_fecha,
         ...otrosDatos
       } = doc.data();
 
