@@ -112,55 +112,45 @@ class Controlador_Negocio {
   };
 
   paginacionNegocios = async (req, res) => {
-    const pagParams = validador(
-      {
-        tamano: req.body.pageSize,
-        seed: req.body.seed,
-        cursor: req.body.cursor,
-        direccion: req.body.direction,
-      },
-      paginacionParams
-    );
-
-    if (!pagParams.exito) return res.status(400).json(pagParams);
-
-    const pagFiltros = validador(
-      {
-        proximidad: req.body.proximidad,
-        general: req.body.general,
-        usuario_locacion: req.body.usuario_locacion,
-      },
-      paginacionFiltros
-    );
-    if (!pagFiltros.exito) return res.status(400).json(pagParams);
-
-    const { usuario_locacion, ...filtros } = pagFiltros.datos;
-    const { tamano, cursor, direccion, seed } = pagParams.datos;
-    var respuesta = {};
-
     try {
-      if (
-        filtros.categoria ||
-        filtros.proximidad ||
-        filtros.precio ||
-        filtros.precio_rango ||
-        filtros.general
-      )
-        respuesta = await this.#serviciosNegocios.paginacionNegocios_filtros(
-          filtros,
-          usuario_locacion,
-          pagParams.datos.tamano,
-          pagParams.datos.cursor,
-          pagParams.datos.direccion
-        );
-      else
-        respuesta = await this.#serviciosNegocios.paginacionNegocios_alazar(
-          tamano,
-          seed,
-          usuario_locacion,
-          cursor,
-          direccion
-        );
+      const pagParams = validador(
+        {
+          tamano: req.body.pageSize,
+          seed: req.body.seed,
+          cursor: req.body.cursor,
+          direccion: req.body.direction,
+        },
+        paginacionParams
+      );
+
+      if (!pagParams.exito) return res.status(400).json(pagParams);
+
+      const pagFiltros = validador(
+        {
+          general: req.body.general,
+          usuario_locacion: req.body.usuario_locacion,
+          distancia_orden: req.body.distancia_orden,
+          distancia_rango: req.body.distancia_rango,
+        },
+        paginacionFiltros
+      );
+      if (!pagFiltros.exito) return res.status(400).json(pagParams);
+
+      const { usuario_locacion, distancia_orden, distancia_rango, general } =
+        pagFiltros.datos;
+      const { tamano, cursor, direccion, seed } = pagParams.datos;
+      var respuesta = {};
+
+      respuesta = await this.#serviciosNegocios.paginacionNegocios_alazar(
+        tamano,
+        seed,
+        general,
+        usuario_locacion,
+        distancia_orden,
+        distancia_rango,
+        cursor,
+        direccion
+      );
 
       respuesta.datos = respuesta.datos.map((negocio) => {
         return {
@@ -170,6 +160,7 @@ class Controlador_Negocio {
           logo: negocio.logo ?? null,
           random_key: negocio.randomKey,
           descripcion: negocio.descripcion ?? null,
+          distancia: negocio.distancia ?? null,
         };
       });
 

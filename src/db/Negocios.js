@@ -48,10 +48,10 @@ class Modelo_Negocio {
       .collection("negocios")
       .doc(negocioId)
       .update({
-        ubicacion: new admin.firestore.GeoPoint(
-          ubicacion.latitude,
-          ubicacion.longitude
-        ),
+        ubicacion: {
+          latitude: ubicacion.latitude,
+          longitude: ubicacion.longitude,
+        },
         ...demasDatos,
         actualizado: admin.firestore.Timestamp.now(),
       });

@@ -18,14 +18,17 @@ class ServiciosNegocios {
   paginacionNegocios_alazar = async (
     tamano,
     seed,
+    general = null,
     usuario_locacion = null,
+    distancia_orden = null,
+    distancia_rango = null,
     cursor,
     direccion
   ) => {
     var consulta;
     var datos = [];
-    var primerToken;
-    var ultimoToken;
+    var primerToken = null;
+    var ultimoToken = null;
 
     if (typeof cursor !== "number") cursor = null;
 
@@ -33,6 +36,14 @@ class ServiciosNegocios {
 
     // siguiente pagina - Consigue los registros despues del cursor
     consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(tamano, avanza);
+
+    consulta = this.#aplicarFiltrosDistanci(
+      consulta,
+      distancia_orden,
+      usuario_locacion,
+      distancia_rango
+    );
+
     if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
       consulta = consulta.where(
         "randomKey",
@@ -42,25 +53,41 @@ class ServiciosNegocios {
 
       const snapshot = await consulta.get();
 
-      datos = this.#activoYactualizado(snapshot);
+      datos = this.#extraerDatos(snapshot);
 
       if (datos.length < tamano) {
         consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
           tamano - datos.length,
           avanza
         );
+
         consulta = consulta.where("randomKey", avanza ? ">" : "<", seed);
+
+        consulta = this.#aplicarFiltrosDistanci(
+          consulta,
+          distancia_orden,
+          usuario_locacion,
+          distancia_rango
+        );
+
         const snapshotDespues = await consulta.get();
 
-        datos = [...datos, ...this.#activoYactualizado(snapshotDespues)];
+        datos = [...datos, ...this.#extraerDatos(snapshotDespues)];
       }
     } else {
       consulta = consulta
         .where("randomKey", avanza ? "<" : ">", cursor)
         .where("randomKey", avanza ? ">" : "<", seed);
 
+      consulta = this.#aplicarFiltrosDistanci(
+        consulta,
+        distancia_orden,
+        usuario_locacion,
+        distancia_rango
+      );
+
       const snapshot = await consulta.get();
-      datos = this.#activoYactualizado(snapshot);
+      datos = this.#extraerDatos(snapshot);
     }
 
     if (!avanza) datos.reverse();
@@ -68,98 +95,17 @@ class ServiciosNegocios {
     primerToken = datos.length ? datos[0].randomKey : null;
     ultimoToken = datos.length ? datos[datos.length - 1].randomKey : null;
 
-    if (usuario_locacion)
-      datos = this.#incluirDistancia(datos, usuario_locacion);
+    if (general) datos = this.#aplicarFiltrosGeneral(datos, general);
+
+    if (usuario_locacion) {
+      datos = this.#incluirDistancia(datos, usuario_locacion, distancia_orden);
+    }
 
     return {
       datos,
       primerToken,
       ultimoToken,
     };
-  };
-
-  paginacionNegocios_filtros = async (
-    filtros,
-    usuario_locacion = null,
-    tamano,
-    cursor,
-    direccion
-  ) => {
-    var query = await this.#modeloNegocio.consultaBase();
-    query = query.where("activo", "==", true);
-
-    // paginacion
-    if (cursor) {
-      const cursorDoc = await this.#modeloNegocio.obtenerNegocio(cursor);
-      if (direccion == "siguiente") query = query.startAfter(cursorDoc);
-      else if (direccion == "anterior") query = query.endBefore(cursorDoc);
-    }
-
-    // Aplicamos el largo de la consulta
-    query = query.limit(tamano);
-
-    // Ejecutamos la consulta
-    var snapshot = await query.get();
-
-    if (snapshot.empty)
-      return { datos: [], primerToken: null, ultimoToken: null };
-
-    var negocios = [];
-    const primerToken = snapshot.docs[0].id;
-    const ultimoToken = snapshot.docs[snapshot.docs.length - 1].id;
-
-    snapshot.forEach((doc) => {
-      const negocio = doc.data();
-      negocio.negocio_id = doc.id;
-      negocios.push(negocio);
-    });
-
-    // Aplicamos filtros que no puede aplicar firebase
-
-    const busquedaGeneral = filtros.general;
-    if (busquedaGeneral) {
-      const searchTerm = busquedaGeneral.toLowerCase();
-      negocios = negocios.filter(
-        (negocio) =>
-          negocio.nombre &&
-          negocio.descripcion &&
-          (negocio.nombre.toLowerCase().includes(searchTerm) ||
-            negocio.descripcion.toLowerCase().includes(searchTerm))
-      );
-    }
-
-    // Filtrado de proximidad (requiere ubicación del usuario y datos comerciales)
-    if (filtros.proximidad && usuario_locacion) {
-      const negocioIds = [...new Set(negocios.map((p) => p.negocio_id))];
-
-      if (negocioIds.length > 0) {
-        const negociosSnapshot = await this.#modeloNegocio.obtenerLista(
-          negocioIds
-        );
-
-        negocios = [];
-        negociosSnapshot.forEach((doc) => {
-          const negocio = doc.data();
-          negocio.negocio_id = doc.id;
-          negocios.push(negocio);
-        });
-
-        // Calcular distancia y añadir negocios
-        negocios = this.#incluirDistancia(negocios, usuario_locacion);
-
-        // Ordenar por distancia
-        negocios.sort((a, b) => {
-          const distA = a?.distancia ?? Infinity;
-          const distB = b?.distancia ?? Infinity;
-
-          return filtros.proximidad === "ASC" ? distA - distB : distB - distA;
-        });
-      }
-    }
-    if (!filtros.proximidad && usuario_locacion)
-      negocios = this.#incluirDistancia(negocios, usuario_locacion);
-
-    return { datos: negocios, primerToken, ultimoToken };
   };
 
   subirImagenNegocio = async (imagen, negocio_id, usuario_id) => {
@@ -200,6 +146,27 @@ class ServiciosNegocios {
     });
   };
 
+  #cuadroDelimitador = (center, radiusKm) => {
+    const earthRadius = 6371; // km
+    const lat = center.latitude;
+    const lng = center.longitude;
+
+    // latitude: 1° ≈ 111 km
+    const latDelta = (radiusKm / earthRadius) * (180 / Math.PI);
+
+    // longitude delta depends on latitude
+    const lngDelta =
+      ((radiusKm / earthRadius) * (180 / Math.PI)) /
+      Math.cos((lat * Math.PI) / 180);
+
+    return {
+      minLat: lat - latDelta,
+      maxLat: lat + latDelta,
+      minLng: lng - lngDelta,
+      maxLng: lng + lngDelta,
+    };
+  };
+
   #distanciaAprox = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radio de la tierra en KM
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -214,23 +181,29 @@ class ServiciosNegocios {
     return R * c; // Distancia en km
   };
 
-  #incluirDistancia = (negocios, usuario_locacion) => {
+  #incluirDistancia = (negocios, usuario_locacion, orden) => {
     // Calcular distancia y añadir negocios
-    return negocios.map((negocio) => {
+    negocios = negocios.map((negocio) => {
       if (negocio && negocio.ubicacion) {
         const distance = this.#distanciaAprox(
           usuario_locacion.latitude,
           usuario_locacion.longitude,
-          negocio.ubicacion._latitude,
-          negocio.ubicacion._longitude
+          negocio.ubicacion.latitude,
+          negocio.ubicacion.longitude
         );
         negocio.distancia = distance;
       }
       return negocio;
     });
+
+    negocios.sort((a, b) =>
+      orden == "DESC" ? b.distancia - a.distancia : a.distancia - b.distancia
+    );
+
+    return negocios;
   };
 
-  #activoYactualizado = (snapshot) => {
+  #extraerDatos = (snapshot) => {
     const datos = [];
     snapshot.forEach((doc) => {
       const negocioDatos = doc.data();
@@ -239,6 +212,40 @@ class ServiciosNegocios {
     });
 
     return datos;
+  };
+
+  #aplicarFiltrosDistanci = (
+    consulta,
+    distancia_orden = null,
+    usuario_locacion = null,
+    distancia_rango = null
+  ) => {
+    if (usuario_locacion && distancia_orden && distancia_rango) {
+      const delimitacion = this.#cuadroDelimitador(
+        usuario_locacion,
+        distancia_rango
+      );
+
+      return consulta
+        .where("ubicacion.latitude", ">=", delimitacion.minLat)
+        .where("ubicacion.latitude", "<=", delimitacion.maxLat)
+        .where("ubicacion.longitude", ">=", delimitacion.minLng)
+        .where("ubicacion.longitude", "<=", delimitacion.maxLng)
+        .orderBy("ubicacion.latitude", distancia_orden.toLowerCase());
+    }
+
+    return consulta;
+  };
+
+  #aplicarFiltrosGeneral = (array, general) => {
+    const searchTerm = general.toLowerCase();
+
+    return array.filter((item) => {
+      const nombre = item.nombre?.toLowerCase() || "";
+      const descripcion = item.descripcion?.toLowerCase() || "";
+
+      return nombre.includes(searchTerm) || descripcion.includes(searchTerm);
+    });
   };
 }
 
