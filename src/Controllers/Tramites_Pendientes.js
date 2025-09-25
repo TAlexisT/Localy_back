@@ -19,20 +19,37 @@ class Controlador_Tramites_Pendientes {
   }
 
   obtenerTramite = async (req, res) => {
-    const { id } = req.params;
-
     try {
-      const tramiteRegistro =
-        await this.#modeloTramitesPendientes.obtenerTramitePendiente(id);
+      const { id } = req.params;
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-      if (!tramiteRegistro.exists)
+      var tramiteReconocido = false;
+      var concurrencia = 4;
+      var tramiteRegistro;
+      var datosTramite;
+
+      while (concurrencia > 0) {
+        tramiteRegistro =
+          await this.#modeloTramitesPendientes.obtenerTramitePendiente(id);
+
+        datosTramite = tramiteRegistro.data();
+
+        if (datosTramite.usuario_id) {
+          tramiteReconocido = true;
+          break;
+        }
+
+        await sleep(500);
+
+        concurrencia++;
+      }
+
+      if (!tramiteRegistro.exists || !tramiteReconocido)
         res.status(404).json({
           exito: false,
-          mensaje: `El registro especificado con el id: ${id} no fue encontrado dentro de la base de datos.`,
+          mensaje: `El registro especificado con el id: ${id} no fue encontrado dentro de la base de datos o no ha sido procesado aun.`,
           datos: null,
         });
-
-      const datosTramite = tramiteRegistro.data();
 
       const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
         datosTramite.usuario_id

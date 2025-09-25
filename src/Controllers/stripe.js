@@ -33,9 +33,7 @@ class Controlador_Stripe {
       return res.status(400).json({ received: true });
     }
 
-    /**
-     * Necesitamos hacer un switch para poder gestionar diferentes escenarios y permitir los pagos periódicos.
-     */
+    
     try {
       switch (event.type) {
         case "checkout.session.completed":
