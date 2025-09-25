@@ -53,7 +53,7 @@ class Controlador_Negocio {
         return res.status(404).json({ error: "Negocio no encontrado" });
 
       const {
-        randomKey,
+        random_key,
         usuarioId,
         creado,
         actualizado,
@@ -158,7 +158,7 @@ class Controlador_Negocio {
           nombre: negocio.nombre ?? null,
           distancia: negocio.distancia ?? null,
           logo: negocio.logo ?? null,
-          random_key: negocio.randomKey,
+          random_key: negocio.random_key,
           descripcion: negocio.descripcion ?? null,
           distancia: negocio.distancia ?? null,
         };

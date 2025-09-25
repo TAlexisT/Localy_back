@@ -46,7 +46,7 @@ class ServiciosNegocios {
 
     if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
       consulta = consulta.where(
-        "randomKey",
+        "random_key",
         avanza ? "<" : ">",
         !cursor ? seed : cursor
       );
@@ -61,7 +61,7 @@ class ServiciosNegocios {
           avanza
         );
 
-        consulta = consulta.where("randomKey", avanza ? ">" : "<", seed);
+        consulta = consulta.where("random_key", avanza ? ">" : "<", seed);
 
         consulta = this.#aplicarFiltrosDistanci(
           consulta,
@@ -76,8 +76,8 @@ class ServiciosNegocios {
       }
     } else {
       consulta = consulta
-        .where("randomKey", avanza ? "<" : ">", cursor)
-        .where("randomKey", avanza ? ">" : "<", seed);
+        .where("random_key", avanza ? "<" : ">", cursor)
+        .where("random_key", avanza ? ">" : "<", seed);
 
       consulta = this.#aplicarFiltrosDistanci(
         consulta,
@@ -92,8 +92,8 @@ class ServiciosNegocios {
 
     if (!avanza) datos.reverse();
 
-    primerToken = datos.length ? datos[0].randomKey : null;
-    ultimoToken = datos.length ? datos[datos.length - 1].randomKey : null;
+    primerToken = datos.length ? datos[0].random_key : null;
+    ultimoToken = datos.length ? datos[datos.length - 1].random_key : null;
 
     if (general) datos = this.#aplicarFiltrosGeneral(datos, general);
 
