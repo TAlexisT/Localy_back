@@ -39,7 +39,7 @@ class Controlador_Tramites_Pendientes {
           break;
         }
 
-        await sleep(500);
+        await sleep(1000);
 
         concurrencia++;
       }
