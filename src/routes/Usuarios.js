@@ -6,6 +6,8 @@ var router = express.Router();
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
 const Controlador_Usuario = require("../Controllers/Usuarios");
+const Usuarios_Middleware = require("../Middleware/Usuarios_Middleware");
+
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -15,6 +17,7 @@ const Controlador_Usuario = require("../Controllers/Usuarios");
  * Inicialización de las clases subyacentes, así como variables de control
  */
 const controladorUsuario = new Controlador_Usuario();
+const usuariosMiddleware = new Usuarios_Middleware();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -22,5 +25,10 @@ const controladorUsuario = new Controlador_Usuario();
 router.post("/registro", controladorUsuario.registro);
 router.post("/login", controladorUsuario.login);
 router.post("/logout", controladorUsuario.logout);
+router.post(
+  "/autenticar-sesion",
+  usuariosMiddleware.validarSesion,
+  controladorUsuario.autenticarSecion
+);
 
 module.exports = router;

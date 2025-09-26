@@ -166,6 +166,15 @@ class Controlador_Usuario {
       .clearCookie("token_de_acceso")
       .json({ exito: true, mensaje: "Sesión cerrada" });
   };
+
+  autenticarSecion = async (req, res) => {
+    if (!req.usuario)
+      return res
+        .status(403)
+        .json({ exito: false, mensaje: "La sesion es invalida o no existe" });
+
+    return res.status(200).json({ exito: true, datos: req.usuario });
+  };
 }
 
 module.exports = Controlador_Usuario;
