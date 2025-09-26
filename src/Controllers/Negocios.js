@@ -72,7 +72,18 @@ class Controlador_Negocio {
   actualizarPerfil = async (req, res) => {
     const { negocio_id } = req.params;
 
-    const validacion = validador(req.body, esquemaNegocio);
+    const { nombre, descripcion, ubicacion, horario, redes } = req.body;
+
+    const validacion = validador(
+      {
+        nombre,
+        descripcion,
+        ubicacion: JSON.parse(ubicacion),
+        horario: JSON.parse(horario),
+        redes: JSON.parse(redes),
+      },
+      esquemaNegocio
+    );
 
     if (!validacion.exito) {
       return res.status(400).send({
