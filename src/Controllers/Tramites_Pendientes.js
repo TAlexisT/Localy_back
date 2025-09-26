@@ -29,7 +29,6 @@ class Controlador_Tramites_Pendientes {
       var datosTramite;
 
       while (concurrencia > 0) {
-        await sleep(1000);
         tramiteRegistro =
           await this.#modeloTramitesPendientes.obtenerTramitePendiente(id);
 
@@ -40,6 +39,7 @@ class Controlador_Tramites_Pendientes {
           break;
         }
 
+        await sleep(1000);
         concurrencia--;
       }
 
