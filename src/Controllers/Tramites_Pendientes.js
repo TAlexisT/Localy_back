@@ -67,8 +67,6 @@ class Controlador_Tramites_Pendientes {
       const token = servs.jwt_accessToken(datos);
       const atConfigs = servs.cookieParser_AccessTokenConfigs();
 
-      await this.#modeloTramitesPendientes.tramiteConcluido(id);
-
       res.cookie("token_de_acceso", token, atConfigs).status(200).json({
         exito: true,
         mensaje: "Datos obtenidos correctamente.",
