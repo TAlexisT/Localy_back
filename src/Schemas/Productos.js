@@ -22,6 +22,48 @@ const esquemaProductoUpload = joi.object({
     "string.max":
       "La descripcion del producto no pued exceder los 500 caracteres",
   }),
+  en_oferta: joi.boolean().default(false).messages({
+    "boolean.base": `"en_oferta" must be true or false`,
+    "any.required": `"en_oferta" is required`,
+  }),
 });
 
-module.exports = { esquemaProductoUpload };
+const paginacionParams = joi.object({
+  tamano: joi.number().integer().min(1).max(50).default(20),
+  direccion: joi.string().valid("siguiente", "anterior").default("siguiente"),
+  seed: joi
+    .number()
+    .precision(8)
+    .default(() => parseFloat(Math.random().toFixed(8))),
+  cursor: joi
+    .alternatives()
+    .try(joi.number().precision(8), joi.string())
+    .allow(null),
+});
+
+const paginacionFiltros = joi.object({
+  general: joi.string().max(100).allow("", null).messages({
+    "string.max": "El filtro general no debe exceder los 100 caracteres",
+  }),
+  categoria: joi.string().alphanum().max(50).allow("", null).messages({
+    "string.max": "La categoria del producto no pued esceder los 50 caracteres",
+    "string.alphanum":
+      "La categoria del producto solo puede contener letras y numeros",
+  }),
+  precio_orden: joi.string().valid("DESC", "ASC").allow("", null).messages({
+    "string.base": "El valor del ordenamiento debe ser de tipo texto.",
+    "anu.only": "El valor del ordenamiento debe ser 'ASC' o 'DESC'.",
+  }),
+  precio_rango: joi
+    .string()
+    .pattern(/^\d+(\.\d+)?-\d+(\.\d+)?$/)
+    .allow("", null)
+    .messages({
+      "string.valid":
+        "El rango de precio tiene que ser un string que contenga los limites: minNum - maxNum",
+      "string.pattern.base":
+        "El patron del string tiene que ser: <minNum - maxNum>",
+    }),
+});
+
+module.exports = { esquemaProductoUpload, paginacionFiltros, paginacionParams };

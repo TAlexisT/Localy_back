@@ -31,7 +31,8 @@ class Controlador_Productos {
         error: validacion.errores,
       });
 
-    const { nombre, precio, categoria, descripcion } = validacion.datos;
+    const { nombre, precio, categoria, descripcion, en_oferta } =
+      validacion.datos;
 
     try {
       // Creación del producto en la base de datos
@@ -41,10 +42,11 @@ class Controlador_Productos {
         precio,
         categoria,
         descripcion,
+        en_oferta,
         req.negocio_id // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
       );
 
-      const estado = await this.#subirImagenProducto(
+      const estado = await this.#serviciosProducto.subirImagenProducto(
         req.file,
         productoId.id,
         req.negocio_id,
@@ -54,7 +56,7 @@ class Controlador_Productos {
       // Actualizar el producto con la URL de la imagen subida
       if (estado.exito)
         await this.#modeloProducto.patchProducto(productoId.id, {
-          imagenURL: estado.url,
+          imagen_URL: estado.url,
         });
 
       // Respuesta exitosa con el ID del nuevo producto creado
