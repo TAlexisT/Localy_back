@@ -7,6 +7,7 @@ var router = express.Router();
  */
 const ControladorProductos = require("../Controllers/Productos");
 const Productos_Middleware = require("../Middleware/Productos_Middleware");
+const Proteccion_Server = require("../Middleware/ProteccionServer");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
