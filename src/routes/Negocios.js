@@ -41,7 +41,6 @@ router.post(
   controladorNegocio.negocioPriceRenovacion
 );
 
-// Error handling middleware
-router.use(ProteccionServer.multerError);
+
 
 module.exports = router;
