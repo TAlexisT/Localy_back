@@ -41,6 +41,6 @@ router.post(
   controladorNegocio.negocioPriceRenovacion
 );
 
-
+router.use(ProteccionServer.multerError);
 
 module.exports = router;

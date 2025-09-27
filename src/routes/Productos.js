@@ -46,4 +46,6 @@ router.delete(
   controladorProductos.eliminarProducto
 );
 
+router.use(Proteccion_Server.multerError);
+
 module.exports = router;

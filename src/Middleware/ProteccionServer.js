@@ -21,10 +21,12 @@ class ProteccionServer {
       if (error.code === "LIMIT_UNEXPECTED_FILE") {
         return res
           .status(400)
-          .json({ message: "Unexpected field in form data" });
+          .json({ exito: false, message: "Unexpected field in form data" });
       }
       if (error.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({ message: "File too large" });
+        return res
+          .status(400)
+          .json({ exito: false, message: "File too large" });
       }
     }
     res.status(500).json({ message: error.message });

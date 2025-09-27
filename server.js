@@ -25,7 +25,6 @@ const PORT = 3000;
 app.use(cors(corsConfigs));
 app.use(cookieParser());
 app.use(ProteccionServer.tasaMaxima());
-app.use(ProteccionServer.multerError);
 // app.use(express.static("public"));
 
 /**
