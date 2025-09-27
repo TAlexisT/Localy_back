@@ -1,6 +1,6 @@
 const Modelo_Productos = require("../db/Productos");
 const Modelo_Negocio = require("../db/Negocios");
-const { bucket } = require("../../Configuraciones");
+const Servicios_Productos = require("../Services/ServiciosProductos");
 
 const { esquemaProductoUpload } = require("../Schemas/Productos");
 const { validador } = require("../Validators/Validador");
@@ -11,6 +11,7 @@ class Controlador_Productos {
    */
   #modeloProducto;
   #modeloNegocio;
+  #serviciosProducto;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
@@ -18,6 +19,7 @@ class Controlador_Productos {
   constructor() {
     this.#modeloProducto = new Modelo_Productos();
     this.#modeloNegocio = new Modelo_Negocio();
+    this.#serviciosProducto = new Servicios_Productos();
   }
 
   crearProducto = async (req, res) => {
@@ -123,7 +125,7 @@ class Controlador_Productos {
         descripcion
       );
 
-      const estado = await this.#subirImagenProducto(
+      const estado = await this.#serviciosProducto.subirImagenProducto(
         req.file,
         id,
         req.negocio_id,
