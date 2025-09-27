@@ -4,10 +4,11 @@ const { admin, db } = require("../../Configuraciones");
 class Productos {
   async crearProducto(
     nombre,
-    imagenURL,
+    imagen_URL,
     precio,
     categoria,
     descripcion,
+    en_oferta,
     negocio_id
   ) {
     return db.collection("productos").add({
@@ -15,7 +16,11 @@ class Productos {
       precio,
       categoria,
       descripcion,
+      imagen_URL,
       negocio_id,
+      en_oferta,
+      activo: true,
+      random_key: Math.random(),
       creado: admin.firestore.Timestamp.now(),
     });
   }
