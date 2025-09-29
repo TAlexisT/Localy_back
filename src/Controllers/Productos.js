@@ -99,6 +99,93 @@ class Controlador_Productos {
     }
   };
 
+  obtenerProductosNegocio = async (req, res) => {
+    try {
+      const { negocio_id } = req.params;
+
+      if (!negocio_id) {
+        return res.status(400).json({
+          exito: false,
+          mensaje:
+            "No se especificó el id del negocio dentro de los parametros en la url",
+        });
+      }
+
+      const productosSnap = await this.#modeloProducto.obtenerProductoNegocio(
+        negocio_id
+      );
+
+      if (productosSnap.empty) {
+        return res.status(200).json({
+          exito: true,
+          datos: [],
+          mensaje: "No hay productos registrados para este negocio",
+        });
+      }
+
+      const datos = productosSnap.docs.map((doc) => {
+        return { producto_id: doc.id, ...doc.data() };
+      });
+
+      return res.status(200).json({
+        exito: true,
+        datos: datos,
+      });
+    } catch (err) {
+      console.error("Ocurrio un error al obtener el producto:", err);
+      return res.status(500).json({
+        exito: false,
+        mensaje: "Ocurrio un error dendtro del servidor",
+      });
+    }
+  };
+
+  paginacionProductos = async (req, res) => {
+    try {
+      const pagParams = validador(
+        {
+          tamano: req.body.pageSize,
+          seed: req.body.seed,
+          cursor: req.body.cursor,
+          direccion: req.body.direction,
+        },
+        paginacionParams
+      );
+
+      if (!pagParams.exito) return res.status(400).json(pagParams);
+
+      const pagFiltros = validador(
+        {
+          general: req.body.general,
+          categoria: req.body.categoria,
+          precio_orden: req.body.precio_orden,
+          precio_rango: req.body.precio_rango,
+        },
+        paginacionFiltros
+      );
+      if (!pagFiltros.exito) return res.status(400).json(pagParams);
+
+      const { tamano, cursor, direccion, seed } = pagParams.datos;
+      const { general, categoria, precio_orden, precio_rango } =
+        pagFiltros.datos;
+      var respuesta = {};
+
+      respuesta = this.#serviciosProducto.paginacionProducto(
+        tamano,
+        direccion,
+        cursor,
+        seed,
+        general,
+        categoria,
+        precio_orden,
+        precio_rango
+      );
+    } catch (err) {
+      console.error("Error en paginación:", err);
+      res.status(500).json({ error: "Error del servidor" });
+    }
+  };
+
   actualizarProducto = async (req, res) => {
     const { id } = req.params;
     if (!id)
@@ -166,49 +253,6 @@ class Controlador_Productos {
         .status(500)
         .json({ exito: false, mensaje: "Error del servidor." });
     }
-  };
-
-  #subirImagenProducto = async (
-    imagen,
-    producto_id,
-    negocio_id,
-    usuario_id
-  ) => {
-    if (!imagen)
-      return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
-
-    const nombreArchivo = `productos/usuario_${usuario_id}/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${
-      imagen.originalname
-    }`;
-
-    const archivo = bucket.file(nombreArchivo);
-    const stream = archivo.createWriteStream({
-      metadata: {
-        contentType: imagen.mimetype,
-        metadata: { usuario_id, negocio_id, producto_id },
-      },
-      resumable: false,
-    });
-
-    return new Promise((resolve, reject) => {
-      stream.on("error", (err) => {
-        console.log("Error al subir imagen:", err);
-        reject({ exito: false, mensaje: "Error al subir la imagen." });
-      });
-
-      stream.on("finish", async () => {
-        try {
-          await archivo.makePublic();
-          const urlPublica = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
-          resolve({ exito: true, url: urlPublica });
-        } catch (err) {
-          console.log("Error al hacer la imagen pública:", err);
-          reject({ exito: false, mensaje: "Error al procesar la imagen." });
-        }
-      });
-
-      stream.end(imagen.buffer);
-    });
   };
 }
 

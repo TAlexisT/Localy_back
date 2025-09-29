@@ -37,7 +37,11 @@ class Productos_Middleware {
       const negocio = await this.#modeloNegocio.negocioDeUsuario(
         req.usuario.id
       );
-      if (negocio.empty || negocio.docs[0].id !== negocio_id)
+      if (
+        negocio.empty ||
+        negocio.docs[0].id !== negocio_id ||
+        !negocio.docs[0].data().activo
+      )
         return res.status(403).json({
           exito: false,
           mensaje:
@@ -57,7 +61,7 @@ class Productos_Middleware {
   productoImagen = multer({
     storage: multer.memoryStorage(),
     limits: {
-      fileSize: 3 * 1024 * 1024, // 3 MB
+      fileSize: 2 * 1024 * 1024, // 2 MB
     },
     fileFilter: (req, file, cb) => {
       // Aceptar solo imágenes

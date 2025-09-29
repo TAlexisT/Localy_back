@@ -26,7 +26,15 @@ class Productos {
   }
 
   async obtenerProducto(productoId) {
-    return await db.collection("prductos").doc(productoId).get();
+    return await db.collection("productos").doc(productoId).get();
+  }
+
+  async obtenerProductosNegocio(negocioId) {
+    return await db
+      .collection("productos")
+      .where("negocio_id", "==", negocioId)
+      .where("activo", "==", true)
+      .get();
   }
 
   async actualizarProducto(productoId, nombre, precio, categoria, descripcion) {

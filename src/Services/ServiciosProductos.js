@@ -147,9 +147,7 @@ class ServiciosProductos {
   #extraerDatos = (snapshot) => {
     const datos = [];
     snapshot.forEach((doc) => {
-      const negocioDatos = doc.data();
-      if (negocioDatos.nombre)
-        datos.push({ negocio_id: doc.id, ...doc.data() });
+      datos.push({ negocio_id: doc.id, ...doc.data() });
     });
 
     return datos;
