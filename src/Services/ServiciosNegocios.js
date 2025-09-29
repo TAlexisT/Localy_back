@@ -108,13 +108,30 @@ class ServiciosNegocios {
     };
   };
 
-  subirImagenNegocio = async (imagen, negocio_id, usuario_id) => {
+  subirImagenNegocio = async (imagen, negocio_id, usuario_id, tipo) => {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `negocios/negocio_${negocio_id}/${Date.now()}_${
-      imagen.originalname
-    }`;
+    var nombreArchivo = "";
+    const prefijo = `negocios/negocio_${negocio_id}`;
+    const sufijo = `${imagen.originalname}`;
+
+    switch (tipo) {
+      case "logo":
+        nombreArchivo = `${prefijo}/${sufijo}`;
+        break;
+
+      case "menu":
+        nombreArchivo = `${prefijo}/menus/${sufijo}`;
+        break;
+
+      default:
+        return {
+          exito: false,
+          mensaje:
+            "No se especifico el tipo en los parametros del metodo (back-end).",
+        };
+    }
 
     const archivo = bucket.file(nombreArchivo);
     const stream = archivo.createWriteStream({

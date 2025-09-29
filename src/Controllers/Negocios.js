@@ -93,10 +93,6 @@ class Controlador_Negocio {
       });
     }
 
-    if (!negocio_id) {
-      return res.status(400).json({ error: "ID de negocio no proporcionado." });
-    }
-
     try {
       const usuarioId = await this.#modeloNegocio.obtenerPropietario(
         negocio_id
@@ -105,7 +101,8 @@ class Controlador_Negocio {
       const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
         req.file,
         negocio_id,
-        usuarioId
+        usuarioId,
+        "logo"
       );
 
       if (subirImagen.exito) validacion.datos.logo = subirImagen.url;
@@ -287,6 +284,58 @@ class Controlador_Negocio {
       res
         .status(500)
         .json({ exito: false, error: "Error al renovar la subscripcion" });
+    }
+  };
+
+  subirMenuImagen = async (req, res) => {
+    try {
+      const { negocio_id } = req.params;
+
+      const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
+        req.file,
+        negocio_id,
+        usuarioId,
+        "menu"
+      );
+
+      if (!subirImagen.exito) return res.status(500).json(subirImagen);
+
+      await this.#modeloNegocio.subirMenu(negocio_id, subirImagen.url);
+
+      return res.status(200).json({
+        exito: true,
+        mensaje: "La imagen fue subida correctamente al servidor.",
+      });
+    } catch (err) {
+      console.error("Ocurrio un error al subir la imagen del menu:", err);
+      res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor." });
+    }
+  };
+
+  eliminarMenuImagen = async (req, res) => {
+    try {
+      const { negocio_id, menu_id } = req.params;
+
+      if (!menu_id)
+        return res.status(400).json({
+          exito: false,
+          mensaje:
+            "Has olvidado añadir el id del menu en los parametros de la url.",
+        });
+
+      await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
+
+      return res.status(200).json({
+        exito: true,
+        mensaje: "El menú fue borrado correctamente de la base de datos.",
+      });
+    } catch (err) {
+      console.error("Ocurrio un error al eliminar la imagen del menu:", err);
+      return res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor." });
     }
   };
 }

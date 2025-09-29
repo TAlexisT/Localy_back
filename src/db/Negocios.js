@@ -148,10 +148,35 @@ class Modelo_Negocio {
         customer_id,
         price_id,
       },
+      menus: {},
       random_key: Math.random(),
       pago_fecha: admin.firestore.Timestamp.now(),
       creado: admin.firestore.Timestamp.now(),
     });
+  }
+
+  async subirMenu(negocioId, menuURL) {
+    const id = Math.random().toString(36).substring(2, 11);
+
+    // Crear una instancia de los datos a actualizar
+    const updateData = {
+      actualizado: admin.firestore.Timestamp.now(),
+    };
+    // Insertamos el nuevo campo de menus
+    updateData[`menus.${id}`] = menuURL;
+
+    await db.collection("negocios").doc(negocioId).update(updateData);
+  }
+
+  async eliminarMenu(negocioId, menuId) {
+    const menuLink = `menus.${menuId}`;
+    await db
+      .collection("negocios")
+      .doc(negocioId)
+      .update({
+        actualizado: admin.firestore.Timestamp.now(),
+        [menuLink]: deleteField(),
+      });
   }
 }
 

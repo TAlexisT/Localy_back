@@ -68,6 +68,21 @@ class Negocios_Middleware {
       }
     },
   });
+
+  menuUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 2 * 1024 * 1024, // 2MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      const allowedTypes = ["image/jpeg", "image/png"];
+      if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+      } else {
+        cb(new Error("Only JPG, PNG files are allowed"), false);
+      }
+    },
+  });
 }
 
 module.exports = Negocios_Middleware;

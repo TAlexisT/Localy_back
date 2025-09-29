@@ -40,6 +40,20 @@ router.post(
   middlewareNegocio.validarUsuario,
   controladorNegocio.negocioPriceRenovacion
 );
+router.post(
+  "/subir-menu/:negocio_id",
+  middlewareNegocio.validarSesion,
+  middlewareNegocio.validarUsuario,
+  middlewareNegocio.menuUpload.single(imagen),
+  controladorNegocio.subirMenuImagen
+);
+
+router.delete(
+  "/borrar-menu/:negocio_id/:menu_id",
+  middlewareNegocio.validarSesion,
+  middlewareNegocio.validarUsuario,
+  controladorNegocio.eliminarMenuImagen
+);
 
 router.use(ProteccionServer.multerError);
 
