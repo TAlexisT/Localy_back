@@ -124,12 +124,12 @@ class Controlador_Productos {
       }
 
       const datos = productosSnap.docs.map((doc) => {
-        const { nombre, en_oferta, imagen_URL, precio, producto_id } =
+        const { nombre, en_oferta, imagen_URL, precio } =
           doc.data();
 
         return {
           producto_id: doc.id,
-          ...{ nombre, en_oferta, imagen_URL, precio, producto_id },
+          ...{ nombre, en_oferta, imagen_URL, precio },
         };
       });
 
