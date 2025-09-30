@@ -210,7 +210,7 @@ class Controlador_Productos {
     const { nombre, precio, categoria, descripcion } = validacion.datos;
 
     try {
-      _ = await this.#modeloProducto.actualizarProducto(
+      await this.#modeloProducto.actualizarProducto(
         id,
         nombre,
         precio,
