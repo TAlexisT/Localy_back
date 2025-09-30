@@ -226,7 +226,7 @@ class Controlador_Productos {
       );
 
       if (estado.exito)
-        await this.#modeloProducto.patchProducto(id, { imagenURL: estado.url });
+        await this.#modeloProducto.patchProducto(id, { imagen_URL: estado.url });
 
       return res
         .status(200)
