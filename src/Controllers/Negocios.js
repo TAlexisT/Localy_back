@@ -294,7 +294,7 @@ class Controlador_Negocio {
       const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
         req.file,
         negocio_id,
-        usuarioId,
+        req.usuario.id,
         "menu"
       );
 
