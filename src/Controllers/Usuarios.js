@@ -175,6 +175,20 @@ class Controlador_Usuario {
 
     return res.status(200).json({ exito: true, datos: req.usuario });
   };
+
+  autenticarNegocio = async () => {
+    if (!req.usuario)
+      return res
+        .status(403)
+        .json({ exito: false, mensaje: "La sesion es invalida o no existe" });
+
+    return res
+      .status(200)
+      .json({
+        exito: true,
+        mensaje: "El usuario y negocio estan autenticados.",
+      });
+  };
 }
 
 module.exports = Controlador_Usuario;

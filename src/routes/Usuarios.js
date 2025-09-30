@@ -30,5 +30,11 @@ router.post(
   usuariosMiddleware.validarSesion,
   controladorUsuario.autenticarSecion
 );
+router.post(
+  "/autenticar-negocio/:negocio_id",
+  usuariosMiddleware.validarSesion,
+  usuariosMiddleware.validarUsuario,
+  controladorUsuario.autenticarNegocio
+);
 
 module.exports = router;
