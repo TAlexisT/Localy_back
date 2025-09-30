@@ -111,7 +111,7 @@ class Controlador_Productos {
         });
       }
 
-      const productosSnap = await this.#modeloProducto.obtenerProductoNegocio(
+      const productosSnap = await this.#modeloProducto.obtenerProductosNegocio(
         negocio_id
       );
 
