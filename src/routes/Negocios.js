@@ -44,7 +44,7 @@ router.post(
   "/subir-menu/:negocio_id",
   middlewareNegocio.validarSesion,
   middlewareNegocio.validarUsuario,
-  middlewareNegocio.menuUpload.single(imagen),
+  middlewareNegocio.menuUpload.single("imagen"),
   controladorNegocio.subirMenuImagen
 );
 
