@@ -176,7 +176,7 @@ class Controlador_Usuario {
     return res.status(200).json({ exito: true, datos: req.usuario });
   };
 
-  autenticarNegocio = async () => {
+  autenticarNegocio = async (req, res) => {
     if (!req.usuario)
       return res
         .status(403)
