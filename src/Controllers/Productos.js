@@ -75,6 +75,7 @@ class Controlador_Productos {
   };
 
   obtenerProducto = async (req, res) => {
+    try {
     const { id } = req.params;
     if (!id)
       return res.status(400).json({
@@ -82,7 +83,6 @@ class Controlador_Productos {
         mensaje:
           "El ID del restaurante al que pertenece el producto no fue proporcionado.",
       });
-    try {
       const productoSnap = await this.#modeloProducto.obtenerProducto(id);
       if (!productoSnap.exists)
         return res
@@ -124,7 +124,13 @@ class Controlador_Productos {
       }
 
       const datos = productosSnap.docs.map((doc) => {
-        return { producto_id: doc.id, ...doc.data() };
+        const { nombre, en_oferta, imagen_URL, precio, producto_id } =
+          doc.data();
+
+        return {
+          producto_id: doc.id,
+          ...{ nombre, en_oferta, imagen_URL, precio, producto_id },
+        };
       });
 
       return res.status(200).json({
