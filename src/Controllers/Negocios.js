@@ -302,8 +302,13 @@ class Controlador_Negocio {
 
       await this.#modeloNegocio.subirMenu(negocio_id, subirImagen.url);
 
+      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+
+      const { menus } = negocioSnap.data();
+
       return res.status(200).json({
         exito: true,
+        datos: menus,
         mensaje: "La imagen fue subida correctamente al servidor.",
       });
     } catch (err) {
@@ -327,8 +332,13 @@ class Controlador_Negocio {
 
       await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
 
+      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+
+      const { menus } = negocioSnap.data();
+
       return res.status(200).json({
         exito: true,
+        datos: menus,
         mensaje: "El menú fue borrado correctamente de la base de datos.",
       });
     } catch (err) {
