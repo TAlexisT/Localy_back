@@ -175,7 +175,7 @@ class Modelo_Negocio {
       .doc(negocioId)
       .update({
         actualizado: admin.firestore.Timestamp.now(),
-        [menuLink]: deleteField(),
+        [menuLink]: admin.firestore.FieldValue.delete(),
       });
   }
 }
