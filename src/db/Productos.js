@@ -60,6 +60,29 @@ class Productos {
   async eliminarProducto(productoId) {
     return await db.collection("productos").doc(productoId).delete();
   }
+
+  async tamanoConsultaOrdenada(
+    tamano,
+    porPrecio = false,
+    orden = "desc",
+    categoria = null,
+    precioRango = null
+  ) {
+    var consulta = db
+      .collection("productos")
+      .where("activo", "==", true)
+      .orderBy(porPrecio ? "precio" : "random_key", orden)
+      .limit(tamano);
+
+    if (categoria) consulta = consulta.where("categoria", "==", categoria);
+
+    if (precioRango)
+      consulta = consulta
+        .where("precio", ">=", precioRango[0])
+        .where("precio", "<=", precioRango[1]);
+
+    return consulta;
+  }
 }
 
 module.exports = Productos;

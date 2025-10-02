@@ -1,13 +1,18 @@
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Usuario {
-  async obtenerUsuario(usuario_id) {
-    return await db.collection("usuarios").doc(usuario_id).get();
+  #coleccion;
+
+  constructor() {
+    this.#coleccion = db.collection("usuarios");
+  }
+
+  async obtenerUsuario(usuarioId) {
+    return await this.#coleccion.doc(usuarioId).get();
   }
 
   async nombreExiste(usuarioNombre) {
-    const usuarioExistente = await db
-      .collection("usuarios")
+    const usuarioExistente = await this.#coleccion
       .where("usuario", "==", usuarioNombre)
       .get();
 
@@ -15,8 +20,7 @@ class Modelo_Usuario {
   }
 
   async correoExiste(usuarioCorreo) {
-    const correoExistente = await db
-      .collection("usuarios")
+    const correoExistente = await this.#coleccion
       .where("correo", "==", usuarioCorreo)
       .get();
 
@@ -24,11 +28,13 @@ class Modelo_Usuario {
   }
 
   async registrarUsuario(usuario, contrasena, correo, tipo) {
-    const docRef = await db.collection("usuarios").add({
+    const docRef = await this.#coleccion.add({
       usuario,
       contrasena,
       correo,
       tipo,
+      negocios_favoritos: {},
+      productos_favoritos: {},
       creado: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -36,8 +42,7 @@ class Modelo_Usuario {
   }
 
   async usuario(correo) {
-    const snapshot = await db
-      .collection("usuarios")
+    const snapshot = await this.#coleccion
       .where("correo", "==", correo)
       .limit(1)
       .get();
@@ -48,6 +53,31 @@ class Modelo_Usuario {
           usuarioId: snapshot.docs[0].id,
         }
       : null;
+  }
+
+  async borrarFavorito(usuarioId, favoritoLlave, esNegocio = true) {
+    const llave = `${
+      esNegocio ? "negocios" : "productos"
+    }_favoritos.${favoritoLlave}`;
+
+    await this.#coleccion.doc(usuarioId).update({
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
+      [llave]: admin.firestore.FieldValue.delete(),
+    });
+  }
+
+  async crearFavorito(usuarioId, favoritoId, esNegocio = true) {
+    const campo = `${esNegocio ? "negocios" : "productos"}_favoritos`;
+    const llave = Math.random().toString(36).substring(2, 11);
+
+    const actualizacion = {
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
+    };
+
+    // Save favoritoId under campo.llave
+    actualizacion[`${campo}.${llave}`] = favoritoId;
+
+    await this.#coleccion.doc(usuarioId).update(actualizacion);
   }
 }
 
