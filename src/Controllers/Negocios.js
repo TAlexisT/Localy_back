@@ -173,7 +173,7 @@ class Controlador_Negocio {
       });
 
       res.status(200).json({
-        seed, // Return the seed for consistent pagination
+        exito: true,
         ...respuesta,
       });
     } catch (error) {
