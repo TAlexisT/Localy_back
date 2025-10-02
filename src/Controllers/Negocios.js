@@ -123,7 +123,7 @@ class Controlador_Negocio {
     try {
       const pagParams = validador(
         {
-          tamano: req.body.pageSize,
+          tamano: req.body.tamano,
           seed: req.body.seed,
           cursor: req.body.cursor,
           direccion: req.body.direction,
