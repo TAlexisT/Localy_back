@@ -79,13 +79,6 @@ class ServiciosNegocios {
         .where("random_key", avanza ? "<" : ">", cursor)
         .where("random_key", avanza ? ">" : "<", seed);
 
-      consulta = this.#aplicarFiltrosDistanci(
-        consulta,
-        distancia_orden,
-        usuario_locacion,
-        distancia_rango
-      );
-
       const snapshot = await consulta.get();
       datos = this.#extraerDatos(snapshot);
     }
