@@ -25,6 +25,18 @@ class Usuarios_Middleware {
   };
 
   validarUsuario = async (req, res, next) => {
+    const { usuario_id } = req.params;
+    if (req.usuario.id !== usuario_id)
+      return res.status(403).json({
+        exito: false,
+        mensaje:
+          "No estas autorizado a realizar actualizaciones o eliminaciones para este usuario",
+      });
+
+    next();
+  };
+
+  validarNegocioUsuario = async (req, res, next) => {
     const { negocio_id } = req.params;
     if (!negocio_id)
       return res

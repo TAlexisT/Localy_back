@@ -2,7 +2,11 @@ const Modelo_Productos = require("../db/Productos");
 const Modelo_Negocio = require("../db/Negocios");
 const Servicios_Productos = require("../Services/ServiciosProductos");
 
-const { esquemaProductoUpload } = require("../Schemas/Productos");
+const {
+  esquemaProductoUpload,
+  paginacionFiltros,
+  paginacionParams,
+} = require("../Schemas/Productos");
 const { validador } = require("../Validators/Validador");
 
 class Controlador_Productos {
@@ -76,13 +80,13 @@ class Controlador_Productos {
 
   obtenerProducto = async (req, res) => {
     try {
-    const { id } = req.params;
-    if (!id)
-      return res.status(400).json({
-        exito: false,
-        mensaje:
-          "El ID del restaurante al que pertenece el producto no fue proporcionado.",
-      });
+      const { id } = req.params;
+      if (!id)
+        return res.status(400).json({
+          exito: false,
+          mensaje:
+            "El ID del restaurante al que pertenece el producto no fue proporcionado.",
+        });
       const productoSnap = await this.#modeloProducto.obtenerProducto(id);
       if (!productoSnap.exists)
         return res
@@ -124,8 +128,7 @@ class Controlador_Productos {
       }
 
       const datos = productosSnap.docs.map((doc) => {
-        const { nombre, en_oferta, imagen_URL, precio } =
-          doc.data();
+        const { nombre, en_oferta, imagen_URL, precio } = doc.data();
 
         return {
           producto_id: doc.id,
@@ -153,7 +156,7 @@ class Controlador_Productos {
           tamano: req.body.pageSize,
           seed: req.body.seed,
           cursor: req.body.cursor,
-          direccion: req.body.direction,
+          direccion: req.body.direccion,
         },
         paginacionParams
       );
@@ -176,7 +179,7 @@ class Controlador_Productos {
         pagFiltros.datos;
       var respuesta = {};
 
-      respuesta = this.#serviciosProducto.paginacionProducto(
+      respuesta = await this.#serviciosProducto.paginacionProducto(
         tamano,
         direccion,
         cursor,
@@ -186,6 +189,8 @@ class Controlador_Productos {
         precio_orden,
         precio_rango
       );
+
+      return res.status(200).json({ exito: true, ...respuesta });
     } catch (err) {
       console.error("Error en paginación:", err);
       res.status(500).json({ error: "Error del servidor" });
@@ -226,7 +231,9 @@ class Controlador_Productos {
       );
 
       if (estado.exito)
-        await this.#modeloProducto.patchProducto(id, { imagen_URL: estado.url });
+        await this.#modeloProducto.patchProducto(id, {
+          imagen_URL: estado.url,
+        });
 
       return res
         .status(200)

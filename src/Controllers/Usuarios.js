@@ -4,7 +4,11 @@ const bcrypt = require("bcrypt");
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
 
-const { esquemaUsuario } = require("../Schemas/Usuarios");
+const {
+  esquemaUsuario,
+  favoritoTipo,
+  crearFavorito,
+} = require("../Schemas/Usuarios");
 const { validador } = require("../Validators/Validador");
 const servs = require("../Services/ServiciosGenerales");
 
@@ -167,6 +171,93 @@ class Controlador_Usuario {
       .json({ exito: true, mensaje: "Sesión cerrada" });
   };
 
+  borrarFavorito = async (req, res) => {
+    try {
+      const { favorito_llave, tipo } = req.params;
+
+      const validacion = validador({ tipo, favorito_llave }, favoritoTipo);
+
+      if (!validacion.exito) return res.status(400).json(validacion);
+
+      await this.#modeloUsuario.borrarFavorito(
+        req.usuario.id,
+        favorito_llave,
+        tipo == "negocio" ? true : false
+      );
+
+      return res.status(200).json({
+        exito: true,
+        mensaje:
+          "El producto ya no forma parte de los productos favoritos del usuario.",
+      });
+    } catch (err) {
+      console.error("Ocurrio un error al borrar un producto favorito:", err);
+      res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor" });
+    }
+  };
+
+  crearFavorito = async (req, res) => {
+    try {
+      const { usuario_id } = req.params;
+      const { tipo, favorito_id } = req.body;
+
+      const validacion = validador(
+        { usuario_id, tipo, favorito_id },
+        crearFavorito
+      );
+
+      if (!validacion.exito) return res.status(400).json(validacion);
+
+      await this.#modeloUsuario.crearFavorito(
+        usuario_id,
+        favorito_id,
+        tipo == "negocio"
+      );
+
+      return res
+        .status(200)
+        .json({ exito: true, mensaje: `El ${tipo} favorito ha sido añadido` });
+    } catch (err) {
+      console.error("Ocurrio un error al crear un favorito:", err);
+      return res.status(500).json({
+        exito: false,
+        mensaje: "Ocurrio un error en el servidor",
+      });
+    }
+  };
+
+  mostrarFavoritos = async (req, res) => {
+    try {
+      const { usuario_id } = req.params;
+
+      const favoritosSnap = await this.#modeloUsuario.obtenerUsuario(
+        usuario_id
+      );
+
+      if (!favoritosSnap.exists)
+        return res.status(404).json({
+          exito: false,
+          mensaje: `El usuario con el id: ${usuario_id} no fue encontrado en la base de datos`,
+        });
+
+      const { negocios_favoritos, productos_favoritos } = favoritosSnap.data();
+
+      return res
+        .status(200)
+        .json({
+          exito: true,
+          datos: { negocios_favoritos, productos_favoritos },
+        });
+    } catch (err) {
+      console.error("Ocurrio un error al mostrar los objetos favoritos:", err);
+      return res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor" });
+    }
+  };
+
   autenticarSecion = async (req, res) => {
     if (!req.usuario)
       return res
@@ -182,12 +273,10 @@ class Controlador_Usuario {
         .status(403)
         .json({ exito: false, mensaje: "La sesion es invalida o no existe" });
 
-    return res
-      .status(200)
-      .json({
-        exito: true,
-        mensaje: "El usuario y negocio estan autenticados.",
-      });
+    return res.status(200).json({
+      exito: true,
+      mensaje: "El usuario y negocio estan autenticados.",
+    });
   };
 }
 

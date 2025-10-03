@@ -19,9 +19,7 @@ class ServiciosProductos {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `productos/usuario_${usuario_id}/negocio_${negocio_id}/producto_${producto_id}/${
-      imagen.originalname
-    }`;
+    const nombreArchivo = `productos/usuario_${usuario_id}/negocio_${negocio_id}/producto_${producto_id}/${imagen.originalname}`;
 
     const archivo = bucket.file(nombreArchivo);
     const stream = archivo.createWriteStream({
@@ -64,17 +62,18 @@ class ServiciosProductos {
     precio_rango
   ) => {
     const ordenPorPrecio = !(precio_orden == "" || precio_orden == null);
+    const precioRango = precio_rango
+      ? precio_rango.split("-").map((item) => parseFloat(item.trim()))
+      : null;
 
     var datos = [];
     var primerToken = null;
     var ultimoToken = null;
     var consulta;
 
-    var precioRango = precio_rango
-      ? precio_rango.split("-").map((item) => parseFloat(item))
-      : null;
-
     if (ordenPorPrecio) {
+      if (typeof cursor !== "string") cursor = null;
+
       consulta = await this.#modeloProducto.tamanoConsultaOrdenada(
         tamano,
         true,
@@ -83,9 +82,28 @@ class ServiciosProductos {
         precioRango || null
       );
 
+      if (cursor) {
+        const cursorSnap = await this.#modeloProducto.obtenerProducto(cursor);
+
+        if (!cursorSnap.exists)
+          return {
+            datos: [],
+            primerToken: null,
+            ultimoToken: null,
+          };
+
+        if (direccion == "siguiente")
+          consulta = consulta.startAfter(cursorSnap);
+        else if (direccion == "anterior")
+          consulta = consulta.endBefore(cursorSnap);
+      }
+
       const snapshot = await consulta.get();
 
       datos = this.#extraerDatos(snapshot);
+
+      primerToken = datos[0].negocio_id;
+      ultimoToken = datos[datos.length - 1].negocio_id;
     } else {
       if (typeof cursor !== "number") cursor = null;
       const avanza = direccion == "siguiente" || !cursor;
@@ -132,10 +150,18 @@ class ServiciosProductos {
         const snapshot = await consulta.get();
         datos = this.#extraerDatos(snapshot);
       }
+
+      primerToken = datos[0].random_key;
+      ultimoToken = datos[datos.length - 1].random_key;
     }
 
-    primerToken = datos[0].negocio_id;
-    ultimoToken = datos[datos.length - 1].negocio_id;
+    // filtrado general
+    if (general)
+      datos = datos.filter(
+        (prod) =>
+          prod.nombre.toLowerCase().includes(general.toLowerCase()) ||
+          prod.descripcion.toLowerCase().includes(general.toLowerCase())
+      );
 
     return {
       datos,

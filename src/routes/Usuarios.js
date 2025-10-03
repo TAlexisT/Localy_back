@@ -33,8 +33,20 @@ router.post(
 router.post(
   "/autenticar-negocio/:negocio_id",
   usuariosMiddleware.validarSesion,
-  usuariosMiddleware.validarUsuario,
+  usuariosMiddleware.validarNegocioUsuario,
   controladorUsuario.autenticarNegocio
 );
+
+// Usamos los middleware correspondientes para los enpoints referentes a los favoritos del usuario
+// Tamar precaucion puesto que se añadirán estos middleware a todos los endpoints añadidos abajo
+router.use(usuariosMiddleware.validarSesion, usuariosMiddleware.validarUsuario);
+router.delete(
+  "/borrar-favorito/:usuario_id/:favorito_llave/:tipo",
+  controladorUsuario.borrarFavorito
+);
+
+router.post("/crear-favorito/:usuario_id", controladorUsuario.crearFavorito);
+
+router.get("/favoritos/:usuario_id", controladorUsuario.mostrarFavoritos);
 
 module.exports = router;
