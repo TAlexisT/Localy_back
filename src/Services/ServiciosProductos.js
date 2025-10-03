@@ -102,6 +102,13 @@ class ServiciosProductos {
 
       datos = this.#extraerDatos(snapshot);
 
+      if (datos.length == 0)
+        return {
+          datos: [],
+          primerToken: null,
+          ultimoToken: null,
+        };
+
       primerToken = datos[0].negocio_id;
       ultimoToken = datos[datos.length - 1].negocio_id;
     } else {
@@ -151,6 +158,13 @@ class ServiciosProductos {
         datos = this.#extraerDatos(snapshot);
       }
 
+      if (datos.length == 0)
+        return {
+          datos: [],
+          primerToken: null,
+          ultimoToken: null,
+        };
+
       primerToken = datos[0].random_key;
       ultimoToken = datos[datos.length - 1].random_key;
     }
@@ -173,7 +187,7 @@ class ServiciosProductos {
   #extraerDatos = (snapshot) => {
     const datos = [];
     snapshot.forEach((doc) => {
-      datos.push({ negocio_id: doc.id, ...doc.data() });
+      datos.push({ producto_id: doc.id, ...doc.data() });
     });
 
     return datos;
