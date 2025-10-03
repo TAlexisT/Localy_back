@@ -35,10 +35,7 @@ const paginacionParams = joi.object({
     .number()
     .precision(8)
     .default(() => parseFloat(Math.random().toFixed(8))),
-  cursor: joi
-    .alternatives()
-    .try(joi.number().precision(8), joi.string())
-    .allow(null),
+  cursor: joi.alternatives().try(joi.number(), joi.string()).allow(null),
 });
 
 const paginacionFiltros = joi.object({
