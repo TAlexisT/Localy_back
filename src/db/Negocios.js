@@ -155,7 +155,7 @@ class Modelo_Negocio {
     });
   }
 
-  async subirMenu(negocioId, menuURL) {
+  async subirMenu(negocioId, menuURL, menuRuta) {
     const id = Math.random().toString(36).substring(2, 11);
 
     // Crear una instancia de los datos a actualizar
@@ -163,7 +163,7 @@ class Modelo_Negocio {
       actualizado: admin.firestore.Timestamp.now(),
     };
     // Insertamos el nuevo campo de menus
-    updateData[`menus.${id}`] = menuURL;
+    updateData[`menus.${id}`] = { url: menuURL, ruta: menuRuta };
 
     await db.collection("negocios").doc(negocioId).update(updateData);
   }

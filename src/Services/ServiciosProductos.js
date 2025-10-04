@@ -40,7 +40,7 @@ class ServiciosProductos {
         try {
           await archivo.makePublic();
           const urlPublica = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
-          resolve({ exito: true, url: urlPublica });
+          resolve({ exito: true, url: urlPublica, nombreArchivo });
         } catch (err) {
           console.log("Error al hacer la imagen pública:", err);
           reject({ exito: false, mensaje: "Error al procesar la imagen." });

@@ -3,6 +3,7 @@ const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
 const Servicios_Negocios = require("../Services/ServiciosNegocios");
+const Servicios_Generales = require("../Services/ServiciosGenerales");
 
 const bcrypt = require("bcrypt");
 
@@ -50,7 +51,9 @@ class Controlador_Negocio {
       const doc = await this.#modeloNegocio.obtenerNegocio(id);
 
       if (!doc.exists)
-        return res.status(404).json({ error: "Negocio no encontrado" });
+        return res
+          .status(404)
+          .json({ exito: false, mensaje: "Negocio no encontrado" });
 
       const {
         random_key,
@@ -70,43 +73,52 @@ class Controlador_Negocio {
   };
 
   actualizarPerfil = async (req, res) => {
-    const { negocio_id } = req.params;
-
-    const { nombre, descripcion, ubicacion, horario, redes } = req.body;
-
-    const validacion = validador(
-      {
-        nombre,
-        descripcion,
-        ubicacion: JSON.parse(ubicacion),
-        horario: JSON.parse(horario),
-        redes: JSON.parse(redes),
-      },
-      esquemaNegocio
-    );
-
-    if (!validacion.exito) {
-      return res.status(400).send({
-        exito: validacion.exito,
-        mensaje: validacion.mensaje,
-        errores: validacion.errores,
-      });
-    }
-
     try {
-      const usuarioId = await this.#modeloNegocio.obtenerPropietario(
-        negocio_id
+      const { negocio_id } = req.params;
+
+      const { nombre, descripcion, ubicacion, horario, redes } = req.body;
+
+      const validacion = validador(
+        {
+          nombre,
+          descripcion,
+          ubicacion: JSON.parse(ubicacion),
+          horario: JSON.parse(horario),
+          redes: JSON.parse(redes),
+        },
+        esquemaNegocio
       );
+
+      if (!validacion.exito) {
+        return res.status(400).send({
+          exito: validacion.exito,
+          mensaje: validacion.mensaje,
+          errores: validacion.errores,
+        });
+      }
 
       const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
         req.file,
         negocio_id,
-        usuarioId,
+        req.usuario.id,
         "logo"
       );
 
-      if (subirImagen.exito) validacion.datos.logo = subirImagen.url;
-      else validacion.datos.logo = "";
+      if (subirImagen.exito) {
+        // borrar imagen si ya existe una.
+        const negocioSnap = await this.#modeloNegocio.obtenerNegocio(
+          negocio_id
+        );
+        const negocioDatos = negocioSnap.data();
+
+        const { ruta } = negocioDatos.logo;
+        if (ruta) await Servicios_Generales.borrarArchivo(ruta);
+
+        validacion.datos.logo = {
+          url: subirImagen.url,
+          ruta: subirImagen.ruta,
+        };
+      } else validacion.datos.logo = { url: "", ruta: "" };
 
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
 
@@ -300,15 +312,14 @@ class Controlador_Negocio {
 
       if (!subirImagen.exito) return res.status(500).json(subirImagen);
 
-      await this.#modeloNegocio.subirMenu(negocio_id, subirImagen.url);
-
-      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
-
-      const { menus } = negocioSnap.data();
+      await this.#modeloNegocio.subirMenu(
+        negocio_id,
+        subirImagen.url,
+        subirImagen.ruta
+      );
 
       return res.status(200).json({
         exito: true,
-        datos: menus,
         mensaje: "La imagen fue subida correctamente al servidor.",
       });
     } catch (err) {
@@ -330,15 +341,16 @@ class Controlador_Negocio {
             "Has olvidado añadir el id del menu en los parametros de la url.",
         });
 
-      await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
-
       const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+      const { menus } = negocioSnap.data;
+      const objetivo = menus[menu_id];
 
-      const { menus } = negocioSnap.data();
+      if (objetivo.ruta) await Servicios_Generales.borrarArchivo(objetivo.ruta);
+
+      await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
 
       return res.status(200).json({
         exito: true,
-        datos: menus,
         mensaje: "El menú fue borrado correctamente de la base de datos.",
       });
     } catch (err) {

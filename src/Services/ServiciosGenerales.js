@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const { jwtSecreta } = require("../../Configuraciones");
+const { jwtSecreta, bucket } = require("../../Configuraciones");
 const { string } = require("joi");
 
 class ServiciosGenerales {
@@ -45,6 +45,11 @@ class ServiciosGenerales {
       };
 
     return { exito: true, error: "" };
+  }
+
+  static async borrarArchivo(ruta) {
+    const archivo = bucket.file(ruta);
+    await archivo.delete();
   }
 }
 
