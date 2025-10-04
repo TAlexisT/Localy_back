@@ -19,7 +19,7 @@ class ServiciosProductos {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `productos/usuario_${usuario_id}/negocio_${negocio_id}/producto_${producto_id}/${imagen.originalname}`;
+    const nombreArchivo = `negocios/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${imagen.originalname}`;
 
     const archivo = bucket.file(nombreArchivo);
     const stream = archivo.createWriteStream({
