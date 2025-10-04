@@ -177,7 +177,7 @@ class Controlador_Negocio {
           negocio_id: negocio.negocio_id ?? null,
           nombre: negocio.nombre ?? null,
           distancia: negocio.distancia ?? null,
-          logo: negocio.logo ?? null,
+          logo: negocio.logo?.url ?? negocio.logo ?? null,
           random_key: negocio.random_key,
           descripcion: negocio.descripcion ?? null,
           distancia: negocio.distancia ?? null,
