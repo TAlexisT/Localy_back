@@ -41,6 +41,12 @@ class Controlador_Productos {
       validacion.datos;
 
     try {
+      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(
+        req.negocio_id
+      );
+
+      const negocioDatos = negocioSnap.data();
+
       // Creación del producto en la base de datos
       const productoId = await this.#modeloProducto.crearProducto(
         nombre,
@@ -49,7 +55,8 @@ class Controlador_Productos {
         categoria,
         descripcion,
         en_oferta,
-        req.negocio_id // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
+        req.negocio_id, // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
+        negocioDatos.nombre
       );
 
       const estado = await this.#serviciosProducto.subirImagenProducto(

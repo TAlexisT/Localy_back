@@ -9,7 +9,8 @@ class Productos {
     categoria,
     descripcion,
     en_oferta,
-    negocio_id
+    negocio_id,
+    nombre_negocio
   ) {
     return db.collection("productos").add({
       nombre,
@@ -19,6 +20,7 @@ class Productos {
       imagen_URL,
       negocio_id,
       en_oferta,
+      nombre_negocio,
       activo: true,
       random_key: Math.random(),
       creado: admin.firestore.Timestamp.now(),
