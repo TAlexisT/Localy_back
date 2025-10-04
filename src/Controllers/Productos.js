@@ -56,7 +56,8 @@ class Controlador_Productos {
         descripcion,
         en_oferta,
         req.negocio_id, // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
-        negocioDatos.nombre
+        negocioDatos.nombre,
+        negocioDatos.ubicacion
       );
 
       const estado = await this.#serviciosProducto.subirImagenProducto(
