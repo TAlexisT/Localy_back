@@ -107,7 +107,7 @@ class ServiciosNegocios {
 
     var nombreArchivo = "";
     const prefijo = `negocios/negocio_${negocio_id}`;
-    const sufijo = `${imagen.originalname}`;
+    const sufijo = `${Date.now()}_${imagen.originalname}`;
 
     switch (tipo) {
       case "logo":
