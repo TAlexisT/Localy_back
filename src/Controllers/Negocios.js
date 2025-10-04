@@ -65,6 +65,9 @@ class Controlador_Negocio {
         ...otrosDatos
       } = doc.data();
 
+      otrosDatos.menus = Servicios_Generales.soloURLs(otrosDatos.menus);
+      otrosDatos.logo = Servicios_Generales.soloURL(otrosDatos.logo);
+
       res.status(200).json({ exito: true, datos: otrosDatos });
     } catch (err) {
       console.error("Error al obtener negocio:", err);

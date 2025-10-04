@@ -47,6 +47,16 @@ class ServiciosGenerales {
     return { exito: true, error: "" };
   }
 
+  static soloURLs(imagObjetos) {
+    return Object.fromEntries(
+      Object.entries(imagObjetos).map(([key, item]) => [key, item?.url || item])
+    );
+  }
+
+  static soloURL(imagObjeto) {
+    return imagObjeto?.url || imagObjeto;
+  }
+
   static async borrarArchivo(ruta) {
     const archivo = bucket.file(ruta);
     await archivo.delete();
