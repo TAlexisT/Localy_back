@@ -342,7 +342,7 @@ class Controlador_Negocio {
         });
 
       const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
-      const { menus } = negocioSnap.data;
+      const { menus } = negocioSnap.data();
       const objetivo = menus[menu_id];
 
       if (objetivo.ruta) await Servicios_Generales.borrarArchivo(objetivo.ruta);
