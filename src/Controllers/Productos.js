@@ -287,7 +287,7 @@ class Controlador_Productos {
       if (productoDatos.imagen_URL?.ruta)
         await Servicios_Generales.borrarArchivo(productoDatos.imagen_URL?.ruta);
 
-      _ = await this.#modeloProducto.eliminarProducto(id);
+      await this.#modeloProducto.eliminarProducto(id);
       return res
         .status(200)
         .json({ exito: true, mensaje: "Producto eliminado correctamente" });

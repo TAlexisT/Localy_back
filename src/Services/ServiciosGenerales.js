@@ -48,9 +48,14 @@ class ServiciosGenerales {
   }
 
   static soloURLs(imagObjetos) {
-    return Object.fromEntries(
-      Object.entries(imagObjetos).map(([key, item]) => [key, item?.url || item])
-    );
+    return imagObjetos
+      ? Object.fromEntries(
+          Object.entries(imagObjetos).map(([key, item]) => [
+            key,
+            item?.url || item,
+          ])
+        )
+      : {};
   }
 
   static soloURL(imagObjeto) {
