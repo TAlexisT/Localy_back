@@ -5,7 +5,7 @@ class ProteccionServer {
   tasaMaxima = () => {
     return rateLimit({
       windowMs: 5 * 60 * 1000, // 5 minutos
-      max: 100, // Limite de 100 peticiones por IP dentro del periodo de tiempo
+      max: 300, // Limite de 300 peticiones por IP dentro del periodo de tiempo
       message: {
         exito: false,
         mensaje:
