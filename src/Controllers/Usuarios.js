@@ -176,8 +176,8 @@ class Controlador_Usuario {
         .json({
           exito: true,
           datos: {
-            negocios_favoritos: info.usuario.negocios_favoritos || {},
-            productos_favoritos: info.usuario.productos_favoritos || {},
+            negocios_favoritos: info.usuario.negocios_favoritos || [],
+            productos_favoritos: info.usuario.productos_favoritos || [],
             ...datos,
           },
         });
@@ -268,7 +268,10 @@ class Controlador_Usuario {
 
       return res.status(200).json({
         exito: true,
-        datos: { negocios_favoritos, productos_favoritos },
+        datos: {
+          negocios_favoritos: negocios_favoritos || [],
+          productos_favoritos: productos_favoritos || [],
+        },
       });
     } catch (err) {
       console.error("Ocurrio un error al mostrar los objetos favoritos:", err);
