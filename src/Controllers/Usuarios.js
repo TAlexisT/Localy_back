@@ -173,15 +173,15 @@ class Controlador_Usuario {
 
   borrarFavorito = async (req, res) => {
     try {
-      const { favorito_llave, tipo } = req.params;
+      const { favorito_id, tipo } = req.params;
 
-      const validacion = validador({ tipo, favorito_llave }, favoritoTipo);
+      const validacion = validador({ tipo, favorito_id }, favoritoTipo);
 
       if (!validacion.exito) return res.status(400).json(validacion);
 
       await this.#modeloUsuario.borrarFavorito(
         req.usuario.id,
-        favorito_llave,
+        favorito_id,
         tipo == "negocio" ? true : false
       );
 
@@ -244,12 +244,10 @@ class Controlador_Usuario {
 
       const { negocios_favoritos, productos_favoritos } = favoritosSnap.data();
 
-      return res
-        .status(200)
-        .json({
-          exito: true,
-          datos: { negocios_favoritos, productos_favoritos },
-        });
+      return res.status(200).json({
+        exito: true,
+        datos: { negocios_favoritos, productos_favoritos },
+      });
     } catch (err) {
       console.error("Ocurrio un error al mostrar los objetos favoritos:", err);
       return res
