@@ -107,7 +107,22 @@ class Controlador_Usuario {
 
     if (acceso) {
       const extraccion = servs.jwt_dataExtraction(acceso);
-      return res.status(extraccion.exito ? 200 : 400).json(extraccion);
+
+      if (extraccion.exito) {
+        const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
+          extraccion.datos.id
+        );
+        const usuarioDatos = usuarioSnap.data();
+
+        extraccion.datos["productos_favoritos"] =
+          usuarioDatos.productos_favoritos || {};
+        extraccion.datos["negocios_favoritos"] =
+          usuarioDatos.negocios_favoritos || {};
+
+        return res.status(200).json({ extraccion });
+      } else {
+        return res.status(400).json(extraccion);
+      }
     }
 
     const { correo, contrasena } = req.body;
@@ -155,10 +170,17 @@ class Controlador_Usuario {
       const token = servs.jwt_accessToken(datos);
       const atConfigs = servs.cookieParser_AccessTokenConfigs();
 
-      res.cookie("token_de_acceso", token, atConfigs).status(202).json({
-        exito: true,
-        datos,
-      });
+      res
+        .cookie("token_de_acceso", token, atConfigs)
+        .status(202)
+        .json({
+          exito: true,
+          datos: {
+            negocios_favoritos: info.usuario.negocios_favoritos,
+            productos_favoritos: info.usuario.productos_favoritos,
+            ...datos,
+          },
+        });
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
       res.status(500).json({ error: "Error del servidor" });
