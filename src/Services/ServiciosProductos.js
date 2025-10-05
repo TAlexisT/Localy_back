@@ -20,7 +20,7 @@ class ServiciosProductos {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `negocios/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${
+    const nombreArchivo = `negocios/negocio_${negocio_id}/producto/${producto_id}_${Date.now()}_${
       imagen.originalname
     }`;
 
