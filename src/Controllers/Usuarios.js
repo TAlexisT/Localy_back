@@ -176,8 +176,8 @@ class Controlador_Usuario {
         .json({
           exito: true,
           datos: {
-            negocios_favoritos: info.usuario.negocios_favoritos,
-            productos_favoritos: info.usuario.productos_favoritos,
+            negocios_favoritos: info.usuario.negocios_favoritos || {},
+            productos_favoritos: info.usuario.productos_favoritos || {},
             ...datos,
           },
         });
