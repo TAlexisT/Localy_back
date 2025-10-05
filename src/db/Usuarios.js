@@ -55,27 +55,22 @@ class Modelo_Usuario {
       : null;
   }
 
-  async borrarFavorito(usuarioId, favoritoLlave, esNegocio = true) {
-    const llave = `${
-      esNegocio ? "negocios" : "productos"
-    }_favoritos.${favoritoLlave}`;
+  async borrarFavorito(usuarioId, favoritoId, esNegocio = true) {
+    const campo = `${esNegocio ? "negocios" : "productos"}_favoritos`;
 
     await this.#coleccion.doc(usuarioId).update({
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
-      [llave]: admin.firestore.FieldValue.delete(),
+      [campo]: admin.firestore.FieldValue.arrayRemove(favoritoId),
     });
   }
 
   async crearFavorito(usuarioId, favoritoId, esNegocio = true) {
     const campo = `${esNegocio ? "negocios" : "productos"}_favoritos`;
-    const llave = Math.random().toString(36).substring(2, 11);
 
     const actualizacion = {
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
+      [campo]: admin.firestore.FieldValue.arrayUnion(favoritoId),
     };
-
-    // Save favoritoId under campo.llave
-    actualizacion[`${campo}.${llave}`] = favoritoId;
 
     await this.#coleccion.doc(usuarioId).update(actualizacion);
   }
