@@ -1,6 +1,7 @@
 const Modelo_Producto = require("../db/Productos");
 
 const { bucket } = require("../../Configuraciones");
+const ServiciosGenerales = require("./ServiciosGenerales");
 
 class ServiciosProductos {
   /**
@@ -19,7 +20,9 @@ class ServiciosProductos {
     if (!imagen)
       return { exito: false, mensaje: "No se proporcionó ninguna imagen." };
 
-    const nombreArchivo = `negocios/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${imagen.originalname}`;
+    const nombreArchivo = `negocios/negocio_${negocio_id}/producto_${producto_id}/${Date.now()}_${
+      imagen.originalname
+    }`;
 
     const archivo = bucket.file(nombreArchivo);
     const stream = archivo.createWriteStream({
@@ -40,7 +43,7 @@ class ServiciosProductos {
         try {
           await archivo.makePublic();
           const urlPublica = `https://storage.googleapis.com/${bucket.name}/${nombreArchivo}`;
-          resolve({ exito: true, url: urlPublica, nombreArchivo });
+          resolve({ exito: true, url: urlPublica, ruta: nombreArchivo });
         } catch (err) {
           console.log("Error al hacer la imagen pública:", err);
           reject({ exito: false, mensaje: "Error al procesar la imagen." });
@@ -176,6 +179,11 @@ class ServiciosProductos {
           prod.nombre.toLowerCase().includes(general.toLowerCase()) ||
           prod.descripcion.toLowerCase().includes(general.toLowerCase())
       );
+
+    for (var i = 0; i < datos.length; i++) {
+      var item = datos[i];
+      datos[i].imagen_URL = ServiciosGenerales.soloURL(item.imagen_URL);
+    }
 
     return {
       datos,

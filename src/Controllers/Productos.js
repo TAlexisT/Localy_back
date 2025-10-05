@@ -1,6 +1,7 @@
 const Modelo_Productos = require("../db/Productos");
 const Modelo_Negocio = require("../db/Negocios");
 const Servicios_Productos = require("../Services/ServiciosProductos");
+const Servicios_Generales = require("../Services/ServiciosGenerales");
 
 const {
   esquemaProductoUpload,
@@ -70,7 +71,7 @@ class Controlador_Productos {
       // Actualizar el producto con la URL de la imagen subida
       if (estado.exito)
         await this.#modeloProducto.patchProducto(productoId.id, {
-          imagen_URL: estado.url,
+          imagen_URL: { url: estado.url, ruta: estado.ruta },
         });
 
       // Respuesta exitosa con el ID del nuevo producto creado
@@ -101,7 +102,13 @@ class Controlador_Productos {
           .status(404)
           .json({ exito: false, mensaje: "Producto no encontrado" });
 
-      const { creado, ...demasDatos } = productoSnap.data();
+      const { creado, activo, actualizado, random_key, ...demasDatos } =
+        productoSnap.data();
+
+      demasDatos.imagen_URL = Servicios_Generales.soloURL(
+        demasDatos.imagen_URL
+      );
+
       return res.status(200).json({ exito: true, datos: demasDatos });
     } catch (err) {
       console.error("Error al obtener producto:", err);
@@ -136,7 +143,8 @@ class Controlador_Productos {
       }
 
       const datos = productosSnap.docs.map((doc) => {
-        const { nombre, en_oferta, imagen_URL, precio } = doc.data();
+        var { nombre, en_oferta, imagen_URL, precio } = doc.data();
+        imagen_URL = Servicios_Generales.soloURL(imagen_URL);
 
         return {
           producto_id: doc.id,
@@ -206,23 +214,23 @@ class Controlador_Productos {
   };
 
   actualizarProducto = async (req, res) => {
-    const { id } = req.params;
-    if (!id)
-      return res.status(400).json({
-        exito: false,
-        mensaje: "El ID del producto no fue proporcionado.",
-      });
-    const validacion = validador(req.body, esquemaProductoUpload);
-    if (!validacion.exito)
-      return res.status(400).json({
-        exito: validacion.exito,
-        mensaje: validacion.mensaje,
-        error: validacion.errores,
-      });
-
-    const { nombre, precio, categoria, descripcion } = validacion.datos;
-
     try {
+      const { id } = req.params;
+      if (!id)
+        return res.status(400).json({
+          exito: false,
+          mensaje: "El ID del producto no fue proporcionado.",
+        });
+      const validacion = validador(req.body, esquemaProductoUpload);
+      if (!validacion.exito)
+        return res.status(400).json({
+          exito: validacion.exito,
+          mensaje: validacion.mensaje,
+          error: validacion.errores,
+        });
+
+      const { nombre, precio, categoria, descripcion } = validacion.datos;
+
       await this.#modeloProducto.actualizarProducto(
         id,
         nombre,
@@ -238,10 +246,19 @@ class Controlador_Productos {
         req.usuario.id
       );
 
-      if (estado.exito)
+      if (estado.exito) {
+        const productoSnap = await this.#modeloProducto.obtenerProducto(id);
+        const productoDatos = productoSnap.data();
+
+        if (productoDatos.imagen_URL?.ruta)
+          await Servicios_Generales.borrarArchivo(
+            productoDatos.imagen_URL?.ruta
+          );
+
         await this.#modeloProducto.patchProducto(id, {
-          imagen_URL: estado.url,
+          imagen_URL: { url: estado.url, ruta: estado.ruta },
         });
+      }
 
       return res
         .status(200)
@@ -255,15 +272,21 @@ class Controlador_Productos {
   };
 
   eliminarProducto = async (req, res) => {
-    // Lógica para eliminar un producto (a implementar)
-    const { id } = req.params;
-    if (!id)
-      return res.status(400).json({
-        exito: false,
-        mensaje: "El ID del producto no fue proporcionado.",
-      });
-
     try {
+      // Lógica para eliminar un producto (a implementar)
+      const { id } = req.params;
+      if (!id)
+        return res.status(400).json({
+          exito: false,
+          mensaje: "El ID del producto no fue proporcionado.",
+        });
+
+      const productoSnap = await this.#modeloProducto.obtenerProducto(id);
+      const productoDatos = productoSnap.data();
+
+      if (productoDatos.imagen_URL?.ruta)
+        await Servicios_Generales.borrarArchivo(productoDatos.imagen_URL?.ruta);
+
       _ = await this.#modeloProducto.eliminarProducto(id);
       return res
         .status(200)
