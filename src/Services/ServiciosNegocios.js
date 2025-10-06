@@ -159,6 +159,7 @@ class ServiciosNegocios {
   obtenerMultiplesNegocios = async (productosRefs = []) => {
     const productosSnap = await this.#modeloNegocio.obtenerLista(productosRefs);
 
+    if (!productosSnap) return [];
     return this.#extraerDatos(productosSnap);
   };
 

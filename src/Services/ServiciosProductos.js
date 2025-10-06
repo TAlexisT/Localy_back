@@ -197,6 +197,7 @@ class ServiciosProductos {
       productosRefs
     );
 
+    if (!productosSnap) return [];
     return this.#extraerDatos(productosSnap);
   };
 

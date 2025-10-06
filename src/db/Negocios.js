@@ -26,6 +26,7 @@ class Modelo_Negocio {
   }
 
   async obtenerLista(negocioIds) {
+    if (negocioIds.length == 0) return null;
     return await db
       .collection("negocios")
       .where(admin.firestore.FieldPath.documentId(), "in", negocioIds)
