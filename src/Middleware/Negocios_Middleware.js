@@ -54,6 +54,16 @@ class Negocios_Middleware {
     }
   };
 
+  sesionUsuario = async (req, res, next) => {
+    const acceso = req.cookies.token_de_acceso;
+    if (!acceso) return next();
+
+    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
+    req.usuario = jwtExtraccion.datos;
+    next();
+  };
+
   logoUpload = multer({
     storage: multer.memoryStorage(),
     limits: {

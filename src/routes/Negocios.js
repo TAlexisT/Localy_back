@@ -22,7 +22,11 @@ const middlewareNegocio = new Negocios_Middleware();
  * {Fin de Sección: Inisialización}
  */
 
-router.get("/perfil/:id", controladorNegocio.obtenerNegocio);
+router.get(
+  "/perfil/:id",
+  middlewareNegocio.sesionUsuario,
+  controladorNegocio.obtenerNegocio
+);
 
 router.put(
   "/perfil/:negocio_id",

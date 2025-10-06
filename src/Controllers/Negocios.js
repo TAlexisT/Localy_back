@@ -39,16 +39,24 @@ class Controlador_Negocio {
   }
 
   obtenerNegocio = async (req, res) => {
-    const { id } = req.params;
-
-    if (!id)
-      return req.status(400).json({
-        error:
-          "Es obligatorio añadir un id de negocio en el cuerpo de la petición",
-      });
-
     try {
+      const { id } = req.params;
+      const esFavorito = false;
+
+      if (!id)
+        return req.status(400).json({
+          error:
+            "Es obligatorio añadir un id de negocio en el cuerpo de la petición",
+        });
+
       const doc = await this.#modeloNegocio.obtenerNegocio(id);
+
+      if (req.usuario?.id) {
+        var usuario = await this.#modeloUsuario.obtenerUsuario(req.usuario.id);
+        usuario = usuario.data();
+
+        esFavorito = usuario.negocios_favoritos?.includes(id) || false;
+      }
 
       if (!doc.exists)
         return res
@@ -67,6 +75,7 @@ class Controlador_Negocio {
 
       otrosDatos.menus = Servicios_Generales.soloURLs(otrosDatos.menus);
       otrosDatos.logo = Servicios_Generales.soloURL(otrosDatos.logo);
+      otrosDatos["esFavorito"] = esFavorito;
 
       res.status(200).json({ exito: true, datos: otrosDatos });
     } catch (err) {
