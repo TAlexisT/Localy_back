@@ -38,7 +38,7 @@ router.post(
 );
 
 router.delete(
-  "/borrar-favorito/:usuario_id/:favorito_llave/:tipo",
+  "/borrar-favorito/:usuario_id/:favorito_id/:tipo",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
   controladorUsuario.borrarFavorito
