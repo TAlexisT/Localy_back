@@ -26,6 +26,16 @@ class Productos_Middleware {
     next();
   };
 
+  sesionUsuario = async (req, res, next) => {
+    const acceso = req.cookies.token_de_acceso;
+    if (!acceso) next;
+
+    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
+    req.usuario = jwtExtraccion.datos;
+    next();
+  };
+
   validarUsuarioNegocio = async (req, res, next) => {
     // Logica para validar que el usuario tiene un negocio asociado
     const { negocio_id } = req.params;

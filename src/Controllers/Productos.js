@@ -1,5 +1,6 @@
-const Modelo_Productos = require("../db/Productos");
+const Modelo_Producto = require("../db/Productos");
 const Modelo_Negocio = require("../db/Negocios");
+const Modelo_Usuario = require("../db/Usuarios");
 const Servicios_Productos = require("../Services/ServiciosProductos");
 const Servicios_Generales = require("../Services/ServiciosGenerales");
 
@@ -16,14 +17,16 @@ class Controlador_Productos {
    */
   #modeloProducto;
   #modeloNegocio;
+  #modeloUsuario;
   #serviciosProducto;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
    */
   constructor() {
-    this.#modeloProducto = new Modelo_Productos();
+    this.#modeloProducto = new Modelo_Producto();
     this.#modeloNegocio = new Modelo_Negocio();
+    this.#modeloUsuario = new Modelo_Usuario();
     this.#serviciosProducto = new Servicios_Productos();
   }
 
@@ -90,6 +93,8 @@ class Controlador_Productos {
   obtenerProducto = async (req, res) => {
     try {
       const { id } = req.params;
+      var esFavorito = false;
+
       if (!id)
         return res.status(400).json({
           exito: false,
@@ -97,6 +102,14 @@ class Controlador_Productos {
             "El ID del restaurante al que pertenece el producto no fue proporcionado.",
         });
       const productoSnap = await this.#modeloProducto.obtenerProducto(id);
+
+      if (req.usuario?.id) {
+        var usuario = await this.#modeloUsuario.obtenerUsuario(req.usuario.id);
+        usuario = usuario.data();
+
+        esFavorito = usuario.productos_favoritos?.includes(id) || false;
+      }
+
       if (!productoSnap.exists)
         return res
           .status(404)
@@ -108,6 +121,7 @@ class Controlador_Productos {
       demasDatos.imagen_URL = Servicios_Generales.soloURL(
         demasDatos.imagen_URL
       );
+      demasDatos["esFavorito"] = esFavorito;
 
       return res.status(200).json({ exito: true, datos: demasDatos });
     } catch (err) {

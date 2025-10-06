@@ -22,7 +22,11 @@ const productosMiddleware = new Productos_Middleware();
  * {Fin de Sección: Inisialización}
  */
 
-router.get("/obtener-producto/:id", controladorProductos.obtenerProducto);
+router.get(
+  "/obtener-producto/:id",
+  productosMiddleware.sesionUsuario,
+  controladorProductos.obtenerProducto
+);
 router.get(
   "/obtener-productos/:negocio_id",
   controladorProductos.obtenerProductosNegocio

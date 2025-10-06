@@ -48,8 +48,8 @@ const favoritoTipo = joi.object({
     "any.only": "El campo 'tipo' solo puede ser 'negocio' o 'producto'.",
   }),
   favorito_id: joi.string().required().messages({
-    "any.required": "El campo 'favorito_llave' es obligatorio.",
-    "string.base": "El campo 'favorito_llave' debe ser un texto.",
+    "any.required": "El campo 'favorito_id' es obligatorio.",
+    "string.base": "El campo 'favorito_id' debe ser un texto.",
   }),
 });
 
