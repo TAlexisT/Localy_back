@@ -89,6 +89,7 @@ class Productos {
   }
 
   async obtenerLista(productosIds) {
+    if (productosIds.length == 0) return null;
     return await db
       .collection("productos")
       .where(admin.firestore.FieldPath.documentId(), "in", productosIds)
