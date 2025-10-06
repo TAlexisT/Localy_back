@@ -41,7 +41,7 @@ class Controlador_Negocio {
   obtenerNegocio = async (req, res) => {
     try {
       const { id } = req.params;
-      const esFavorito = false;
+      var esFavorito = false;
 
       if (!id)
         return req.status(400).json({
