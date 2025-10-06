@@ -288,10 +288,10 @@ class Controlador_Usuario {
       const { negocios_favoritos, productos_favoritos } = favoritosSnap.data();
 
       var favoritos = {
-        negocios_favoritos: this.#serviciosNegocio.obtenerMultiplesNegocios(
+        negocios_favoritos: await this.#serviciosNegocio.obtenerMultiplesNegocios(
           negocios_favoritos || []
         ),
-        productos_favoritos: this.#serviciosProducto.obtenerMultiplesProductos(
+        productos_favoritos: await this.#serviciosProducto.obtenerMultiplesProductos(
           productos_favoritos || []
         ),
       };
