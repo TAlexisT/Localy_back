@@ -207,8 +207,15 @@ class Controlador_Usuario {
         tipo == "negocio" ? true : false
       );
 
+      var usuario = await this.#modeloUsuario.obtenerUsuario(req.usuario.id);
+      usuario = usuario.data();
+
       return res.status(200).json({
         exito: true,
+        datos: {
+          productos_favoritos: usuario.productos_favoritos || [],
+          negocios_favoritos: usuario.negocios_favoritos || [],
+        },
         mensaje:
           "El producto ya no forma parte de los productos favoritos del usuario.",
       });
@@ -238,9 +245,17 @@ class Controlador_Usuario {
         tipo == "negocio"
       );
 
-      return res
-        .status(200)
-        .json({ exito: true, mensaje: `El ${tipo} favorito ha sido añadido` });
+      var usuario = await this.#modeloUsuario.obtenerUsuario(usuario_id);
+      usuario = usuario.data();
+
+      return res.status(200).json({
+        exito: true,
+        datos: {
+          productos_favoritos: usuario.productos_favoritos || [],
+          negocios_favoritos: usuario.negocios_favoritos || [],
+        },
+        mensaje: `El ${tipo} favorito ha sido añadido`,
+      });
     } catch (err) {
       console.error("Ocurrio un error al crear un favorito:", err);
       return res.status(500).json({
