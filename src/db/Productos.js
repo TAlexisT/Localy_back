@@ -87,6 +87,13 @@ class Productos {
 
     return consulta;
   }
+
+  async obtenerLista(productosIds) {
+    return await db
+      .collection("productos")
+      .where(admin.firestore.FieldPath.documentId(), "in", productosIds)
+      .get();
+  }
 }
 
 module.exports = Productos;

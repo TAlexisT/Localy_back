@@ -11,6 +11,8 @@ const {
 } = require("../Schemas/Usuarios");
 const { validador } = require("../Validators/Validador");
 const servs = require("../Services/ServiciosGenerales");
+const servicios_producto = require("../Services/ServiciosProductos");
+const servicios_negocio = require("../Services/ServiciosNegocios");
 
 const { hashSaltRounds } = require("../../Configuraciones");
 
@@ -20,6 +22,8 @@ class Controlador_Usuario {
    */
   #modeloUsuario;
   #modeloNegocio;
+  #serviciosProducto;
+  #serviciosNegocio;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
@@ -27,6 +31,8 @@ class Controlador_Usuario {
   constructor() {
     this.#modeloUsuario = new Modelo_Usuario();
     this.#modeloNegocio = new Modelo_Negocio();
+    this.#serviciosNegocio = new servicios_negocio();
+    this.#serviciosProducto = new servicios_producto();
   }
 
   registro = async (req, res) => {
@@ -281,12 +287,18 @@ class Controlador_Usuario {
 
       const { negocios_favoritos, productos_favoritos } = favoritosSnap.data();
 
+      var favoritos = {
+        negocios_favoritos: this.#serviciosNegocio.obtenerMultiplesNegocios(
+          negocios_favoritos || []
+        ),
+        productos_favoritos: this.#serviciosProducto.obtenerMultiplesProductos(
+          productos_favoritos || []
+        ),
+      };
+
       return res.status(200).json({
         exito: true,
-        datos: {
-          negocios_favoritos: negocios_favoritos || [],
-          productos_favoritos: productos_favoritos || [],
-        },
+        datos: favoritos,
       });
     } catch (err) {
       console.error("Ocurrio un error al mostrar los objetos favoritos:", err);

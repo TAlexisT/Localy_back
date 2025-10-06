@@ -192,10 +192,20 @@ class ServiciosProductos {
     };
   };
 
+  obtenerMultiplesProductos = async (productosRefs = []) => {
+    const productosSnap = await this.#modeloProducto.obtenerLista(
+      productosRefs
+    );
+
+    return this.#extraerDatos(productosSnap);
+  };
+
   #extraerDatos = (snapshot) => {
     const datos = [];
     snapshot.forEach((doc) => {
-      datos.push({ producto_id: doc.id, ...doc.data() });
+      const { activo, actualizado, creado, random_key, ...demasDatos } =
+        doc.data();
+      datos.push({ producto_id: doc.id, ...demasDatos });
     });
 
     return datos;

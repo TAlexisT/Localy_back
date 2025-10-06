@@ -156,6 +156,12 @@ class ServiciosNegocios {
     });
   };
 
+  obtenerMultiplesNegocios = async (productosRefs = []) => {
+    const productosSnap = await this.#modeloNegocio.obtenerLista(productosRefs);
+
+    return this.#extraerDatos(productosSnap);
+  };
+
   #cuadroDelimitador = (center, radiusKm) => {
     const earthRadius = 6371; // km
     const lat = center.latitude;
@@ -217,8 +223,18 @@ class ServiciosNegocios {
     const datos = [];
     snapshot.forEach((doc) => {
       const negocioDatos = doc.data();
-      if (negocioDatos.nombre)
-        datos.push({ negocio_id: doc.id, ...doc.data() });
+      if (negocioDatos.nombre) {
+        const {
+          activo,
+          actualizado,
+          creado,
+          pago_fecha,
+          random_key,
+          stripe,
+          ...demasDatos
+        } = doc.data();
+        datos.push({ negocio_id: doc.id, ...demasDatos });
+      }
     });
 
     return datos;
