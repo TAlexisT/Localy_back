@@ -1,4 +1,5 @@
 const Modelo_Negocio = require("../db/Negocios");
+const servs = require("./ServiciosGenerales");
 
 const { bucket } = require("../../Configuraciones");
 
@@ -156,11 +157,23 @@ class ServiciosNegocios {
     });
   };
 
-  obtenerMultiplesNegocios = async (productosRefs = []) => {
+  obtenerMultiplesNegocios = async (usuarioUbicacion, productosRefs = []) => {
     const productosSnap = await this.#modeloNegocio.obtenerLista(productosRefs);
 
     if (!productosSnap) return [];
-    return this.#extraerDatos(productosSnap);
+
+    const datos = this.#extraerDatos(productosSnap);
+    return datos.map((item) => {
+      if (usuarioUbicacion)
+        item.distancia = this.#distanciaAprox(
+          item.ubicacion.latitude,
+          item.ubicacion.longitude,
+          usuarioUbicacion.latitude,
+          usuarioUbicacion.longitude
+        );
+      item.logo = servs.soloURL(item.logo);
+      return item;
+    });
   };
 
   #cuadroDelimitador = (center, radiusKm) => {

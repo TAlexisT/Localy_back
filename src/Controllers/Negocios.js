@@ -88,12 +88,14 @@ class Controlador_Negocio {
     try {
       const { negocio_id } = req.params;
 
-      const { nombre, descripcion, ubicacion, horario, redes } = req.body;
+      const { nombre, descripcion, borrar_logo, ubicacion, horario, redes } =
+        req.body;
 
       const validacion = validador(
         {
           nombre,
           descripcion,
+          borrar_logo,
           ubicacion: JSON.parse(ubicacion),
           horario: JSON.parse(horario),
           redes: JSON.parse(redes),
@@ -116,24 +118,23 @@ class Controlador_Negocio {
         "logo"
       );
 
+      var negocio = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+      negocio = negocio.data();
+
+      // borrar imagen si ya existe una.
       if (subirImagen.exito) {
-        // borrar imagen si ya existe una.
-        const negocioSnap = await this.#modeloNegocio.obtenerNegocio(
-          negocio_id
-        );
-        const negocioDatos = negocioSnap.data();
-
-        const { ruta } = negocioDatos.logo;
+        const { ruta } = negocio.logo;
         if (ruta) await Servicios_Generales.borrarArchivo(ruta);
-
         validacion.datos.logo = {
           url: subirImagen.url,
           ruta: subirImagen.ruta,
         };
-      } else validacion.datos.logo = { url: "", ruta: "" };
-
+      } else if (validacion.datos.borrar_logo) {
+        const { ruta } = negocio.logo;
+        if (ruta) await Servicios_Generales.borrarArchivo(ruta);
+        validacion.datos.logo = { url: "", ruta: "" };
+      }
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
-
       res
         .status(200)
         .json({ exito: true, message: "Perfil guardado correctamente" });

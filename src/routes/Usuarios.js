@@ -36,14 +36,12 @@ router.post(
   usuariosMiddleware.validarNegocioUsuario,
   controladorUsuario.autenticarNegocio
 );
-
-router.delete(
-  "/borrar-favorito/:usuario_id/:favorito_id/:tipo",
+router.post(
+  "/favoritos/:usuario_id",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
-  controladorUsuario.borrarFavorito
+  controladorUsuario.mostrarFavoritos
 );
-
 router.post(
   "/crear-favorito/:usuario_id",
   usuariosMiddleware.validarSesion,
@@ -51,11 +49,11 @@ router.post(
   controladorUsuario.crearFavorito
 );
 
-router.get(
-  "/favoritos/:usuario_id",
+router.delete(
+  "/borrar-favorito/:usuario_id/:favorito_id/:tipo",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
-  controladorUsuario.mostrarFavoritos
+  controladorUsuario.borrarFavorito
 );
 
 module.exports = router;

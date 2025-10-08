@@ -1,7 +1,7 @@
 const Modelo_Producto = require("../db/Productos");
 
 const { bucket } = require("../../Configuraciones");
-const ServiciosGenerales = require("./ServiciosGenerales");
+const servs = require("./ServiciosGenerales");
 
 class ServiciosProductos {
   /**
@@ -182,7 +182,7 @@ class ServiciosProductos {
 
     for (var i = 0; i < datos.length; i++) {
       var item = datos[i];
-      datos[i].imagen_URL = ServiciosGenerales.soloURL(item.imagen_URL);
+      datos[i].imagen_URL = servs.soloURL(item.imagen_URL);
     }
 
     return {
@@ -196,9 +196,12 @@ class ServiciosProductos {
     const productosSnap = await this.#modeloProducto.obtenerLista(
       productosRefs
     );
-
     if (!productosSnap) return [];
-    return this.#extraerDatos(productosSnap);
+    var datos = this.#extraerDatos(productosSnap);
+    return datos.map((item) => {
+      item.imagen_URL = servs.soloURL(item.imagen_URL);
+      return item;
+    });
   };
 
   #extraerDatos = (snapshot) => {

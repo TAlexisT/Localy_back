@@ -1,4 +1,5 @@
 const joi = require("joi");
+const { borrarArchivo } = require("../Services/ServiciosGenerales");
 
 const esquemaNegocio = joi.object({
   nombre: joi.string().min(1).max(100).required(),
@@ -130,6 +131,11 @@ const esquemaNegocio = joi.object({
       TikTok: joi.string().uri().allow(null, ""),
     })
     .required(),
+
+  borrar_logo: joi.boolean().truthy("true").falsy("false").required().messages({
+    "any.required": "El campo 'borrar_logo' es obligatorio.",
+    "boolean.base": "El campo 'borrar_logo' debe ser verdadero o falso.",
+  }),
 });
 
 const esquemaPropietario = joi.object({

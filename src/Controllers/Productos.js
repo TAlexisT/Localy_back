@@ -243,15 +243,16 @@ class Controlador_Productos {
           error: validacion.errores,
         });
 
-      const { nombre, precio, categoria, descripcion } = validacion.datos;
+      const { nombre, precio, categoria, descripcion, en_oferta } =
+        validacion.datos;
 
-      await this.#modeloProducto.actualizarProducto(
-        id,
+      await this.#modeloProducto.patchProducto(id, {
         nombre,
         precio,
         categoria,
-        descripcion
-      );
+        descripcion,
+        en_oferta,
+      });
 
       const estado = await this.#serviciosProducto.subirImagenProducto(
         req.file,
@@ -272,7 +273,7 @@ class Controlador_Productos {
         await this.#modeloProducto.patchProducto(id, {
           imagen_URL: { url: estado.url, ruta: estado.ruta },
         });
-      }
+      } else if (req.file) console.warn(`No se pudo subir la imagen`, estado);
 
       return res
         .status(200)

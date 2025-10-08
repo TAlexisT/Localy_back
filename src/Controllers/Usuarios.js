@@ -8,6 +8,7 @@ const {
   esquemaUsuario,
   favoritoTipo,
   crearFavorito,
+  validarUbicacion,
 } = require("../Schemas/Usuarios");
 const { validador } = require("../Validators/Validador");
 const servs = require("../Services/ServiciosGenerales");
@@ -15,6 +16,7 @@ const servicios_producto = require("../Services/ServiciosProductos");
 const servicios_negocio = require("../Services/ServiciosNegocios");
 
 const { hashSaltRounds } = require("../../Configuraciones");
+const { valid } = require("joi");
 
 class Controlador_Usuario {
   /**
@@ -275,10 +277,12 @@ class Controlador_Usuario {
     try {
       const { usuario_id } = req.params;
 
+      const validacion = validador(req.body, validarUbicacion);
+      if (!validacion.exito) return res.status(400).json(validacion);
+
       const favoritosSnap = await this.#modeloUsuario.obtenerUsuario(
         usuario_id
       );
-
       if (!favoritosSnap.exists)
         return res.status(404).json({
           exito: false,
@@ -286,14 +290,16 @@ class Controlador_Usuario {
         });
 
       const { negocios_favoritos, productos_favoritos } = favoritosSnap.data();
-
       var favoritos = {
-        negocios_favoritos: await this.#serviciosNegocio.obtenerMultiplesNegocios(
-          negocios_favoritos || []
-        ),
-        productos_favoritos: await this.#serviciosProducto.obtenerMultiplesProductos(
-          productos_favoritos || []
-        ),
+        negocios_favoritos:
+          await this.#serviciosNegocio.obtenerMultiplesNegocios(
+            validacion.datos?.ubicacion || null,
+            negocios_favoritos || []
+          ),
+        productos_favoritos:
+          await this.#serviciosProducto.obtenerMultiplesProductos(
+            productos_favoritos || []
+          ),
       };
 
       return res.status(200).json({

@@ -53,6 +53,15 @@ const favoritoTipo = joi.object({
   }),
 });
 
+const validarUbicacion = joi.object({
+  ubicacion: joi
+    .object({
+      latitude: joi.number().min(-90).max(90).required(),
+      longitude: joi.number().min(-180).max(180).required(),
+    })
+    .allow(null),
+});
+
 const crearFavorito = joi.object({
   tipo: joi.string().valid("negocio", "producto").required().messages({
     "any.required": "El campo 'tipo' es obligatorio.",
@@ -83,4 +92,9 @@ const crearFavorito = joi.object({
     }),
 });
 
-module.exports = { esquemaUsuario, favoritoTipo, crearFavorito };
+module.exports = {
+  esquemaUsuario,
+  favoritoTipo,
+  crearFavorito,
+  validarUbicacion,
+};
