@@ -97,8 +97,8 @@ class ServiciosNegocios {
 
     return {
       datos,
-      primerToken,
-      ultimoToken,
+      primerToken: primerToken || null,
+      ultimoToken: ultimoToken || null,
     };
   };
 
@@ -243,7 +243,6 @@ class ServiciosNegocios {
           actualizado,
           creado,
           pago_fecha,
-          random_key,
           stripe,
           ...demasDatos
         } = doc.data();

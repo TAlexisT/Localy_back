@@ -33,8 +33,8 @@ class Modelo_Usuario {
       contrasena,
       correo,
       tipo,
-      negocios_favoritos: {},
-      productos_favoritos: {},
+      negocios_favoritos: [],
+      productos_favoritos: [],
       creado: admin.firestore.FieldValue.serverTimestamp(),
     });
 

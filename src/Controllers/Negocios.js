@@ -123,7 +123,7 @@ class Controlador_Negocio {
 
       // borrar imagen si ya existe una.
       if (subirImagen.exito) {
-        const { ruta } = negocio.logo;
+        const ruta = negocio.logo?.ruta;
         if (ruta) await Servicios_Generales.borrarArchivo(ruta);
         validacion.datos.logo = {
           url: subirImagen.url,

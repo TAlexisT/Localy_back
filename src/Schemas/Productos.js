@@ -18,7 +18,7 @@ const esquemaProductoUpload = joi.object({
       "La categoria del producto solo puede contener letras y numeros",
     "any.required": "La categoria del producto es requerida",
   }),
-  descripcion: joi.string().max(500).allow("", null).messages({
+  descripcion: joi.string().max(1000).allow("", null).messages({
     "string.max":
       "La descripcion del producto no pued exceder los 500 caracteres",
   }),
