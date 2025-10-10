@@ -86,8 +86,11 @@ class ServiciosNegocios {
 
     if (!avanza) datos.reverse();
 
-    primerToken = datos.length ? datos[0].random_key : null;
-    ultimoToken = datos.length ? datos[datos.length - 1].random_key : null;
+    primerToken = datos.length && cursor ? datos[0].random_key : null;
+    ultimoToken =
+      datos.length && datos.length == tamano
+        ? datos[datos.length - 1].random_key
+        : null;
 
     if (general) datos = this.#aplicarFiltrosGeneral(datos, general);
 
@@ -282,6 +285,7 @@ class ServiciosNegocios {
     return array.filter((item) => {
       const nombre = item.nombre?.toLowerCase() || "";
       const descripcion = item.descripcion?.toLowerCase() || "";
+      
 
       return nombre.includes(searchTerm) || descripcion.includes(searchTerm);
     });

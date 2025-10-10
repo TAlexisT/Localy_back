@@ -1,13 +1,16 @@
 const joi = require("joi");
 
 const esquemaUsuario = joi.object({
-  usuario: joi.string().alphanum().min(3).max(30).required().messages({
-    "string.alphanum":
-      "El nombre de usuario debe contener solo caracteres alfanuméricos",
-    "string.min": "El nombre de usuario debe contener como mínimo 3 caracteres",
-    "string.max": "El nombre de usuario no debe exceder los 30 caracteres",
-    "any.required": "El nombre de usuario es requerido",
-  }),
+  usuario: joi
+    .string()
+    .pattern(/^[A-Za-z0-9._-]{3,30}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "El nombre de usuario solo puede contener letras, números, puntos, guiones y guiones bajos, y debe tener entre 3 y 30 caracteres.",
+      "any.required": "El nombre de usuario es requerido",
+      "string.empty": "El nombre de usuario no puede estar vacío",
+    }),
 
   contrasena: joi
     .string()

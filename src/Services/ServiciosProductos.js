@@ -177,7 +177,8 @@ class ServiciosProductos {
       datos = datos.filter(
         (prod) =>
           prod.nombre.toLowerCase().includes(general.toLowerCase()) ||
-          prod.descripcion.toLowerCase().includes(general.toLowerCase())
+          prod.descripcion.toLowerCase().includes(general.toLowerCase()) ||
+          prod.categoria.toLowerCase().includes(general.toLowerCase())
       );
 
     for (var i = 0; i < datos.length; i++) {
@@ -207,8 +208,7 @@ class ServiciosProductos {
   #extraerDatos = (snapshot) => {
     const datos = [];
     snapshot.forEach((doc) => {
-      const { activo, actualizado, creado, random_key, ...demasDatos } =
-        doc.data();
+      const { activo, actualizado, creado, ...demasDatos } = doc.data();
       datos.push({ producto_id: doc.id, ...demasDatos });
     });
 

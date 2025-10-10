@@ -139,12 +139,16 @@ const esquemaNegocio = joi.object({
 });
 
 const esquemaPropietario = joi.object({
-  usuario: joi.string().alphanum().min(3).max(30).required().messages({
-    "string.alphanum": "Username must only contain alphanumeric characters",
-    "string.min": "Username must be at least 3 characters long",
-    "string.max": "Username cannot exceed 30 characters",
-    "any.required": "Username is required",
-  }),
+  usuario: joi
+    .string()
+    .pattern(/^[A-Za-z0-9._-]{3,30}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "El nombre de usuario solo puede contener letras, números, puntos, guiones y guiones bajos, y debe tener entre 3 y 30 caracteres.",
+      "any.required": "El nombre de usuario es requerido",
+      "string.empty": "El nombre de usuario no puede estar vacío",
+    }),
 
   contrasena: joi
     .string()
