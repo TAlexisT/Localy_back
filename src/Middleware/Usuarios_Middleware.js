@@ -17,7 +17,7 @@ class Usuarios_Middleware {
   validarSesion = async (req, res, next) => {
     const acceso = req.cookies.token_de_acceso;
     if (!acceso)
-      return res.status(401).json({ exito: false, mensaje: "No autorizado." });
+      return res.status(203).json({ exito: false, mensaje: "No autorizado." });
     const jwtExtraccion = servs.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     req.usuario = jwtExtraccion.datos;
@@ -27,7 +27,7 @@ class Usuarios_Middleware {
   validarUsuario = async (req, res, next) => {
     const { usuario_id } = req.params;
     if (req.usuario.id !== usuario_id)
-      return res.status(403).json({
+      return res.status(203).json({
         exito: false,
         mensaje:
           "No estas autorizado a realizar actualizaciones o eliminaciones para este usuario",
@@ -47,7 +47,7 @@ class Usuarios_Middleware {
         req.usuario.id
       );
       if (negocio.empty || negocio.docs[0].id !== negocio_id)
-        return res.status(403).json({
+        return res.status(203).json({
           exito: false,
           mensaje:
             "No tienes permisos para agregar o modificar productos a este negocio.",

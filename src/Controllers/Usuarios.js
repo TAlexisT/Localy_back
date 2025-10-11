@@ -317,7 +317,7 @@ class Controlador_Usuario {
   autenticarSecion = async (req, res) => {
     if (!req.usuario)
       return res
-        .status(403)
+        .status(203)
         .json({ exito: false, mensaje: "La sesion es invalida o no existe" });
 
     return res.status(200).json({ exito: true, datos: req.usuario });
@@ -326,7 +326,7 @@ class Controlador_Usuario {
   autenticarNegocio = async (req, res) => {
     if (!req.usuario)
       return res
-        .status(403)
+        .status(203)
         .json({ exito: false, mensaje: "La sesion es invalida o no existe" });
 
     return res.status(200).json({
