@@ -54,7 +54,7 @@ class Modelo_Negocio {
           longitude: ubicacion.longitude,
         },
         ...demasDatos,
-        actualizado: admin.firestore.Timestamp.now(),
+        actualizado: admin.firestore.FieldValue.serverTimestamp(),
       });
   }
 
@@ -77,7 +77,7 @@ class Modelo_Negocio {
       .doc(negocioId)
       .update({
         ...datos,
-        actualizado: admin.firestore.Timestamp.now(),
+        actualizado: admin.firestore.FieldValue.serverTimestamp(),
       });
   }
 
@@ -105,8 +105,8 @@ class Modelo_Negocio {
         customerId,
         price_id,
       },
-      pago_fecha: admin.firestore.Timestamp.now(),
-      actualizado: admin.firestore.Timestamp.now(),
+      pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -120,8 +120,8 @@ class Modelo_Negocio {
     const negocioRef = negocioSnap.docs[0].ref;
     await negocioRef.update({
       activo: true,
-      pago_fecha: admin.firestore.Timestamp.now(),
-      actualizado: admin.firestore.Timestamp.now(),
+      pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -135,7 +135,7 @@ class Modelo_Negocio {
     const negocioRef = negocioSnap.docs[0].ref;
     await negocioRef.update({
       activo: false,
-      actualizado: admin.firestore.Timestamp.now(),
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -151,8 +151,8 @@ class Modelo_Negocio {
       },
       menus: {},
       random_key: Math.random(),
-      pago_fecha: admin.firestore.Timestamp.now(),
-      creado: admin.firestore.Timestamp.now(),
+      pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
+      creado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -161,7 +161,7 @@ class Modelo_Negocio {
 
     // Crear una instancia de los datos a actualizar
     const updateData = {
-      actualizado: admin.firestore.Timestamp.now(),
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
     };
     // Insertamos el nuevo campo de menus
     updateData[`menus.${id}`] = { url: menuURL, ruta: menuRuta };
@@ -175,7 +175,7 @@ class Modelo_Negocio {
       .collection("negocios")
       .doc(negocioId)
       .update({
-        actualizado: admin.firestore.Timestamp.now(),
+        actualizado: admin.firestore.FieldValue.serverTimestamp(),
         [menuLink]: admin.firestore.FieldValue.delete(),
       });
   }

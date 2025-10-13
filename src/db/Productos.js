@@ -25,7 +25,7 @@ class Productos {
       negocio_ubicacion,
       activo: true,
       random_key: Math.random(),
-      creado: admin.firestore.Timestamp.now(),
+      creado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -47,7 +47,7 @@ class Productos {
       precio,
       categoria,
       descripcion,
-      actualizado: admin.firestore.Timestamp.now(),
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }
 
@@ -57,7 +57,7 @@ class Productos {
       .doc(productoId)
       .update({
         ...datos,
-        actualizado: admin.firestore.Timestamp.now(),
+        actualizado: admin.firestore.FieldValue.serverTimestamp(),
       });
   }
 

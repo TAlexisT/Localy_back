@@ -6,6 +6,7 @@ const { corsConfigs } = require("./Configuraciones");
 
 var usuariosRutas = require("./src/routes/Usuarios");
 var negociosRutas = require("./src/routes/Negocios");
+var sugerenciasRutas = require("./src/routes/Sugerencias");
 var productosRutas = require("./src/routes/Productos");
 var tramitesRutas = require("./src/routes/Tramites");
 var stripeRutas = require("./src/routes/Stripe");
@@ -25,7 +26,6 @@ const PORT = 3000;
 app.use(cors(corsConfigs));
 app.use(cookieParser());
 app.use(ProteccionServer.tasaMaxima());
-// app.use(express.static("public"));
 
 /**
  * Prefijo para los correspondientes endpoints
@@ -40,6 +40,7 @@ app.use("/api/usuarios", usuariosRutas);
 app.use("/api/negocios", negociosRutas);
 app.use("/api/productos", productosRutas);
 app.use("/api/tramites", tramitesRutas);
+app.use("/api/sugerencias", sugerenciasRutas);
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
