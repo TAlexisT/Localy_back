@@ -4,7 +4,6 @@ class Sugerencias {
   async crearSugerencia(
     titulo,
     descripcion,
-    importancia,
     negocioId,
     negocioNombre,
     propietarioCorreo,
@@ -13,12 +12,10 @@ class Sugerencias {
     return db.collection("sugerencias").add({
       titulo,
       descripcion,
-      importancia,
       negocioId,
       negocioNombre,
       propietarioCorreo,
       propietarioNombre,
-      progreso: 0,
       creado: admin.firestore.FieldValue.serverTimestamp(),
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });

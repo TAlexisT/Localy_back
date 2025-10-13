@@ -24,14 +24,13 @@ class Controlador_Sugerencia {
       const validacion = validador(req.body, subirSugerencia);
       if (!validacion.exito) return res.status(400).json(validacion);
 
-      const { titulo, descripcion, importancia } = validacion.datos;
+      const { titulo, descripcion } = validacion.datos;
       var negocio = await this.#modeloNegocio.obtenerNegocio(req.negocio_id);
       negocio = negocio.data();
 
       const nuevaSugerencia = await this.#modeloSugerencia.crearSugerencia(
         titulo,
         descripcion,
-        importancia,
         req.negocio_id,
         negocio.nombre,
         req.usuario.correo,
