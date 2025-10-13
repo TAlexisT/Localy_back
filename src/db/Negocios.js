@@ -14,6 +14,10 @@ class Modelo_Negocio {
     return await db.collection("negocios").doc(negocioId).get();
   }
 
+  async obtenerCadaNegocio() {
+    return await db.collection("negocios").get();
+  }
+
   async consultaBase() {
     return db.collection("negocios");
   }
@@ -89,7 +93,6 @@ class Modelo_Negocio {
    * @returns {Promise<Query>} Una promesa que resuelve la consulta con el orden especificado y el límite aplicado.
    */
   async tamanoConsultaOrdenada(tamano, esDesc = true) {
-    // Posibilidad de añadir algunos filtros como parametros
     return db
       .collection("negocios")
       .where("activo", "==", true)

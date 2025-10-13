@@ -27,6 +27,11 @@ router.get(
   middlewareNegocio.sesionUsuario,
   controladorNegocio.obtenerNegocio
 );
+router.get(
+  "/obtener-cada-negocio",
+  middlewareNegocio.validarAdministrador,
+  controladorNegocio.obtenerCadaNegocio
+);
 
 router.put(
   "/perfil/:negocio_id",

@@ -84,6 +84,21 @@ class Controlador_Negocio {
     }
   };
 
+  obtenerCadaNegocio = async (req, res) => {
+    try {
+      var cadaNegocio = await this.#modeloNegocio.obtenerCadaNegocio();
+      cadaNegocio = cadaNegocio.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      return res.status(200).json({ exito: true, datos: cadaNegocio });
+    } catch (err) {
+      console.error("Error al obtener negocios:", err);
+      res.status(500).json({ error: "Error del servidor" });
+    }
+  };
+
   actualizarPerfil = async (req, res) => {
     try {
       const { negocio_id } = req.params;
