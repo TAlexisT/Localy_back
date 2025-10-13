@@ -49,6 +49,29 @@ class Controlador_Sugerencia {
     }
   };
 
+  borrarSugerencia = async (req, res) => {
+    try {
+      const { sugerencia_id } = req.params;
+      if (!sugerencia_id)
+        return res.status(400).json({
+          exito: false,
+          mensaje: "El id de la sugerencia no fue proporcionado",
+        });
+
+      await this.#modeloSugerencia.borrarSugerencia(sugerencia_id);
+
+      return res.status(200).json({
+        extio: true,
+        mensaje: `La sugerencia con el id ${sugerencia_id} fue borrada correctamente`,
+      });
+    } catch (err) {
+      console.error("Un error ocurrio al borrar una sugerencia:", err);
+      res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor" });
+    }
+  };
+
   mostrarCadaSugerencia = async (req, res) => {
     try {
       const snapshot = await this.#modeloSugerencia.obtenerSugerencias(true);

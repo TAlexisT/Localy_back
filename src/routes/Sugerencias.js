@@ -29,6 +29,12 @@ router.post(
   controladorSugerencias.crearSugerencia
 );
 
+router.delete(
+  "/borrar-sugerencia/:sugerencia_id",
+  sugerenciasMiddleware.validarAdministrador,
+  controladorSugerencias.borrarSugerencia
+);
+
 router.get(
   "/obtener-toda-sugerencia",
   sugerenciasMiddleware.validarAdministrador,
