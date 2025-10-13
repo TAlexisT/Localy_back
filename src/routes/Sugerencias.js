@@ -30,7 +30,7 @@ router.post(
 );
 
 router.get(
-  "/obtener-toda-sugerencias",
+  "/obtener-toda-sugerencia",
   sugerenciasMiddleware.validarAdministrador,
   controladorSugerencias.mostrarCadaSugerencia
 );
