@@ -61,7 +61,7 @@ class Controlador_Sugerencia {
       await this.#modeloSugerencia.borrarSugerencia(sugerencia_id);
 
       return res.status(200).json({
-        extio: true,
+        exito: true,
         mensaje: `La sugerencia con el id ${sugerencia_id} fue borrada correctamente`,
       });
     } catch (err) {
