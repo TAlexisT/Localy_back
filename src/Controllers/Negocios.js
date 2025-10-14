@@ -3,7 +3,7 @@ const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
 const Servicios_Negocios = require("../Services/ServiciosNegocios");
-const Servicios_Generales = require("../Services/ServiciosGenerales");
+const servs = require("../Services/ServiciosGenerales");
 
 const bcrypt = require("bcrypt");
 
@@ -73,8 +73,8 @@ class Controlador_Negocio {
         ...otrosDatos
       } = doc.data();
 
-      otrosDatos.menus = Servicios_Generales.soloURLs(otrosDatos.menus);
-      otrosDatos.logo = Servicios_Generales.soloURL(otrosDatos.logo);
+      otrosDatos.menus = servs.soloURLs(otrosDatos.menus);
+      otrosDatos.logo = servs.soloURL(otrosDatos.logo);
       otrosDatos["esFavorito"] = esFavorito;
 
       res.status(200).json({ exito: true, datos: otrosDatos });
@@ -87,10 +87,24 @@ class Controlador_Negocio {
   obtenerCadaNegocio = async (req, res) => {
     try {
       var cadaNegocio = await this.#modeloNegocio.obtenerCadaNegocio();
-      cadaNegocio = cadaNegocio.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      cadaNegocio = cadaNegocio.docs.map((doc) => {
+        const {
+          activo,
+          actualizado,
+          creado,
+          pago_fecha,
+          random_key,
+          stripe,
+          logo,
+          ...demasDatos
+        } = doc.data();
+
+        return {
+          negocio_id: doc.id,
+          logo: servs.soloURL(logo),
+          ...demasDatos,
+        };
+      });
 
       return res.status(200).json({ exito: true, datos: cadaNegocio });
     } catch (err) {
@@ -139,14 +153,14 @@ class Controlador_Negocio {
       // borrar imagen si ya existe una.
       if (subirImagen.exito) {
         const ruta = negocio.logo?.ruta;
-        if (ruta) await Servicios_Generales.borrarArchivo(ruta);
+        if (ruta) await servs.borrarArchivo(ruta);
         validacion.datos.logo = {
           url: subirImagen.url,
           ruta: subirImagen.ruta,
         };
       } else if (validacion.datos.borrar_logo) {
         const { ruta } = negocio.logo;
-        if (ruta) await Servicios_Generales.borrarArchivo(ruta);
+        if (ruta) await servs.borrarArchivo(ruta);
         validacion.datos.logo = { url: "", ruta: "" };
       }
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
@@ -373,7 +387,7 @@ class Controlador_Negocio {
       const { menus } = negocioSnap.data();
       const objetivo = menus[menu_id];
 
-      if (objetivo.ruta) await Servicios_Generales.borrarArchivo(objetivo.ruta);
+      if (objetivo.ruta) await servs.borrarArchivo(objetivo.ruta);
 
       await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
 
