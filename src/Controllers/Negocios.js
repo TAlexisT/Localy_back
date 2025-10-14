@@ -89,10 +89,12 @@ class Controlador_Negocio {
       var cadaNegocio = await this.#modeloNegocio.obtenerCadaNegocio();
       cadaNegocio = cadaNegocio.docs.map((doc) => {
         const {
-          activo,
           actualizado,
           creado,
-          pago_fecha,
+          horario,
+          menus,
+          redes,
+          ubicacion,
           random_key,
           stripe,
           logo,
