@@ -82,6 +82,7 @@ class Controlador_Usuario {
         correo: correo,
         tipo: "usuario",
         negocioId: null,
+        negocioActivo: null,
       });
 
       return res
@@ -100,6 +101,7 @@ class Controlador_Usuario {
             correo: correo,
             tipo: "usuario",
             negocioId: null,
+            negocioActivo: null,
           },
         });
     } catch (error) {
@@ -111,35 +113,37 @@ class Controlador_Usuario {
   };
 
   login = async (req, res) => {
-    const acceso = req.cookies.token_de_acceso;
-
-    if (acceso) {
-      const extraccion = servs.jwt_dataExtraction(acceso);
-
-      if (extraccion.exito) {
-        const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
-          extraccion.datos.id
-        );
-        const usuarioDatos = usuarioSnap.data();
-
-        extraccion.datos["productos_favoritos"] =
-          usuarioDatos.productos_favoritos || {};
-        extraccion.datos["negocios_favoritos"] =
-          usuarioDatos.negocios_favoritos || {};
-
-        return res.status(200).json({ extraccion });
-      } else {
-        return res.status(400).json(extraccion);
-      }
-    }
-
-    const { correo, contrasena } = req.body;
-
-    if (!correo || !contrasena) {
-      return res.status(400).json({ error: "Correo y contraseña requeridos" });
-    }
-
     try {
+      const acceso = req.cookies.token_de_acceso;
+
+      if (acceso) {
+        const extraccion = servs.jwt_dataExtraction(acceso);
+
+        if (extraccion.exito) {
+          const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
+            extraccion.datos.id
+          );
+          const usuarioDatos = usuarioSnap.data();
+
+          extraccion.datos["productos_favoritos"] =
+            usuarioDatos.productos_favoritos || [];
+          extraccion.datos["negocios_favoritos"] =
+            usuarioDatos.negocios_favoritos || [];
+
+          return res.status(200).json({ extraccion });
+        } else {
+          return res.status(400).json(extraccion);
+        }
+      }
+
+      const { correo, contrasena } = req.body;
+
+      if (!correo || !contrasena) {
+        return res
+          .status(400)
+          .json({ error: "Correo y contraseña requeridos" });
+      }
+
       const info = await this.#modeloUsuario.usuario(correo);
 
       if (info == null) {
@@ -165,7 +169,13 @@ class Controlador_Usuario {
         );
 
         info.negocioId = !restSnap.empty ? restSnap.docs[0].id : null;
-      } else info.negocioId = null;
+        info.negocioActivo = !restSnap.empty
+          ? restSnap.docs[0].data().activo
+          : null;
+      } else {
+        info.negocioId = null;
+        info.negocioActivo = null;
+      }
 
       const datos = {
         id: info.usuarioId,
@@ -173,6 +183,7 @@ class Controlador_Usuario {
         correo: info.usuario.correo,
         tipo: info.usuario.tipo,
         negocioId: info.negocioId,
+        negocioActivo: info.negocioActivo,
       };
 
       const token = servs.jwt_accessToken(datos);

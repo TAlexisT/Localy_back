@@ -62,6 +62,7 @@ class Controlador_Tramites_Pendientes {
         tipo: datosUsuario.tipo,
         correo: datosUsuario.correo,
         negocioId: datosTramite.negocio_id,
+        negocioActivo: true,
       };
 
       const token = servs.jwt_accessToken(datos);
