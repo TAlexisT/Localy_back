@@ -8,6 +8,7 @@ var router = express.Router();
 const Controlador_Negocio = require("../Controllers/Negocios");
 const Negocios_Middleware = require("../Middleware/Negocios_Middleware");
 const ProteccionServer = require("../Middleware/ProteccionServer");
+const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -18,6 +19,7 @@ const ProteccionServer = require("../Middleware/ProteccionServer");
  */
 const controladorNegocio = new Controlador_Negocio();
 const middlewareNegocio = new Negocios_Middleware();
+const middlewaresGenerales = new MiddlewaresGenerales();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -29,7 +31,7 @@ router.get(
 );
 router.get(
   "/obtener-cada-negocio",
-  middlewareNegocio.validarAdministrador,
+  middlewaresGenerales.validarAdministrador,
   controladorNegocio.obtenerCadaNegocio
 );
 
@@ -46,7 +48,7 @@ router.post("/crear-sesion-pago", controladorNegocio.negocioRegistro);
 router.post(
   "/reactivar-sesion-pago/:negocio_id",
   middlewareNegocio.validarSesion,
-  middlewareNegocio.validarUsuario,
+  middlewareNegocio.validarRenovacion,
   controladorNegocio.negocioPriceRenovacion
 );
 router.post(

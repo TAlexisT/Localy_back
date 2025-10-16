@@ -142,7 +142,14 @@ class Modelo_Negocio {
     });
   }
 
-  async crearNegocio(usuarioId, correo, telefono, price_id, customer_id) {
+  async crearNegocio(
+    usuarioId,
+    correo,
+    telefono,
+    price_id,
+    customer_id,
+    recurrente = false
+  ) {
     return await db.collection("negocios").add({
       usuarioId,
       correo,
@@ -151,6 +158,7 @@ class Modelo_Negocio {
       stripe: {
         customer_id,
         price_id,
+        recurrente,
       },
       menus: {},
       random_key: Math.random(),

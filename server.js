@@ -10,8 +10,13 @@ var sugerenciasRutas = require("./src/routes/Sugerencias");
 var productosRutas = require("./src/routes/Productos");
 var tramitesRutas = require("./src/routes/Tramites");
 var stripeRutas = require("./src/routes/Stripe");
+var adminRutas = require("./src/routes/Admin");
 
 const ProteccionServer = require("./src/Middleware/ProteccionServer");
+const SubscripcionJobs = require("./src/jobs/GestionarSubscripcionJobs");
+
+const subscripcionJobs = new SubscripcionJobs();
+subscripcionJobs.init();
 
 const app = express();
 
@@ -41,6 +46,7 @@ app.use("/api/negocios", negociosRutas);
 app.use("/api/productos", productosRutas);
 app.use("/api/tramites", tramitesRutas);
 app.use("/api/sugerencias", sugerenciasRutas);
+app.use("/api/admin", adminRutas);
 
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);

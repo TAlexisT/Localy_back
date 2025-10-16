@@ -155,14 +155,14 @@ class Controlador_Negocio {
       // borrar imagen si ya existe una.
       if (subirImagen.exito) {
         const ruta = negocio.logo?.ruta;
-        if (ruta) await servs.borrarArchivo(ruta);
+        if (ruta) await servs.borrarRuta(ruta, false);
         validacion.datos.logo = {
           url: subirImagen.url,
           ruta: subirImagen.ruta,
         };
       } else if (validacion.datos.borrar_logo) {
         const { ruta } = negocio.logo;
-        if (ruta) await servs.borrarArchivo(ruta);
+        if (ruta) await servs.borrarRuta(ruta, false);
         validacion.datos.logo = { url: "", ruta: "" };
       }
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
@@ -277,7 +277,7 @@ class Controlador_Negocio {
 
       const session = await this.#interaccionStripe.crearSession(
         price_id,
-        { tramiteId: tramitePendienteRef.id },
+        { tramiteId: tramitePendienteRef.id, recurrente: recurrente ?? false },
         `${front_URL}/pago_exitoso?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
         `${front_URL}/pago_erroneo`, // enfoque para "live"
         recurrente ?? false
@@ -389,7 +389,7 @@ class Controlador_Negocio {
       const { menus } = negocioSnap.data();
       const objetivo = menus[menu_id];
 
-      if (objetivo.ruta) await servs.borrarArchivo(objetivo.ruta);
+      if (objetivo.ruta) await servs.borrarRuta(objetivo.ruta, false);
 
       await this.#modeloNegocio.eliminarMenu(negocio_id, menu_id);
 

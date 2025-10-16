@@ -1,5 +1,4 @@
 const joi = require("joi");
-const { borrarArchivo } = require("../Services/ServiciosGenerales");
 
 const esquemaNegocio = joi.object({
   nombre: joi.string().min(1).max(100).required(),

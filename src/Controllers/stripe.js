@@ -33,7 +33,6 @@ class Controlador_Stripe {
       return res.status(400).json({ received: true });
     }
 
-    
     try {
       switch (event.type) {
         case "checkout.session.completed":
@@ -61,7 +60,7 @@ class Controlador_Stripe {
   // Metodos privados
   #pagoInicial = async (session) => {
     const customerId = session.customer;
-    const tramiteId = session.metadata?.tramiteId;
+    const { tramiteId, recurrente } = session.metadata;
 
     const tramiteSnap =
       await this.#modeloTramitesPendientes.obtenerTramitePendiente(tramiteId);
@@ -108,7 +107,8 @@ class Controlador_Stripe {
       correo,
       telefono,
       price_id,
-      customerId
+      customerId,
+      JSON.parse(recurrente)
     );
 
     await this.#modeloTramitesPendientes.procesandoTramite(

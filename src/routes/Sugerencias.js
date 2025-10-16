@@ -7,6 +7,7 @@ var router = express.Router();
  */
 const Controlador_Sugerencia = require("../Controllers/Sugerencias");
 const Sugerencias_Middleware = require("../Middleware/Sugerencias_Middleware");
+const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
 
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
@@ -18,6 +19,7 @@ const Sugerencias_Middleware = require("../Middleware/Sugerencias_Middleware");
  */
 const controladorSugerencias = new Controlador_Sugerencia();
 const sugerenciasMiddleware = new Sugerencias_Middleware();
+const middlewaresGenerales = new MiddlewaresGenerales();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -31,13 +33,13 @@ router.post(
 
 router.delete(
   "/borrar-sugerencia/:sugerencia_id",
-  sugerenciasMiddleware.validarAdministrador,
+  middlewaresGenerales.validarAdministrador,
   controladorSugerencias.borrarSugerencia
 );
 
 router.get(
   "/obtener-toda-sugerencia",
-  sugerenciasMiddleware.validarAdministrador,
+  middlewaresGenerales.validarAdministrador,
   controladorSugerencias.mostrarCadaSugerencia
 );
 router.get(

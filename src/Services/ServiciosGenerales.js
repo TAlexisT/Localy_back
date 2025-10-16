@@ -62,9 +62,14 @@ class ServiciosGenerales {
     return imagObjeto?.url || imagObjeto;
   }
 
-  static async borrarArchivo(ruta) {
-    const archivo = bucket.file(ruta);
-    await archivo.delete();
+  static async borrarRuta(ruta, directorio = false) {
+    if (!directorio) {
+      const archivo = bucket.file(ruta);
+      await archivo.delete();
+    } else {
+      const prefix = ruta.endsWith("/") ? ruta : `${ruta}/`;
+      await bucket.deleteFiles({ prefix: prefix });
+    }
   }
 }
 

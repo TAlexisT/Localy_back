@@ -266,8 +266,9 @@ class Controlador_Productos {
         const productoDatos = productoSnap.data();
 
         if (productoDatos.imagen_URL?.ruta)
-          await Servicios_Generales.borrarArchivo(
-            productoDatos.imagen_URL?.ruta
+          await Servicios_Generales.borrarRuta(
+            productoDatos.imagen_URL?.ruta,
+            false
           );
 
         await this.#modeloProducto.patchProducto(id, {
@@ -300,7 +301,10 @@ class Controlador_Productos {
       const productoDatos = productoSnap.data();
 
       if (productoDatos.imagen_URL?.ruta)
-        await Servicios_Generales.borrarArchivo(productoDatos.imagen_URL?.ruta);
+        await Servicios_Generales.borrarRuta(
+          productoDatos.imagen_URL?.ruta,
+          false
+        );
 
       await this.#modeloProducto.eliminarProducto(id);
       return res
