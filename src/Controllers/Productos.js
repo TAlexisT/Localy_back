@@ -115,7 +115,7 @@ class Controlador_Productos {
           .status(404)
           .json({ exito: false, mensaje: "Producto no encontrado" });
 
-      const { creado, activo, actualizado, random_key, ...demasDatos } =
+      const { creado, actualizado, random_key, ...demasDatos } =
         productoSnap.data();
 
       demasDatos.imagen_URL = Servicios_Generales.soloURL(
