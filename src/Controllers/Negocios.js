@@ -118,10 +118,10 @@ class Controlador_Negocio {
   actualizarPerfil = async (req, res) => {
     try {
       const { negocio_id } = req.params;
-
       const { nombre, descripcion, borrar_logo, ubicacion, horario, redes } =
         req.body;
 
+      // Validamos los datos entrantes.
       const validacion = validador(
         {
           nombre,
@@ -133,15 +133,14 @@ class Controlador_Negocio {
         },
         esquemaNegocio
       );
-
-      if (!validacion.exito) {
+      if (!validacion.exito)
         return res.status(400).send({
           exito: validacion.exito,
           mensaje: validacion.mensaje,
           errores: validacion.errores,
         });
-      }
 
+      // Subimos la imagen proporcionada, en caso de no hacerlo, el método responderá con un {error: true ...}
       const subirImagen = await this.#serviciosNegocios.subirImagenNegocio(
         req.file,
         negocio_id,
@@ -152,7 +151,7 @@ class Controlador_Negocio {
       var negocio = await this.#modeloNegocio.obtenerNegocio(negocio_id);
       negocio = negocio.data();
 
-      // borrar imagen si ya existe una.
+      // borrar imagen si ya existe una o simplemente no añadimos nada.
       if (subirImagen.exito) {
         const ruta = negocio.logo?.ruta;
         if (ruta) await servs.borrarRuta(ruta, false);
@@ -161,15 +160,20 @@ class Controlador_Negocio {
           ruta: subirImagen.ruta,
         };
       } else if (validacion.datos.borrar_logo) {
+        // En caso de borrar el logo, necesitamos resetear todas la referencias
         const { ruta } = negocio.logo;
         if (ruta) await servs.borrarRuta(ruta, false);
         validacion.datos.logo = { url: "", ruta: "" };
       }
+
+      // Limpiamos datos no deseados para la base de datos
+      delete validacion.datos.borrar_logo;
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
       res
         .status(200)
         .json({ exito: true, message: "Perfil guardado correctamente" });
     } catch (err) {
+      // Manejamos los errores en caso de que ocurran.
       console.error("Error al guardar perfil:", err);
       res.status(500).json({ error: "Error al guardar el perfil" });
     }
