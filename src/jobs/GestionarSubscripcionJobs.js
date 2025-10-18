@@ -61,14 +61,39 @@ class subscripcionJobs {
         return;
       }
 
-      const batch = db.batch();
+      let batch = db.batch();
+      let batchCounter = 0;
+      const MAX_BATCH_SIZE = 450; // Permanecer por de bajo del limite de firebase; 500
 
-      snapshot.docs.forEach((doc) => {
+      for (const doc of snapshot.docs) {
+        // 🧹 inhabilitar los productos relacionados
+        const productosSnap = await db
+          .collection("productos")
+          .where("negocio_id", "==", doc.id)
+          .get();
+
+        for (const prod of productosSnap.docs) {
+          batch.update(prod.ref, {
+            activo: false,
+            actualizado: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          batchCounter++;
+        }
+
+        // 🏢 Por último, actualizamos el mismo negocio
         batch.update(doc.ref, {
           activo: false,
           actualizado: admin.firestore.FieldValue.serverTimestamp(),
         });
-      });
+        batchCounter++;
+
+        // Commits de control para no exceder el maximo de operaciones batch
+        if (batchCounter >= MAX_BATCH_SIZE) {
+          await batch.commit();
+          batch = db.batch();
+          batchCounter = 0;
+        }
+      }
 
       await batch.commit();
 
@@ -127,7 +152,7 @@ class subscripcionJobs {
           await servs.borrarRuta(`negocios/negocio_${doc.id}/`, true);
         } catch (err) {
           console.warn(
-            `⚠️ No se pudo eliminar archivos del negocio ${doc.id}:`,
+            `⚠️ No se pudo eliminar directorio del negocio ${doc.id}:`,
             err.message
           );
         }
