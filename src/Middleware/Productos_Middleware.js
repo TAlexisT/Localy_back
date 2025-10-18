@@ -36,38 +36,6 @@ class Productos_Middleware {
     next();
   };
 
-  validarUsuarioNegocio = async (req, res, next) => {
-    // Logica para validar que el usuario tiene un negocio asociado
-    const { negocio_id } = req.params;
-    if (!negocio_id)
-      return res
-        .status(400)
-        .json({ exito: false, mensaje: "ID de negocio no proporcionado." });
-    try {
-      const negocio = await this.#modeloNegocio.negocioDeUsuario(
-        req.usuario.id
-      );
-      if (
-        negocio.empty ||
-        negocio.docs[0].id !== negocio_id ||
-        !negocio.docs[0].data().activo
-      )
-        return res.status(403).json({
-          exito: false,
-          mensaje:
-            "No tienes permisos para agregar o modificar productos a este negocio.",
-        });
-
-      req.negocio_id = negocio.docs[0].id;
-      next();
-    } catch (err) {
-      console.error("Error en Middleware de validación de negocio:", err);
-      return res
-        .status(500)
-        .json({ exito: false, mensaje: "Error del servidor." });
-    }
-  };
-
   productoImagen = multer({
     storage: multer.memoryStorage(),
     limits: {

@@ -22,43 +22,10 @@ class Negocios_Middleware {
     if (!acceso)
       return res.status(401).json({ exito: false, mensaje: "No autenticado" });
 
-    const jwtExtraccion = await servs.jwt_dataExtraction(acceso);
+    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     req.usuario = jwtExtraccion.datos;
     next();
-  };
-
-  validarUsuario = async (req, res, next) => {
-    const { negocio_id } = req.params;
-    if (!negocio_id)
-      return res
-        .status(400)
-        .json({ exito: false, mensaje: "ID de negocio no proporcionado." });
-    try {
-      const negocio = await this.#modeloNegocio.negocioDeUsuario(
-        req.usuario.id
-      );
-      if (
-        negocio.empty ||
-        negocio.docs[0].id !== negocio_id ||
-        !negocio.docs[0].data().activo
-      )
-        return res.status(403).json({
-          exito: false,
-          mensaje: negocio.empty
-            ? "No fue encontrado ningun negocio vinculado a la sesion del usuario."
-            : negocio.docs[0].id !== negocio_id
-            ? "La sesion de usuario no es propietaria del negocio seleccionado (No tiene permisos de escritura)."
-            : "El negocio especificado NO se encuentra activo. Contacta a soporte en caso de dudas.",
-        });
-      next();
-    } catch (err) {
-      console.error("Error en Middleware de validación de negocio:", err);
-      return res.status(500).json({
-        exito: false,
-        mensaje: "Error del servidor.",
-      });
-    }
   };
 
   validarRenovacion = async (req, res, next) => {

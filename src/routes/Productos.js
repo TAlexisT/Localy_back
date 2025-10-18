@@ -7,6 +7,7 @@ var router = express.Router();
  */
 const ControladorProductos = require("../Controllers/Productos");
 const Productos_Middleware = require("../Middleware/Productos_Middleware");
+const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
 const Proteccion_Server = require("../Middleware/ProteccionServer");
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
@@ -18,6 +19,7 @@ const Proteccion_Server = require("../Middleware/ProteccionServer");
  */
 const controladorProductos = new ControladorProductos();
 const productosMiddleware = new Productos_Middleware();
+const middlewaresGenerales = new MiddlewaresGenerales();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -36,7 +38,7 @@ router.post("/mostrar", controladorProductos.paginacionProductos);
 router.post(
   "/crear/:negocio_id",
   productosMiddleware.validarSesion,
-  productosMiddleware.validarUsuarioNegocio,
+  middlewaresGenerales.validarUsuario,
   productosMiddleware.productoImagen.single("image"),
   controladorProductos.crearProducto
 );
@@ -44,7 +46,7 @@ router.post(
 router.put(
   "/actualizar/:negocio_id/:id",
   productosMiddleware.validarSesion,
-  productosMiddleware.validarUsuarioNegocio,
+  middlewaresGenerales.validarUsuario,
   productosMiddleware.productoImagen.single("image"),
   controladorProductos.actualizarProducto
 );
@@ -52,7 +54,7 @@ router.put(
 router.delete(
   "/eliminar/:negocio_id/:id",
   productosMiddleware.validarSesion,
-  productosMiddleware.validarUsuarioNegocio,
+  middlewaresGenerales.validarUsuario,
   controladorProductos.eliminarProducto
 );
 

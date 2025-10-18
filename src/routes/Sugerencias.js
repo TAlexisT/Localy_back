@@ -27,7 +27,7 @@ const middlewaresGenerales = new MiddlewaresGenerales();
 router.post(
   "/crear-sugerencia/:negocio_id",
   sugerenciasMiddleware.validarSesion,
-  sugerenciasMiddleware.validarUsuarioNegocio,
+  middlewaresGenerales.validarUsuario,
   controladorSugerencias.crearSugerencia
 );
 
@@ -45,7 +45,7 @@ router.get(
 router.get(
   "/obtener-sugerencias/:negocio_id",
   sugerenciasMiddleware.validarSesion,
-  sugerenciasMiddleware.validarUsuarioNegocio,
+  middlewaresGenerales.validarUsuario,
   controladorSugerencias.mostrarSugerenciasNegocio
 );
 

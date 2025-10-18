@@ -7,6 +7,7 @@ var router = express.Router();
  */
 const Controlador_Usuario = require("../Controllers/Usuarios");
 const Usuarios_Middleware = require("../Middleware/Usuarios_Middleware");
+const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
 
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
@@ -18,6 +19,7 @@ const Usuarios_Middleware = require("../Middleware/Usuarios_Middleware");
  */
 const controladorUsuario = new Controlador_Usuario();
 const usuariosMiddleware = new Usuarios_Middleware();
+const middlewaresGenerales = new MiddlewaresGenerales();
 /**
  * {Fin de Sección: Inisialización}
  */
@@ -33,7 +35,7 @@ router.post(
 router.post(
   "/autenticar-negocio/:negocio_id",
   usuariosMiddleware.validarSesion,
-  usuariosMiddleware.validarNegocioUsuario,
+  middlewaresGenerales.validarUsuario,
   controladorUsuario.autenticarNegocio
 );
 router.post(

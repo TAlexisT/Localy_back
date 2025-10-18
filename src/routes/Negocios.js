@@ -38,7 +38,7 @@ router.get(
 router.put(
   "/perfil/:negocio_id",
   middlewareNegocio.validarSesion,
-  middlewareNegocio.validarUsuario,
+  middlewaresGenerales.validarUsuario,
   middlewareNegocio.logoUpload.single("imagen"),
   controladorNegocio.actualizarPerfil
 );
@@ -54,7 +54,7 @@ router.post(
 router.post(
   "/subir-menu/:negocio_id",
   middlewareNegocio.validarSesion,
-  middlewareNegocio.validarUsuario,
+  middlewaresGenerales.validarUsuario,
   middlewareNegocio.menuUpload.single("imagen"),
   controladorNegocio.subirMenuImagen
 );
@@ -62,7 +62,7 @@ router.post(
 router.delete(
   "/borrar-menu/:negocio_id/:menu_id",
   middlewareNegocio.validarSesion,
-  middlewareNegocio.validarUsuario,
+  middlewaresGenerales.validarUsuario,
   controladorNegocio.eliminarMenuImagen
 );
 
