@@ -1,5 +1,6 @@
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
+const Modelo_Productos = require("../db/Productos");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
 
@@ -9,6 +10,7 @@ class Controlador_Stripe {
    */
   #modeloUsuario;
   #modeloNegocio;
+  #modeloProducto;
   #modeloTramitesPendientes;
   #interaccionStripe;
 
@@ -18,6 +20,7 @@ class Controlador_Stripe {
   constructor() {
     this.#modeloUsuario = new Modelo_Usuario();
     this.#modeloNegocio = new Modelo_Negocio();
+    this.#modeloProducto = new Modelo_Productos();
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
     this.#interaccionStripe = new Interaccion_Stripe();
   }
@@ -89,8 +92,17 @@ class Controlador_Stripe {
       await this.#modeloNegocio.renovarSubscripcion(
         negocio_id,
         price_id,
-        customerId
+        customerId,
+        recurrente
       );
+
+      const productosSnap = await this.#modeloProducto.obtenerProductosNegocio(
+        negocio_id
+      );
+
+      for (const prod of productosSnap.docs) {
+        await this.#modeloProducto.patchProducto(prod.id, { activo: true });
+      }
       return;
     }
 
