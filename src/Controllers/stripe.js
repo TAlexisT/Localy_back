@@ -91,7 +91,7 @@ class Controlador_Stripe {
         negocio_id,
         price_id,
         customerId,
-        recurrente
+        JSON.parse(recurrente)
       );
 
       const productosSnap = await this.#modeloProducto.obtenerProductosNegocio(
