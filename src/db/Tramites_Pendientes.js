@@ -22,8 +22,9 @@ class Modelo_Tramites_Pendientes {
     });
   }
 
-  async crearTramitePendiente_Renovacion(negocio_id, price_id) {
+  async crearTramitePendiente_Renovacion(usuario_id, negocio_id, price_id) {
     return await db.collection("tramites_pendientes").add({
+      usuario_id,
       negocio_id,
       price_id,
       renovacion: true,

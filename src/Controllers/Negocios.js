@@ -328,6 +328,7 @@ class Controlador_Negocio {
 
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
+          req.usuario.id,
           negocio_id,
           validacion.datos.price_id
         );
