@@ -85,8 +85,6 @@ class Controlador_Stripe {
     } = tramiteSnap.data();
 
     if (renovacion) {
-      await this.#modeloTramitesPendientes.tramiteConcluido(tramiteId);
-
       if (!negocio_id) return;
 
       await this.#modeloNegocio.renovarSubscripcion(
