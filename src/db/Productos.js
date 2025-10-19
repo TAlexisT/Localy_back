@@ -37,7 +37,6 @@ class Productos {
     return await db
       .collection("productos")
       .where("negocio_id", "==", negocioId)
-      .where("activo", "==", true)
       .get();
   }
 

@@ -12,6 +12,7 @@ const {
   esquemaNegocio,
   paginacionFiltros,
   paginacionParams,
+  renovacion,
 } = require("../Schemas/Negocios");
 const { validador } = require("../Validators/Validador");
 
@@ -301,7 +302,10 @@ class Controlador_Negocio {
 
   negocioPriceRenovacion = async (req, res) => {
     const { negocio_id } = req.params;
-    const { recurrente } = req.body;
+
+    const validacion = validador(req.body, renovacion);
+
+    if (!validacion.exito) return res.status(400).json(validacion);
 
     if (!negocio_id)
       return res.status(400).json({
@@ -325,15 +329,18 @@ class Controlador_Negocio {
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
           negocio_id,
-          negocioDatos.stripe.price_id
+          validacion.datos.price_id
         );
 
       const session = await this.#interaccionStripe.crearSession(
-        negocioDatos.stripe.price_id,
-        { tramiteId: tramitePendienteRef.id },
+        validacion.datos.price_id,
+        {
+          tramiteId: tramitePendienteRef.id,
+          recurrente: validacion.datos.recurrente,
+        },
         `${front_URL}/renovacion_exitosa?tramite_id=${tramitePendienteRef.id}`, // enfoque para "live"
         `${front_URL}/renovacion_erronea`, // enfoque para "live"
-        recurrente ?? false
+        validacion.datos.recurrente
       );
 
       return res.status(202).json({ exito: true, url: session.url });

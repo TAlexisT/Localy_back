@@ -194,7 +194,10 @@ const esquemaPropietario = joi.object({
       "any.required": "Price ID is required",
     }),
 
-  recurrente: joi.boolean(),
+  recurrente: joi.boolean().required().messages({
+    "boolean.base": "El campo 'recurrente' debe ser verdadero o falso.",
+    "any.required": "El campo 'recurrente' es obligatorio.",
+  }),
 });
 
 const paginacionParams = joi.object({
@@ -234,9 +237,27 @@ const paginacionFiltros = joi.object({
   }),
 });
 
+const renovacion = joi.object({
+  price_id: joi
+    .string()
+    .pattern(/^price_[a-zA-Z0-9]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "Price ID must be a valid Stripe price ID format (price_ followed by 24 alphanumeric characters)",
+      "any.required": "Price ID is required",
+    }),
+
+  recurrente: joi.boolean().required().messages({
+    "boolean.base": "El campo 'recurrente' debe ser verdadero o falso.",
+    "any.required": "El campo 'recurrente' es obligatorio.",
+  }),
+});
+
 module.exports = {
   esquemaNegocio,
   esquemaPropietario,
   paginacionParams,
   paginacionFiltros,
+  renovacion,
 };

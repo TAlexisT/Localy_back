@@ -101,12 +101,13 @@ class Modelo_Negocio {
       .limit(tamano);
   }
 
-  async renovarSubscripcion(negocioId, price_id, customerId) {
+  async renovarSubscripcion(negocioId, price_id, customerId, recurrente) {
     await db.collection("negocios").doc(negocioId).update({
       activo: true,
       stripe: {
         customerId,
         price_id,
+        recurrente,
       },
       pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
