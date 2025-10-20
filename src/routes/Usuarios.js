@@ -58,4 +58,6 @@ router.delete(
   controladorUsuario.borrarFavorito
 );
 
+router.get("/verificar-email", controladorUsuario.verificarEmail);
+
 module.exports = router;

@@ -271,7 +271,7 @@ class Controlador_Negocio {
             "El nombre de usuario o el correo electrónico o ambos ya están en uso.",
         });
       tramitePendienteRef =
-        await this.#modeloTramitesPendientes.crearTramitePendiente(
+        await this.#modeloTramitesPendientes.crearTramitePendienteNegocios(
           price_id,
           correo,
           await bcrypt.hash(contrasena, hashSaltRounds),

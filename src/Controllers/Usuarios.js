@@ -1,8 +1,10 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
+const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 
 const {
   esquemaUsuario,
@@ -15,7 +17,12 @@ const servs = require("../Services/ServiciosGenerales");
 const servicios_producto = require("../Services/ServiciosProductos");
 const servicios_negocio = require("../Services/ServiciosNegocios");
 
-const { hashSaltRounds } = require("../../Configuraciones");
+const {
+  hashSaltRounds,
+  transporter,
+  front_URL,
+  back_URL,
+} = require("../../Configuraciones");
 const { valid } = require("joi");
 
 class Controlador_Usuario {
@@ -24,6 +31,7 @@ class Controlador_Usuario {
    */
   #modeloUsuario;
   #modeloNegocio;
+  #modeloTramitesPendietes;
   #serviciosProducto;
   #serviciosNegocio;
 
@@ -33,23 +41,24 @@ class Controlador_Usuario {
   constructor() {
     this.#modeloUsuario = new Modelo_Usuario();
     this.#modeloNegocio = new Modelo_Negocio();
+    this.#modeloTramitesPendietes = new Modelo_Tramites_Pendientes();
     this.#serviciosNegocio = new servicios_negocio();
     this.#serviciosProducto = new servicios_producto();
   }
 
   registro = async (req, res) => {
-    const validacion = validador(req.body, esquemaUsuario);
-
-    if (!validacion.exito)
-      return res.status(400).send({
-        exito: validacion.exito,
-        mensaje: validacion.mensaje,
-        error: validacion.errores,
-      });
-
-    const { usuario, contrasena, correo } = validacion.datos;
-
     try {
+      const validacion = validador(req.body, esquemaUsuario);
+
+      if (!validacion.exito)
+        return res.status(400).send({
+          exito: validacion.exito,
+          mensaje: validacion.mensaje,
+          error: validacion.errores,
+        });
+
+      const { usuario, contrasena, correo } = validacion.datos;
+
       if (await this.#modeloUsuario.correoExiste(correo)) {
         return res
           .status(400)
@@ -62,48 +71,36 @@ class Controlador_Usuario {
           .json({ exito: false, error: "El nombre de usuario ya existe." });
       }
 
-      // Creacion de un nuevo usuario
-      const refID = await this.#modeloUsuario.registrarUsuario(
-        usuario,
-        await bcrypt.hash(contrasena, hashSaltRounds),
-        correo,
-        "usuario"
-      );
+      const tokenVerificacion = crypto.randomBytes(32).toString("hex");
 
-      if (!refID)
-        return res.status(400).json({
-          exito: false,
-          mensaje: "El usuario no pudo ser añadido.",
-        });
+      const tramiteId =
+        await this.#modeloTramitesPendietes.crearTramitePendienteUsuario(
+          correo,
+          await bcrypt.hash(contrasena, hashSaltRounds),
+          usuario,
+          tokenVerificacion
+        );
 
-      const token = servs.jwt_accessToken({
-        id: refID.id,
-        usuario: usuario,
-        correo: correo,
-        tipo: "usuario",
-        negocioId: null,
-        negocioActivo: null,
+      const mailOptions = {
+        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        to: correo,
+        subject: "Confirma tu correo en Localy MX",
+        html: `
+        <p>Hola${usuario ? " " + usuario : ""},</p>
+        <p>Gracias por registrarte. Haz clic en el siguiente enlace para verificar tu correo:</p>
+        <p><a href="${back_URL}/api/usuarios/verificar-email?tramite=${
+          tramiteId.id
+        }&token=${tokenVerificacion}">Verificar correo</a></p>
+        <p>Si no solicitaste esto, ignora este mensaje.</p>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({
+        exito: true,
+        mensaje: "Usuario registrado. Se envió un correo de verificación.",
       });
-
-      return res
-        .cookie(
-          "token_de_acceso",
-          token,
-          servs.cookieParser_AccessTokenConfigs()
-        )
-        .status(201)
-        .json({
-          exito: true,
-          message: "Usuario registrado correctamente",
-          datos: {
-            id: refID.id,
-            usuario: usuario,
-            correo: correo,
-            tipo: "usuario",
-            negocioId: null,
-            negocioActivo: null,
-          },
-        });
     } catch (error) {
       console.error("Error al registrar usuario:", error);
       res
@@ -344,6 +341,78 @@ class Controlador_Usuario {
       exito: true,
       mensaje: "El usuario y negocio estan autenticados.",
     });
+  };
+
+  verificarEmail = async (req, res) => {
+    try {
+      const { tramite, token } = req.query;
+
+      if (!tramite) {
+        return res.status(400).send("Faltan parámetros de verificación");
+      }
+
+      var datos = await this.#modeloTramitesPendietes.obtenerTramitePendiente(
+        tramite
+      );
+
+      if (!datos.exists)
+        return res.status(400).json({
+          exito: false,
+          mensaje: "El trámite ya fue utilizado o no existe.",
+        });
+
+      const { correo, contrasena, usuario, tipo, tokenVerificacion } =
+        datos.data();
+
+      if (token !== tokenVerificacion)
+        return res
+          .status(401)
+          .json({ extio: false, mensaje: "Los tokens no coinciden" });
+
+      await this.#modeloUsuario.registrarUsuario(
+        usuario,
+        contrasena,
+        correo,
+        tipo
+      );
+
+      await this.#modeloTramitesPendietes.tramiteConcluido(datos.id);
+
+      const info = await this.#modeloUsuario.usuario(correo);
+
+      if (info.usuario.tipo === "negocio") {
+        const restSnap = await this.#modeloNegocio.negocioDeUsuario(
+          info.usuarioId
+        );
+
+        info.negocioId = !restSnap.empty ? restSnap.docs[0].id : null;
+        info.negocioActivo = !restSnap.empty
+          ? restSnap.docs[0].data().activo
+          : null;
+      } else {
+        info.negocioId = null;
+        info.negocioActivo = null;
+      }
+
+      const sesion = {
+        id: info.usuarioId,
+        usuario: info.usuario.usuario,
+        correo: info.usuario.correo,
+        tipo: info.usuario.tipo,
+        negocioId: info.negocioId,
+        negocioActivo: info.negocioActivo,
+      };
+
+      const tokenDeAcceso = servs.jwt_accessToken(sesion);
+      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+
+      return res
+        .cookie("token_de_acceso", tokenDeAcceso, atConfigs)
+        .redirect(`${front_URL}/`);
+    } catch (error) {
+      console.error("Error verificando correo:", error);
+      return res.status(500).send("Error al verificar el correo.");
+    }
   };
 }
 

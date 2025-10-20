@@ -2,7 +2,7 @@ const { string } = require("joi");
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Tramites_Pendientes {
-  async crearTramitePendiente(
+  async crearTramitePendienteNegocios(
     price_id,
     correo,
     contrasena,
@@ -19,6 +19,56 @@ class Modelo_Tramites_Pendientes {
       renovacion,
       tipo: "negocio",
       creado: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  }
+
+  async crearTramitePendienteNegocios(
+    price_id,
+    correo,
+    contrasena,
+    telefono,
+    usuario,
+    renovacion
+  ) {
+    return await db.collection("tramites_pendientes").add({
+      usuario,
+      contrasena,
+      telefono,
+      correo,
+      price_id,
+      renovacion,
+      tipo: "negocio",
+      creado: admin.firestore.FieldValue.serverTimestamp(),
+      expira_en: admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ),
+    });
+  }
+
+  async crearTramitePendienteUsuario(
+    correo,
+    contrasena,
+    usuario,
+    tokenVerificacion
+  ) {
+    return await db.collection("tramites_pendientes").add({
+      correo,
+      contrasena,
+      usuario,
+      tipo: "usuario",
+      tokenVerificacion,
+      creado: admin.firestore.FieldValue.serverTimestamp(),
+      expira_en: admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ),
+    });
+  }
+
+  async crearAutenticacion(email, nombre) {
+    return await admin.auth().createUser({
+      email,
+      displayName: nombre,
+      emailVerified: false,
     });
   }
 
@@ -41,7 +91,7 @@ class Modelo_Tramites_Pendientes {
     return docRef;
   }
 
-  async procesandoTramite(tramite_id, negocioId, usuarioId) {
+  async procesandoTramiteNegocio(tramite_id, negocioId, usuarioId) {
     const refDoc = db.collection("tramites_pendientes").doc(tramite_id);
 
     await refDoc.update({
@@ -50,6 +100,7 @@ class Modelo_Tramites_Pendientes {
       usuario: admin.firestore.FieldValue.delete(),
       negocio_id: negocioId,
       usuario_id: usuarioId,
+      procesado: true,
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
   }

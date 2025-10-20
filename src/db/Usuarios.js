@@ -1,4 +1,4 @@
-const { admin, db } = require("../../Configuraciones");
+const { admin, db, back_URL } = require("../../Configuraciones");
 
 class Modelo_Usuario {
   #coleccion;

@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const nodemailer = require("nodemailer");
 const admin = require("firebase-admin");
 
 admin.initializeApp({
@@ -31,10 +32,30 @@ const front_URL =
     ? process.env.FRONTEND_URL_T
     : process.env.FRONTEND_URL_D;
 
+const back_URL =
+  process.env.CURRENT_ENV === "produccion"
+    ? process.env.BACKEND_URL_P
+    : process.env.CURRENT_ENV === "test"
+    ? process.env.BACKEND_URL_T
+    : process.env.BACKEND_URL_D;
+
 const corsConfigs = {
   origin: front_URL,
   credentials: true,
 };
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port:
+    process.env.CURRENT_ENV === "produccion"
+      ? process.env.SMTP_PUERTO_P
+      : process.env.SMTP_PUERTO_T,
+  secure: process.env.CURRENT_ENV === "produccion", 
+  auth: {
+    user: process.env.SMTP_USUARIO,
+    pass: process.env.SMTP_CONTRASENA,
+  },
+});
 
 module.exports = {
   admin,
@@ -45,4 +66,6 @@ module.exports = {
   jwtSecreta,
   corsConfigs,
   front_URL,
+  back_URL,
+  transporter,
 };

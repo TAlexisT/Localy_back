@@ -121,7 +121,7 @@ class Controlador_Stripe {
       JSON.parse(recurrente)
     );
 
-    await this.#modeloTramitesPendientes.procesandoTramite(
+    await this.#modeloTramitesPendientes.procesandoTramiteNegocio(
       tramiteId,
       negocioRef.id,
       usuarioRef.id
