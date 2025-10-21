@@ -16,6 +16,9 @@
     "nodemailer": "^7.0.9",
     "stripe": "^18.2.1"
   },
+  "engines": {
+    "node": "^18.x"
+  },
   "name": "localy",
   "version": "1.0.0",
   "main": "server.js",

@@ -25,19 +25,19 @@ const jwtSecreta =
     ? process.env.JWT_SECRET_KEY_T
     : process.env.JWT_SECRET_KEY_D;
 
-const front_URL =
+var front_URL =
   process.env.CURRENT_ENV === "produccion"
-    ? process.env.FRONTEND_URL_P
+    ? JSON.parse(process.env.FRONTEND_URL_P)
     : process.env.CURRENT_ENV === "test"
-    ? process.env.FRONTEND_URL_T
-    : process.env.FRONTEND_URL_D;
+    ? JSON.parse(process.env.FRONTEND_URL_T)
+    : JSON.parse(process.env.FRONTEND_URL_D);
 
-const back_URL =
+var back_URL =
   process.env.CURRENT_ENV === "produccion"
-    ? process.env.BACKEND_URL_P
+    ? JSON.parse(process.env.BACKEND_URL_P)
     : process.env.CURRENT_ENV === "test"
-    ? process.env.BACKEND_URL_T
-    : process.env.BACKEND_URL_D;
+    ? JSON.parse(process.env.BACKEND_URL_T)
+    : JSON.parse(process.env.BACKEND_URL_D);
 
 const corsConfigs = {
   origin: front_URL,
@@ -50,12 +50,15 @@ const transporter = nodemailer.createTransport({
     process.env.CURRENT_ENV === "produccion"
       ? process.env.SMTP_PUERTO_P
       : process.env.SMTP_PUERTO_T,
-  secure: process.env.CURRENT_ENV === "produccion", 
+  secure: process.env.CURRENT_ENV === "produccion",
   auth: {
     user: process.env.SMTP_USUARIO,
     pass: process.env.SMTP_CONTRASENA,
   },
 });
+
+front_URL = front_URL[0];
+back_URL = back_URL[0];
 
 module.exports = {
   admin,
