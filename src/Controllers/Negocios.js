@@ -7,6 +7,7 @@ const Servicios_Negocios = require("../Services/ServiciosNegocios");
 const servs = require("../Services/ServiciosGenerales");
 
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 const {
   esquemaPropietario,
