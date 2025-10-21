@@ -13,10 +13,10 @@ var stripeRutas = require("./src/routes/Stripe");
 var adminRutas = require("./src/routes/Admin");
 
 const ProteccionServer = require("./src/Middleware/ProteccionServer");
-const SubscripcionJobs = require("./src/jobs/GestionarSubscripcionJobs");
+const SuscripcionJobs = require("./src/jobs/GestionarSuscripcionJobs");
 
-const subscripcionJobs = new SubscripcionJobs();
-subscripcionJobs.init();
+const suscripcionJobs = new SuscripcionJobs();
+suscripcionJobs.init();
 
 const app = express();
 

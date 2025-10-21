@@ -5,7 +5,7 @@ const { db, admin } = require("../../Configuraciones");
 
 const servs = require("../Services/ServiciosGenerales");
 
-class subscripcionJobs {
+class suscripcionJobs {
   constructor() {
     this.jobs = [];
   }
@@ -194,4 +194,4 @@ class subscripcionJobs {
   }
 }
 
-module.exports = subscripcionJobs;
+module.exports = suscripcionJobs;

@@ -1,4 +1,4 @@
-const SubscripcionJobs = require("../jobs/GestionarSubscripcionJobs");
+const SubscripcionJobs = require("../jobs/GestionarSuscripcionJobs");
 
 class Controlador_Admin {
   /**
