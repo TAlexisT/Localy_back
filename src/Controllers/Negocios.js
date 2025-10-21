@@ -2,6 +2,7 @@ const Modelo_Usuario = require("../db/Usuarios");
 const Modelo_Negocio = require("../db/Negocios");
 const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 const Interaccion_Stripe = require("../ThirdParty/Stripe");
+const Emails_ThirdParty = require("../ThirdParty/Emails");
 const Servicios_Negocios = require("../Services/ServiciosNegocios");
 const servs = require("../Services/ServiciosGenerales");
 
@@ -16,7 +17,11 @@ const {
 } = require("../Schemas/Negocios");
 const { validador } = require("../Validators/Validador");
 
-const { front_URL, hashSaltRounds } = require("../../Configuraciones");
+const {
+  front_URL,
+  hashSaltRounds,
+  transporter,
+} = require("../../Configuraciones");
 
 class Controlador_Negocio {
   /**
@@ -24,6 +29,7 @@ class Controlador_Negocio {
    */
   #modeloUsuario;
   #modeloNegocio;
+  #emails;
   #modeloTramitesPendientes;
   #interaccionStripe;
   #serviciosNegocios;
@@ -36,6 +42,7 @@ class Controlador_Negocio {
     this.#modeloNegocio = new Modelo_Negocio();
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
     this.#interaccionStripe = new Interaccion_Stripe();
+    this.#emails = new Emails_ThirdParty();
     this.#serviciosNegocios = new Servicios_Negocios();
   }
 
@@ -244,22 +251,22 @@ class Controlador_Negocio {
   };
 
   negocioRegistro = async (req, res) => {
-    const validacion = validador(req.body, esquemaPropietario);
-
-    if (!validacion.exito) {
-      return res.status(400).send({
-        exito: false,
-        mensaje: validacion.mensaje,
-        errores: validacion.errores,
-      });
-    }
-
-    const { price_id, correo, contrasena, telefono, usuario, recurrente } =
-      validacion.datos;
-
-    var tramitePendienteRef = null;
-
     try {
+      const validacion = validador(req.body, esquemaPropietario);
+
+      if (!validacion.exito) {
+        return res.status(400).send({
+          exito: false,
+          mensaje: validacion.mensaje,
+          errores: validacion.errores,
+        });
+      }
+
+      const { price_id, correo, contrasena, telefono, usuario, recurrente } =
+        validacion.datos;
+
+      var tramitePendienteRef = null;
+
       if (
         (await this.#modeloUsuario.nombreExiste(usuario)) ||
         (await this.#modeloUsuario.correoExiste(correo)) ||
@@ -270,6 +277,9 @@ class Controlador_Negocio {
           error:
             "El nombre de usuario o el correo electrónico o ambos ya están en uso.",
         });
+
+      const token_verificacion = crypto.randomBytes(32).toString("hex");
+
       tramitePendienteRef =
         await this.#modeloTramitesPendientes.crearTramitePendienteNegocios(
           price_id,
@@ -277,6 +287,7 @@ class Controlador_Negocio {
           await bcrypt.hash(contrasena, hashSaltRounds),
           telefono,
           usuario,
+          token_verificacion,
           false
         );
 
@@ -288,7 +299,19 @@ class Controlador_Negocio {
         recurrente ?? false
       );
 
-      return res.status(202).json({ exito: true, url: session.url });
+      const mailOptions = {
+        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        to: correo,
+        subject: "Confirma tu correo en Localy MX",
+        html: this.#emails.verificacionEmail(usuario, session.url),
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(202).json({
+        exito: true,
+        mensaje: "Usuario registrado. Se envió un correo de verificación.",
+      });
     } catch (err) {
       console.error("El metodo fallo al crear una nueva sesion: ", err);
       if (tramitePendienteRef.id)
