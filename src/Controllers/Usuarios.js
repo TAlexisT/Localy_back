@@ -436,7 +436,7 @@ class Controlador_Usuario {
         subject: "Confirma el cambio de contraseña",
         html: this.#emails.verificacionCambioContrasena(
           usuario,
-          `${front_URL}/cambiar-contrasena?tramite=${tramiteId.id}&token=${token_verificacion}`
+          `${front_URL}/cambiar_contrasena?tramite=${tramiteId.id}&token=${token_verificacion}`
         ),
       };
 
