@@ -50,6 +50,11 @@ router.post(
   usuariosMiddleware.validarUsuario,
   controladorUsuario.crearFavorito
 );
+router.post(
+  "/peticion-cambiar-contrasena",
+  controladorUsuario.peticionCambiarContrasena
+);
+router.post("/cambiar-contrasena", controladorUsuario.cambiarContrasena);
 
 router.delete(
   "/borrar-favorito/:usuario_id/:favorito_id/:tipo",

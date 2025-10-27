@@ -2,7 +2,7 @@ const { string } = require("joi");
 const { admin, db } = require("../../Configuraciones");
 
 class Modelo_Tramites_Pendientes {
-    async crearTramitePendienteNegocios(
+  async crearTramitePendienteNegocios(
     price_id,
     correo,
     contrasena,
@@ -42,6 +42,22 @@ class Modelo_Tramites_Pendientes {
       creado: admin.firestore.FieldValue.serverTimestamp(),
       expira_en: admin.firestore.Timestamp.fromDate(
         new Date(Date.now() + 24 * 60 * 60 * 1000)
+      ),
+    });
+  }
+
+  async crearTramitePendienteContrasena(
+    usuario_id,
+    correo,
+    token_verificacion
+  ) {
+    return await db.collection("tramites_pendientes").add({
+      usuario_id,
+      correo,
+      token_verificacion,
+      creado: admin.firestore.FieldValue.serverTimestamp(),
+      expira_en: admin.firestore.Timestamp.fromDate(
+        new Date(Date.now() + 1 * 60 * 60 * 1000)
       ),
     });
   }

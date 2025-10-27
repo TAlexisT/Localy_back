@@ -13,6 +13,8 @@ const {
   favoritoTipo,
   crearFavorito,
   validarUbicacion,
+  peticionCambioContrasena,
+  cambioContrasena,
 } = require("../Schemas/Usuarios");
 const { validador } = require("../Validators/Validador");
 const servs = require("../Services/ServiciosGenerales");
@@ -356,7 +358,7 @@ class Controlador_Usuario {
       );
 
       if (!datos.exists)
-        return res.status(400).json({
+        return res.status(404).json({
           exito: false,
           mensaje: "El trámite ya fue utilizado o no existe.",
         });
@@ -394,24 +396,112 @@ class Controlador_Usuario {
         info.negocioActivo = null;
       }
 
-      const sesion = {
-        id: info.usuarioId,
-        usuario: info.usuario.usuario,
-        correo: info.usuario.correo,
-        tipo: info.usuario.tipo,
-        negocioId: info.negocioId,
-        negocioActivo: info.negocioActivo,
-      };
-
-      const tokenDeAcceso = servs.jwt_accessToken(sesion);
-      const atConfigs = servs.cookieParser_AccessTokenConfigs();
-
       return res
         .cookie("token_de_acceso", tokenDeAcceso, atConfigs)
         .redirect(`${front_URL}/`);
     } catch (error) {
       console.error("Error verificando correo:", error);
       return res.status(500).send("Error al verificar el correo.");
+    }
+  };
+
+  peticionCambiarContrasena = async (req, res) => {
+    try {
+      const validacion = validador(req.body, peticionCambioContrasena);
+
+      if (!validacion.exito) return res.status(400).json(validacion);
+
+      const { correo } = validacion.datos;
+
+      var usuario = await this.#modeloUsuario.usuario(correo);
+      if (usuario == null)
+        return res.status(404).json({
+          exito: false,
+          mensaje:
+            "El usuario con el correo proporcionado no existe en la base de datos.",
+        });
+
+      const token_verificacion = crypto.randomBytes(32).toString("hex");
+
+      const tramiteId =
+        await this.#modeloTramitesPendietes.crearTramitePendienteContrasena(
+          usuario.usuarioId,
+          correo,
+          token_verificacion
+        );
+
+      const mailOptions = {
+        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        to: correo,
+        subject: "Confirma el cambio de contraseña",
+        html: this.#emails.verificacionCambioContrasena(
+          usuario,
+          `${front_URL}/cambiar-contrasena?tramite=${tramiteId.id}&token=${token_verificacion}`
+        ),
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      return res.status(200).json({
+        exito: true,
+        mensaje:
+          "Se envió un correo de confirmación a tu dirección de correo electrónico.",
+      });
+    } catch (err) {
+      console.error(
+        "Ocurrio un error al hacer peticion de cambio de contraseña:",
+        err
+      );
+      return res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor." });
+    }
+  };
+
+  cambiarContrasena = async (req, res) => {
+    try {
+      const { tramite, token } = req.query;
+      if (!tramite) {
+        return res.status(400).send("Faltan parámetros de verificación");
+      }
+
+      const validacion = validador(req.body, cambioContrasena);
+      if (!validacion.exito) return res.status(400).json(validacion);
+
+      var datos = await this.#modeloTramitesPendietes.obtenerTramitePendiente(
+        tramite
+      );
+      if (!datos.exists)
+        return res.status(404).json({
+          exito: false,
+          mensaje: "El trámite ya fue utilizado o no existe.",
+        });
+
+      const { token_verificacion, usuario_id } = datos.data();
+
+      if (token !== token_verificacion)
+        return res
+          .status(401)
+          .json({ extio: false, mensaje: "Los tokens no coinciden" });
+
+      await this.#modeloTramitesPendietes.tramiteConcluido(tramite);
+
+      await this.#modeloUsuario.patchUsuario(usuario_id, {
+        contrasena: await bcrypt.hash(
+          validacion.datos.contrasena,
+          hashSaltRounds
+        ),
+      });
+
+      res.status(200).json({
+        exito: true,
+        mensaje: "La contraseña fué actualizada correctamente.",
+      });
+    } catch (err) {
+      console.error("Ocurrio un error al cambiar la contraseña:", err);
+      return res
+        .status(500)
+        .json({ exito: false, mensaje: "Ocurrio un error en el servidor" });
     }
   };
 }

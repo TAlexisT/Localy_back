@@ -95,9 +95,46 @@ const crearFavorito = joi.object({
     }),
 });
 
+const peticionCambioContrasena = joi.object({
+  correo: joi
+    .string()
+    .email({
+      minDomainSegments: 2,
+      tlds: { allow: ["com", "net", "org", "es"] },
+    })
+    .required()
+    .messages({
+      "string.email":
+        "Por favor, proporcione una dirección de correo electrónico válida.",
+      "any.required": "Se requiere correo electrónico",
+    }),
+});
+
+const cambioContrasena = joi.object({
+  contrasena: joi
+    .string()
+    .pattern(
+      new RegExp(
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]"
+      )
+    )
+    .min(8)
+    .max(30)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "La contraseña debe contener al menos una letra minúscula, una letra mayúscula, un número y un carácter especial",
+      "string.min": "La contraseña debe tener al menos 8 caracteres.",
+      "string.max": "La contraseña no puede exceder los 30 caracteres",
+      "any.required": "Se requiere contraseña",
+    }),
+});
+
 module.exports = {
   esquemaUsuario,
   favoritoTipo,
   crearFavorito,
   validarUbicacion,
+  peticionCambioContrasena,
+  cambioContrasena,
 };

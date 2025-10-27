@@ -1,3 +1,4 @@
+const functions = require("firebase-functions");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -48,6 +49,7 @@ app.use("/api/tramites", tramitesRutas);
 app.use("/api/sugerencias", sugerenciasRutas);
 app.use("/api/admin", adminRutas);
 
+// exports.api = functions.https.onRequest(app);
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

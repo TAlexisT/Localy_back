@@ -55,6 +55,15 @@ class Modelo_Usuario {
       : null;
   }
 
+  async patchUsuario(usuarioId, datos) {
+    await this.#coleccion
+      .doc(usuarioId)
+      .update({
+        actualizado: admin.firestore.FieldValue.serverTimestamp(),
+        ...datos,
+      });
+  }
+
   async borrarFavorito(usuarioId, favoritoId, esNegocio = true) {
     const campo = `${esNegocio ? "negocios" : "productos"}_favoritos`;
 
