@@ -70,7 +70,8 @@ class ServiciosNegocios {
           consulta,
           distancia_orden,
           usuario_locacion,
-          distancia_rango
+          distancia_rango,
+          membresia
         );
 
         const snapshotDespues = await consulta.get();
