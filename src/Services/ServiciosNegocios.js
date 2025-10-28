@@ -23,6 +23,7 @@ class ServiciosNegocios {
     usuario_locacion = null,
     distancia_orden = null,
     distancia_rango = null,
+    membresia = null,
     cursor,
     direccion
   ) => {
@@ -38,11 +39,12 @@ class ServiciosNegocios {
     // siguiente pagina - Consigue los registros despues del cursor
     consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(tamano, avanza);
 
-    consulta = this.#aplicarFiltrosDistanci(
+    consulta = this.#aplicarFiltrosBasicos(
       consulta,
       distancia_orden,
       usuario_locacion,
-      distancia_rango
+      distancia_rango,
+      membresia
     );
 
     if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
@@ -64,7 +66,7 @@ class ServiciosNegocios {
 
         consulta = consulta.where("random_key", avanza ? ">" : "<", seed);
 
-        consulta = this.#aplicarFiltrosDistanci(
+        consulta = this.#aplicarFiltrosBasicos(
           consulta,
           distancia_orden,
           usuario_locacion,
@@ -256,11 +258,12 @@ class ServiciosNegocios {
     return datos;
   };
 
-  #aplicarFiltrosDistanci = (
+  #aplicarFiltrosBasicos = (
     consulta,
     distancia_orden = null,
     usuario_locacion = null,
-    distancia_rango = null
+    distancia_rango = null,
+    membresia = null
   ) => {
     if (usuario_locacion && distancia_orden && distancia_rango) {
       const delimitacion = this.#cuadroDelimitador(
@@ -268,12 +271,16 @@ class ServiciosNegocios {
         distancia_rango
       );
 
-      return consulta
+      consulta = consulta
         .where("ubicacion.latitude", ">=", delimitacion.minLat)
         .where("ubicacion.latitude", "<=", delimitacion.maxLat)
         .where("ubicacion.longitude", ">=", delimitacion.minLng)
         .where("ubicacion.longitude", "<=", delimitacion.maxLng)
         .orderBy("ubicacion.latitude", distancia_orden.toLowerCase());
+    }
+
+    if (membresia) {
+      consulta = consulta.where("membresia", "==", membresia);
     }
 
     return consulta;
@@ -285,7 +292,6 @@ class ServiciosNegocios {
     return array.filter((item) => {
       const nombre = item.nombre?.toLowerCase() || "";
       const descripcion = item.descripcion?.toLowerCase() || "";
-      
 
       return nombre.includes(searchTerm) || descripcion.includes(searchTerm);
     });

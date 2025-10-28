@@ -208,13 +208,19 @@ class Controlador_Negocio {
           usuario_locacion: req.body.usuario_locacion,
           distancia_orden: req.body.distancia_orden,
           distancia_rango: req.body.distancia_rango,
+          membresia: req.body.membresia,
         },
         paginacionFiltros
       );
       if (!pagFiltros.exito) return res.status(400).json(pagParams);
 
-      const { usuario_locacion, distancia_orden, distancia_rango, general } =
-        pagFiltros.datos;
+      const {
+        usuario_locacion,
+        distancia_orden,
+        distancia_rango,
+        general,
+        membresia,
+      } = pagFiltros.datos;
       const { tamano, cursor, direccion, seed } = pagParams.datos;
       var respuesta = {};
 
@@ -225,6 +231,7 @@ class Controlador_Negocio {
         usuario_locacion,
         distancia_orden,
         distancia_rango,
+        membresia,
         cursor,
         direccion
       );
@@ -289,7 +296,8 @@ class Controlador_Negocio {
           telefono,
           usuario,
           token_verificacion,
-          false
+          false,
+          servs.membresiaTipo(price_id)
         );
 
       const session = await this.#interaccionStripe.crearSession(
@@ -354,7 +362,8 @@ class Controlador_Negocio {
         await this.#modeloTramitesPendientes.crearTramitePendiente_Renovacion(
           req.usuario.id,
           negocio_id,
-          validacion.datos.price_id
+          validacion.datos.price_id,
+          servs.membresiaTipo(validacion.datos.price_id)
         );
 
       const session = await this.#interaccionStripe.crearSession(

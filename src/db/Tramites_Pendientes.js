@@ -9,7 +9,8 @@ class Modelo_Tramites_Pendientes {
     telefono,
     usuario,
     token_verificacion,
-    renovacion
+    renovacion,
+    membresia
   ) {
     return await db.collection("tramites_pendientes").add({
       usuario,
@@ -18,6 +19,7 @@ class Modelo_Tramites_Pendientes {
       correo,
       price_id,
       renovacion,
+      membresia,
       tipo: "negocio",
       token_verificacion,
       creado: admin.firestore.FieldValue.serverTimestamp(),
@@ -70,11 +72,17 @@ class Modelo_Tramites_Pendientes {
     });
   }
 
-  async crearTramitePendiente_Renovacion(usuario_id, negocio_id, price_id) {
+  async crearTramitePendiente_Renovacion(
+    usuario_id,
+    negocio_id,
+    price_id,
+    membresia
+  ) {
     return await db.collection("tramites_pendientes").add({
       usuario_id,
       negocio_id,
       price_id,
+      membresia,
       renovacion: true,
       creado: admin.firestore.FieldValue.serverTimestamp(),
     });

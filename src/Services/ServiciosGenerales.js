@@ -1,6 +1,11 @@
 const jwt = require("jsonwebtoken");
 
-const { jwtSecreta, bucket } = require("../../Configuraciones");
+const {
+  jwtSecreta,
+  bucket,
+  pricesIdAmbulante,
+  pricesIdRestaurante,
+} = require("../../Configuraciones");
 const { string } = require("joi");
 
 class ServiciosGenerales {
@@ -60,6 +65,14 @@ class ServiciosGenerales {
 
   static soloURL(imagObjeto) {
     return imagObjeto?.url || imagObjeto;
+  }
+
+  static membresiaTipo(priceId) {
+    return pricesIdAmbulante.includes(priceId)
+      ? "ambulante"
+      : pricesIdRestaurante.includes(priceId)
+      ? "restaurante"
+      : null;
   }
 
   static async borrarRuta(ruta, directorio = false) {

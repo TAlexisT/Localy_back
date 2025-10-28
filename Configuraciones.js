@@ -57,6 +57,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const pricesIdAmbulante = JSON.parse(process.env.STRIPE_AMBULATNE_PRICES);
+const pricesIdRestaurante = JSON.parse(process.env.STRIPE_RESTAURANTE_PRICES);
+
 front_URL = front_URL[0];
 back_URL = back_URL[0];
 
@@ -71,4 +74,6 @@ module.exports = {
   front_URL,
   back_URL,
   transporter,
+  pricesIdAmbulante,
+  pricesIdRestaurante,
 };

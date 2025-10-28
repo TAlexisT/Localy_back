@@ -235,6 +235,15 @@ const paginacionFiltros = joi.object({
     "number.max": "La distancia máxima permitida es de 25 km.",
     "any.required": "Debes especificar una distancia.",
   }),
+  membresia: joi
+    .string()
+    .valid("ambulante", "restaurante")
+    .allow(null, "")
+    .messages({
+      "string.base": "El campo 'membresia' debe ser una cadena de texto.",
+      "any.only":
+        "El campo 'membresia' solo puede ser 'ambulante' o 'restaurante'.",
+    }),
 });
 
 const renovacion = joi.object({

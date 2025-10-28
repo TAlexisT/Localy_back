@@ -82,6 +82,7 @@ class Controlador_Stripe {
       renovacion,
       negocio_id,
       tipo,
+      membresia,
     } = tramiteSnap.data();
 
     if (renovacion) {
@@ -91,7 +92,8 @@ class Controlador_Stripe {
         negocio_id,
         price_id,
         customerId,
-        JSON.parse(recurrente)
+        JSON.parse(recurrente),
+        membresia
       );
 
       const productosSnap = await this.#modeloProducto.obtenerProductosNegocio(
@@ -118,7 +120,8 @@ class Controlador_Stripe {
       telefono,
       price_id,
       customerId,
-      JSON.parse(recurrente)
+      JSON.parse(recurrente),
+      membresia
     );
 
     await this.#modeloTramitesPendientes.procesandoTramiteNegocio(

@@ -101,7 +101,13 @@ class Modelo_Negocio {
       .limit(tamano);
   }
 
-  async renovarSubscripcion(negocioId, price_id, customerId, recurrente) {
+  async renovarSubscripcion(
+    negocioId,
+    price_id,
+    customerId,
+    recurrente,
+    membresia
+  ) {
     await db.collection("negocios").doc(negocioId).update({
       activo: true,
       stripe: {
@@ -109,6 +115,7 @@ class Modelo_Negocio {
         price_id,
         recurrente,
       },
+      membresia,
       pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
       actualizado: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -149,7 +156,8 @@ class Modelo_Negocio {
     telefono,
     price_id,
     customer_id,
-    recurrente = false
+    recurrente = false,
+    membresia
   ) {
     return await db.collection("negocios").add({
       usuarioId,
@@ -161,6 +169,7 @@ class Modelo_Negocio {
         price_id,
         recurrente,
       },
+      membresia,
       menus: {},
       random_key: Math.random(),
       pago_fecha: admin.firestore.FieldValue.serverTimestamp(),
