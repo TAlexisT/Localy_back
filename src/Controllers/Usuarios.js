@@ -27,7 +27,6 @@ const {
   front_URL,
   back_URL,
 } = require("../../Configuraciones");
-const { valid } = require("joi");
 
 class Controlador_Usuario {
   /**
@@ -435,7 +434,7 @@ class Controlador_Usuario {
         to: correo,
         subject: "Confirma el cambio de contraseña",
         html: this.#emails.verificacionCambioContrasena(
-          usuario,
+          usuario.usuario.usuario,
           `${front_URL}/cambiar_contrasena?tramite=${tramiteId.id}&token=${token_verificacion}`
         ),
       };
