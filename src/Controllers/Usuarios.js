@@ -8,6 +8,7 @@ const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
 
 const Emails_ThirdParty = require("../ThirdParty/Emails");
 
+const { atConfigs } = require("../../Configuraciones");
 const {
   esquemaUsuario,
   favoritoTipo,
@@ -370,7 +371,7 @@ class Controlador_Usuario {
           .status(401)
           .json({ extio: false, mensaje: "Los tokens no coinciden" });
 
-      await this.#modeloUsuario.registrarUsuario(
+      const ref = await this.#modeloUsuario.registrarUsuario(
         usuario,
         contrasena,
         correo,
@@ -395,8 +396,18 @@ class Controlador_Usuario {
         info.negocioActivo = null;
       }
 
+      const JWToken = servs.jwt_accessToken({
+        id: ref.id,
+        usuario: usuario,
+        correo: correo,
+        tipo: info.usuario.tipo,
+        negocioId: info.negocioId,
+        negocioActivo: info.negocioActivo,
+      });
+      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+
       return res
-        .cookie("token_de_acceso", tokenDeAcceso, atConfigs)
+        .cookie("token_de_acceso", JWToken, atConfigs)
         .redirect(`${front_URL}/`);
     } catch (error) {
       console.error("Error verificando correo:", error);
