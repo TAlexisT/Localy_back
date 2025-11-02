@@ -1,7 +1,7 @@
-const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../ThirdParty/Stripe");
+import Modelo_Usuario from "../db/Usuarios";
+import Modelo_Negocio from "../db/Negocios";
+import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes";
+import Interaccion_Stripe from "../ThirdParty/Stripe";
 
 class ServiciosStripe {
   /**
@@ -16,4 +16,4 @@ class ServiciosStripe {
   static async;
 }
 
-module.exports = ServiciosStripe;
+export default ServiciosStripe;

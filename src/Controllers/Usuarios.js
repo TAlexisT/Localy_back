@@ -1,33 +1,32 @@
-require("dotenv").config();
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+import { hash, compare } from "bcrypt";
+import { randomBytes } from "crypto";
 
-const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
+import Modelo_Usuario from "../db/Usuarios.js";
+import Modelo_Negocio from "../db/Negocios.js";
+import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
 
-const Emails_ThirdParty = require("../ThirdParty/Emails");
+import Emails_ThirdParty from "../ThirdParty/Emails.js";
 
-const { atConfigs } = require("../../Configuraciones");
-const {
+import { smtp } from "../../Configuraciones.js";
+import {
   esquemaUsuario,
   favoritoTipo,
   crearFavorito,
   validarUbicacion,
   peticionCambioContrasena,
   cambioContrasena,
-} = require("../Schemas/Usuarios");
-const { validador } = require("../Validators/Validador");
-const servs = require("../Services/ServiciosGenerales");
-const servicios_producto = require("../Services/ServiciosProductos");
-const servicios_negocio = require("../Services/ServiciosNegocios");
+} from "../Schemas/Usuarios.js";
+import { validador } from "../Validators/Validador.js";
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
+import servicios_producto from "../Services/ServiciosProductos.js";
+import servicios_negocio from "../Services/ServiciosNegocios.js";
 
-const {
+import {
   hashSaltRounds,
   transporter,
   front_URL,
   back_URL,
-} = require("../../Configuraciones");
+} from "../../Configuraciones.js";
 
 class Controlador_Usuario {
   /**
@@ -77,18 +76,18 @@ class Controlador_Usuario {
           .json({ exito: false, error: "El nombre de usuario ya existe." });
       }
 
-      const token_verificacion = crypto.randomBytes(32).toString("hex");
+      const token_verificacion = randomBytes(32).toString("hex");
 
       const tramiteId =
         await this.#modeloTramitesPendietes.crearTramitePendienteUsuario(
           correo,
-          await bcrypt.hash(contrasena, hashSaltRounds),
+          await hash(contrasena, hashSaltRounds),
           usuario,
           token_verificacion
         );
 
       const mailOptions = {
-        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        from: smtp,
         to: correo,
         subject: "Confirma tu correo en Localy MX",
         html: this.#emails.verificacionEmail(
@@ -116,7 +115,7 @@ class Controlador_Usuario {
       const acceso = req.cookies.token_de_acceso;
 
       if (acceso) {
-        const extraccion = servs.jwt_dataExtraction(acceso);
+        const extraccion = ServiciosGenerales.jwt_dataExtraction(acceso);
 
         if (extraccion.exito) {
           const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
@@ -151,10 +150,7 @@ class Controlador_Usuario {
           .json({ exito: false, error: "Credenciales inválidas" });
       }
 
-      const esValido = await bcrypt.compare(
-        contrasena,
-        info.usuario.contrasena
-      );
+      const esValido = await compare(contrasena, info.usuario.contrasena);
 
       if (!esValido)
         return res.status(401).json({
@@ -185,8 +181,8 @@ class Controlador_Usuario {
         negocioActivo: info.negocioActivo,
       };
 
-      const token = servs.jwt_accessToken(datos);
-      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+      const token = ServiciosGenerales.jwt_accessToken(datos);
+      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
 
       res
         .cookie("token_de_acceso", token, atConfigs)
@@ -396,7 +392,7 @@ class Controlador_Usuario {
         info.negocioActivo = null;
       }
 
-      const JWToken = servs.jwt_accessToken({
+      const JWToken = ServiciosGenerales.jwt_accessToken({
         id: ref.id,
         usuario: usuario,
         correo: correo,
@@ -404,7 +400,7 @@ class Controlador_Usuario {
         negocioId: info.negocioId,
         negocioActivo: info.negocioActivo,
       });
-      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
 
       return res
         .cookie("token_de_acceso", JWToken, atConfigs)
@@ -431,7 +427,7 @@ class Controlador_Usuario {
             "El usuario con el correo proporcionado no existe en la base de datos.",
         });
 
-      const token_verificacion = crypto.randomBytes(32).toString("hex");
+      const token_verificacion = randomBytes(32).toString("hex");
 
       const tramiteId =
         await this.#modeloTramitesPendietes.crearTramitePendienteContrasena(
@@ -441,7 +437,7 @@ class Controlador_Usuario {
         );
 
       const mailOptions = {
-        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        from: smtp,
         to: correo,
         subject: "Confirma el cambio de contraseña",
         html: this.#emails.verificacionCambioContrasena(
@@ -497,10 +493,7 @@ class Controlador_Usuario {
       await this.#modeloTramitesPendietes.tramiteConcluido(tramite);
 
       await this.#modeloUsuario.patchUsuario(usuario_id, {
-        contrasena: await bcrypt.hash(
-          validacion.datos.contrasena,
-          hashSaltRounds
-        ),
+        contrasena: await hash(validacion.datos.contrasena, hashSaltRounds),
       });
 
       res.status(200).json({
@@ -516,4 +509,4 @@ class Controlador_Usuario {
   };
 }
 
-module.exports = Controlador_Usuario;
+export default Controlador_Usuario;

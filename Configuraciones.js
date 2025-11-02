@@ -1,7 +1,10 @@
-require("dotenv").config();
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import admin from "firebase-admin";
 
-const nodemailer = require("nodemailer");
-const admin = require("firebase-admin");
+dotenv.config();
+
+const entorno = process.env.CURRENT_ENV;
 
 admin.initializeApp({
   credential: admin.credential.cert(
@@ -14,28 +17,30 @@ const bucket = admin.storage().bucket();
 
 const db = admin.firestore();
 
-const stripe = require("stripe")(process.env.TEST_SECRET_KEY);
+const stripeModule = await import("stripe");
+const stripe = stripeModule.default(process.env.TEST_SECRET_KEY);
+const webhook = process.env.TEST_WH_SECRET;
 
-const hashSaltRounds = process.env.CURRENT_ENV === "produccion" ? 15 : 3;
+const hashSaltRounds = entorno === "produccion" ? 15 : 3;
 
 const jwtSecreta =
-  process.env.CURRENT_ENV === "produccion"
+  entorno === "produccion"
     ? process.env.JWT_SECRET_KEY_P
-    : process.env.CURRENT_ENV === "test"
+    : entorno === "test"
     ? process.env.JWT_SECRET_KEY_T
     : process.env.JWT_SECRET_KEY_D;
 
 var front_URL =
-  process.env.CURRENT_ENV === "produccion"
+  entorno === "produccion"
     ? JSON.parse(process.env.FRONTEND_URL_P)
-    : process.env.CURRENT_ENV === "test"
+    : entorno === "test"
     ? JSON.parse(process.env.FRONTEND_URL_T)
     : JSON.parse(process.env.FRONTEND_URL_D);
 
 var back_URL =
-  process.env.CURRENT_ENV === "produccion"
+  entorno === "produccion"
     ? JSON.parse(process.env.BACKEND_URL_P)
-    : process.env.CURRENT_ENV === "test"
+    : entorno === "test"
     ? JSON.parse(process.env.BACKEND_URL_T)
     : JSON.parse(process.env.BACKEND_URL_D);
 
@@ -43,6 +48,8 @@ const corsConfigs = {
   origin: front_URL,
   credentials: true,
 };
+
+const smtp = process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN;
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -60,7 +67,7 @@ const pricesIdRestaurante = JSON.parse(process.env.STRIPE_RESTAURANTE_PRICES);
 front_URL = front_URL[0];
 back_URL = back_URL[0];
 
-module.exports = {
+export {
   admin,
   db,
   bucket,
@@ -73,4 +80,7 @@ module.exports = {
   transporter,
   pricesIdAmbulante,
   pricesIdRestaurante,
+  webhook,
+  smtp,
+  entorno,
 };

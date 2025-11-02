@@ -1,11 +1,11 @@
-const dayjs = require("dayjs");
-const cron = require("node-cron");
+import dayjs from "dayjs";
+import cron from "node-cron";
 
-const { db, admin } = require("../../Configuraciones");
+import { db, admin } from "../../Configuraciones.js";
 
-const servs = require("../Services/ServiciosGenerales");
+import servs from "../Services/ServiciosGenerales.js";
 
-class suscripcionJobs {
+class SuscripcionJobs {
   constructor() {
     this.jobs = [];
   }
@@ -194,4 +194,4 @@ class suscripcionJobs {
   }
 }
 
-module.exports = suscripcionJobs;
+export default SuscripcionJobs;

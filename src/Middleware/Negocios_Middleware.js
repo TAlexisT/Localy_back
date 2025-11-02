@@ -1,7 +1,7 @@
-const Negocios_Modelo = require("../db/Negocios");
-const multer = require("multer");
+import Negocios_Modelo from "../db/Negocios.js";
+import multer from "multer";
 
-const servs = require("../Services/ServiciosGenerales");
+import servs from "../Services/ServiciosGenerales.js";
 
 class Negocios_Middleware {
   /**
@@ -102,4 +102,4 @@ class Negocios_Middleware {
   });
 }
 
-module.exports = Negocios_Middleware;
+export default Negocios_Middleware;

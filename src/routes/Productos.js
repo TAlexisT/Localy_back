@@ -1,14 +1,14 @@
-var express = require("express");
+import express from "express";
 var router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const ControladorProductos = require("../Controllers/Productos");
-const Productos_Middleware = require("../Middleware/Productos_Middleware");
-const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
-const Proteccion_Server = require("../Middleware/ProteccionServer");
+import ControladorProductos from "../Controllers/Productos.js";
+import Productos_Middleware from "../Middleware/Productos_Middleware.js";
+import MiddlewaresGenerales from "../Middleware/MiddlewaresGenerales.js";
+import Proteccion_Server from "../Middleware/ProteccionServer.js";
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -60,4 +60,4 @@ router.delete(
 
 router.use(Proteccion_Server.multerError);
 
-module.exports = router;
+export default router;

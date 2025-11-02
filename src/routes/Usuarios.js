@@ -1,13 +1,13 @@
-var express = require("express");
-var router = express.Router();
+import express from "express";
+const router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Usuario = require("../Controllers/Usuarios");
-const Usuarios_Middleware = require("../Middleware/Usuarios_Middleware");
-const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
+import Controlador_Usuario from "../Controllers/Usuarios.js";
+import Usuarios_Middleware from "../Middleware/Usuarios_Middleware.js";
+import MiddlewaresGenerales from "../Middleware/MiddlewaresGenerales.js";
 
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
@@ -65,4 +65,4 @@ router.delete(
 
 router.get("/verificar-email", controladorUsuario.verificarEmail);
 
-module.exports = router;
+export default router;

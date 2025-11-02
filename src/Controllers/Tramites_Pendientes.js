@@ -1,7 +1,7 @@
-const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Modelo_Usuarios = require("../db/Usuarios");
+import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
+import Modelo_Usuarios from "../db/Usuarios.js";
 
-const servs = require("../Services/ServiciosGenerales");
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
 
 class Controlador_Tramites_Pendientes {
   /**
@@ -65,8 +65,8 @@ class Controlador_Tramites_Pendientes {
         negocioActivo: true,
       };
 
-      const token = servs.jwt_accessToken(datos);
-      const atConfigs = servs.cookieParser_AccessTokenConfigs();
+      const token = ServiciosGenerales.jwt_accessToken(datos);
+      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
 
       res.cookie("token_de_acceso", token, atConfigs).status(200).json({
         exito: true,
@@ -84,4 +84,4 @@ class Controlador_Tramites_Pendientes {
   };
 }
 
-module.exports = Controlador_Tramites_Pendientes;
+export default Controlador_Tramites_Pendientes;

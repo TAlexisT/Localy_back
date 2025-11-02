@@ -1,6 +1,6 @@
-const Negocios_Modelo = require("../db/Negocios");
+import Negocios_Modelo from "../db/Negocios.js";
 
-const servs = require("../Services/ServiciosGenerales");
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
 
 class Productos_Middleware {
   /**
@@ -19,11 +19,11 @@ class Productos_Middleware {
     const acceso = req.cookies.token_de_acceso;
     if (!acceso)
       return res.status(401).json({ exito: false, mensaje: "No autorizado." });
-    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    const jwtExtraccion = ServiciosGenerales.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     req.usuario = jwtExtraccion.datos;
     next();
   };
 }
 
-module.exports = Productos_Middleware;
+export default Productos_Middleware;

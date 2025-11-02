@@ -1,7 +1,7 @@
-const Modelo_Negocio = require("../db/Negocios");
-const servs = require("./ServiciosGenerales");
+import Modelo_Negocio from "../db/Negocios.js";
+import servs from "./ServiciosGenerales.js";
 
-const { bucket } = require("../../Configuraciones");
+import { bucket } from "../../Configuraciones.js";
 
 class ServiciosNegocios {
   /**
@@ -299,4 +299,4 @@ class ServiciosNegocios {
   };
 }
 
-module.exports = ServiciosNegocios;
+export default ServiciosNegocios;

@@ -1,23 +1,24 @@
-const jwt = require("jsonwebtoken");
+import jsonwebtoken from "jsonwebtoken";
+const { sign, verify } = jsonwebtoken;
 
-const {
+import {
   jwtSecreta,
   bucket,
   pricesIdAmbulante,
   pricesIdRestaurante,
-} = require("../../Configuraciones");
-const { string } = require("joi");
+  entorno,
+} from "../../Configuraciones.js";
 
 class ServiciosGenerales {
   static jwt_accessToken(datos = {}) {
-    return jwt.sign(datos, jwtSecreta, {
+    return sign(datos, jwtSecreta, {
       expiresIn: "1h",
     });
   }
 
-  static jwt_dataExtraction(token = string) {
+  static jwt_dataExtraction(token) {
     try {
-      const datos = jwt.verify(token, jwtSecreta);
+      const datos = verify(token, jwtSecreta);
       return { exito: true, datos: datos };
     } catch (err) {
       console.error(
@@ -31,8 +32,8 @@ class ServiciosGenerales {
   static cookieParser_AccessTokenConfigs() {
     return {
       httpOnly: true, // Accesible solo en el servidor
-      secure: process.env.CURRENT_ENV === "produccion", // Se activará dependiendo de la variable de entorno "CURRENT_ENV"
-      sameSite: process.env.CURRENT_ENV === "produccion" ? "none" : "lax", // Restringe la cookie solo a nuestro dominio
+      secure: entorno === "produccion", // Se activará dependiendo de la variable de entorno "entorno"
+      sameSite: entorno === "produccion" ? "none" : "lax", // Restringe la cookie solo a nuestro dominio
       maxAge: 1000 * 60 * 60, // Al generarse, solo tiene una validez en un lapso de una hora
     };
   }
@@ -41,7 +42,7 @@ class ServiciosGenerales {
     if (!token)
       return { exito: false, error: "El usuario no ha iniciado sesión" };
 
-    const datos = jwt.verify(token, process.env.JWT_SECRET_KEY_D);
+    const datos = verify(token, process.env.JWT_SECRET_KEY_D);
 
     if (datos.id != idUsuario)
       return {
@@ -86,4 +87,4 @@ class ServiciosGenerales {
   }
 }
 
-module.exports = ServiciosGenerales;
+export default ServiciosGenerales;

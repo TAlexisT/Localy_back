@@ -1,15 +1,15 @@
-const Modelo_Producto = require("../db/Productos");
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Usuario = require("../db/Usuarios");
-const Servicios_Productos = require("../Services/ServiciosProductos");
-const Servicios_Generales = require("../Services/ServiciosGenerales");
+import Modelo_Producto from "../db/Productos.js";
+import Modelo_Negocio from "../db/Negocios.js";
+import Modelo_Usuario from "../db/Usuarios.js";
+import Servicios_Productos from "../Services/ServiciosProductos.js";
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
 
-const {
+import {
   esquemaProductoUpload,
   paginacionFiltros,
   paginacionParams,
-} = require("../Schemas/Productos");
-const { validador } = require("../Validators/Validador");
+} from "../Schemas/Productos.js";
+import { validador } from "../Validators/Validador.js";
 
 class Controlador_Productos {
   /**
@@ -118,9 +118,7 @@ class Controlador_Productos {
       const { creado, actualizado, random_key, ...demasDatos } =
         productoSnap.data();
 
-      demasDatos.imagen_URL = Servicios_Generales.soloURL(
-        demasDatos.imagen_URL
-      );
+      demasDatos.imagen_URL = ServiciosGenerales.soloURL(demasDatos.imagen_URL);
       demasDatos["esFavorito"] = esFavorito;
 
       return res.status(200).json({ exito: true, datos: demasDatos });
@@ -158,7 +156,7 @@ class Controlador_Productos {
 
       const datos = productosSnap.docs.map((doc) => {
         var { nombre, en_oferta, imagen_URL, precio } = doc.data();
-        imagen_URL = Servicios_Generales.soloURL(imagen_URL);
+        imagen_URL = ServiciosGenerales.soloURL(imagen_URL);
 
         return {
           producto_id: doc.id,
@@ -266,7 +264,7 @@ class Controlador_Productos {
         const productoDatos = productoSnap.data();
 
         if (productoDatos.imagen_URL?.ruta)
-          await Servicios_Generales.borrarRuta(
+          await ServiciosGenerales.borrarRuta(
             productoDatos.imagen_URL?.ruta,
             false
           );
@@ -301,7 +299,7 @@ class Controlador_Productos {
       const productoDatos = productoSnap.data();
 
       if (productoDatos.imagen_URL?.ruta)
-        await Servicios_Generales.borrarRuta(
+        await ServiciosGenerales.borrarRuta(
           productoDatos.imagen_URL?.ruta,
           false
         );
@@ -319,4 +317,4 @@ class Controlador_Productos {
   };
 }
 
-module.exports = Controlador_Productos;
+export default Controlador_Productos;

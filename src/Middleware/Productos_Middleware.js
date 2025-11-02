@@ -1,7 +1,7 @@
-const Negocios_Modelo = require("../db/Negocios");
-const multer = require("multer");
+import Negocios_Modelo from "../db/Negocios.js";
+import multer, { memoryStorage } from "multer";
 
-const servs = require("../Services/ServiciosGenerales");
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
 
 class Productos_Middleware {
   /**
@@ -20,7 +20,7 @@ class Productos_Middleware {
     const acceso = req.cookies.token_de_acceso;
     if (!acceso)
       return res.status(401).json({ exito: false, mensaje: "No autorizado." });
-    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    const jwtExtraccion = ServiciosGenerales.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     req.usuario = jwtExtraccion.datos;
     next();
@@ -30,14 +30,14 @@ class Productos_Middleware {
     const acceso = req.cookies.token_de_acceso;
     if (!acceso) return next();
 
-    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    const jwtExtraccion = ServiciosGenerales.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     req.usuario = jwtExtraccion.datos;
     next();
   };
 
   productoImagen = multer({
-    storage: multer.memoryStorage(),
+    storage: memoryStorage(),
     limits: {
       fileSize: 2 * 1024 * 1024, // 2 MB
     },
@@ -52,4 +52,4 @@ class Productos_Middleware {
   });
 }
 
-module.exports = Productos_Middleware;
+export default Productos_Middleware;

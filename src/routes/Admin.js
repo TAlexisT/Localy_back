@@ -1,12 +1,12 @@
-var express = require("express");
+import express from "express";
 var router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
-const Controlador_Admin = require("../Controllers/Admin");
+import MiddlewaresGenerales from "../Middleware/MiddlewaresGenerales.js";
+import Controlador_Admin from "../Controllers/Admin.js";
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -27,4 +27,4 @@ router.get(
   controladorAdmin.dispararSubscripcionJobs
 );
 
-module.exports = router;
+export default router;

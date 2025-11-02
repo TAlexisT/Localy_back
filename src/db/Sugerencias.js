@@ -1,4 +1,4 @@
-const { admin, db } = require("../../Configuraciones");
+import { admin, db } from "../../Configuraciones.js";
 
 class Sugerencias {
   async crearSugerencia(
@@ -47,4 +47,4 @@ class Sugerencias {
   }
 }
 
-module.exports = Sugerencias;
+export default Sugerencias;

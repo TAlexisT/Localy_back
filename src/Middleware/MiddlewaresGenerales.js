@@ -1,5 +1,5 @@
-const servs = require("../Services/ServiciosGenerales");
-const Negocios_Modelo = require("../db/Negocios");
+import ServiciosGenerales from "../Services/ServiciosGenerales.js";
+import Negocios_Modelo from "../db/Negocios.js";
 
 class MiddlewaresGenerales {
   /**
@@ -18,7 +18,7 @@ class MiddlewaresGenerales {
     const acceso = req.cookies.token_de_acceso;
     if (!acceso)
       return res.status(401).json({ exito: false, mensaje: "No autorizado." });
-    const jwtExtraccion = servs.jwt_dataExtraction(acceso);
+    const jwtExtraccion = ServiciosGenerales.jwt_dataExtraction(acceso);
     if (!jwtExtraccion.exito) return res.status(401).json(jwtExtraccion);
     if (jwtExtraccion.datos.tipo !== "admin")
       return res
@@ -66,4 +66,4 @@ class MiddlewaresGenerales {
   };
 }
 
-module.exports = MiddlewaresGenerales;
+export default MiddlewaresGenerales;

@@ -1,4 +1,4 @@
-const SubscripcionJobs = require("../jobs/GestionarSuscripcionJobs");
+import SubscripcionJobs from "../jobs/GestionarSuscripcionJobs.js";
 
 class Controlador_Admin {
   /**
@@ -31,4 +31,4 @@ class Controlador_Admin {
   };
 }
 
-module.exports = Controlador_Admin;
+export default Controlador_Admin;

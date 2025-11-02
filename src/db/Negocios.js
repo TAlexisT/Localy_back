@@ -1,5 +1,4 @@
-const { number, string } = require("joi");
-const { admin, db } = require("../../Configuraciones");
+import { admin, db } from "../../Configuraciones.js";
 
 class Modelo_Negocio {
   /**
@@ -202,4 +201,4 @@ class Modelo_Negocio {
   }
 }
 
-module.exports = Modelo_Negocio;
+export default Modelo_Negocio;

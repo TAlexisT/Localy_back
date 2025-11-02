@@ -1,28 +1,29 @@
-const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../ThirdParty/Stripe");
-const Emails_ThirdParty = require("../ThirdParty/Emails");
-const Servicios_Negocios = require("../Services/ServiciosNegocios");
-const servs = require("../Services/ServiciosGenerales");
+import Modelo_Usuario from "../db/Usuarios.js";
+import Modelo_Negocio from "../db/Negocios.js";
+import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
+import Interaccion_Stripe from "../ThirdParty/Stripe.js";
+import Emails_ThirdParty from "../ThirdParty/Emails.js";
+import Servicios_Negocios from "../Services/ServiciosNegocios.js";
+import servs from "../Services/ServiciosGenerales.js";
 
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
-const {
+import {
   esquemaPropietario,
   esquemaNegocio,
   paginacionFiltros,
   paginacionParams,
   renovacion,
-} = require("../Schemas/Negocios");
-const { validador } = require("../Validators/Validador");
+} from "../Schemas/Negocios.js";
+import { validador } from "../Validators/Validador.js";
 
-const {
+import {
   front_URL,
   hashSaltRounds,
   transporter,
-} = require("../../Configuraciones");
+  smtp,
+} from "../../Configuraciones.js";
 
 class Controlador_Negocio {
   /**
@@ -309,7 +310,7 @@ class Controlador_Negocio {
       );
 
       const mailOptions = {
-        from: process.env.SMTP_USUARIO || process.env.SMTP_ORIGEN,
+        from: smtp,
         to: correo,
         subject: "Confirma tu correo en Localy MX",
         html: this.#emails.verificacionEmail(usuario, session.url),
@@ -451,4 +452,4 @@ class Controlador_Negocio {
   };
 }
 
-module.exports = Controlador_Negocio;
+export default Controlador_Negocio;

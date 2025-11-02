@@ -1,4 +1,4 @@
-const joi = require("joi");
+import joi from "joi";
 
 const esquemaUsuario = joi.object({
   usuario: joi
@@ -130,7 +130,7 @@ const cambioContrasena = joi.object({
     }),
 });
 
-module.exports = {
+export {
   esquemaUsuario,
   favoritoTipo,
   crearFavorito,

@@ -1,11 +1,11 @@
-var express = require("express");
+import express from "express";
 var router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Tramites_Pendientes = require("../Controllers/Tramites_Pendientes");
+import Controlador_Tramites_Pendientes from "../Controllers/Tramites_Pendientes.js";
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -21,4 +21,4 @@ const controladorTramitesPendientes = new Controlador_Tramites_Pendientes();
 
 router.get("/:id", controladorTramitesPendientes.obtenerTramite);
 
-module.exports = router;
+export default router;

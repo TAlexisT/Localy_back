@@ -1,4 +1,4 @@
-const joi = require("joi");
+import joi from "joi";
 
 const esquemaProductoUpload = joi.object({
   nombre: joi.string().min(1).max(100).required().messages({
@@ -63,4 +63,4 @@ const paginacionFiltros = joi.object({
     }),
 });
 
-module.exports = { esquemaProductoUpload, paginacionFiltros, paginacionParams };
+export { esquemaProductoUpload, paginacionFiltros, paginacionParams };

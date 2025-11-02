@@ -1,20 +1,20 @@
-const functions = require("firebase-functions");
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const cors = require("cors");
+import functions from "firebase-functions";
+import express, { json } from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
-const { corsConfigs } = require("./Configuraciones");
+import { corsConfigs } from "./Configuraciones.js";
 
-var usuariosRutas = require("./src/routes/Usuarios");
-var negociosRutas = require("./src/routes/Negocios");
-var sugerenciasRutas = require("./src/routes/Sugerencias");
-var productosRutas = require("./src/routes/Productos");
-var tramitesRutas = require("./src/routes/Tramites");
-var stripeRutas = require("./src/routes/Stripe");
-var adminRutas = require("./src/routes/Admin");
+import usuariosRutas from "./src/routes/Usuarios.js";
+import negociosRutas from "./src/routes/Negocios.js";
+import sugerenciasRutas from "./src/routes/Sugerencias.js";
+import productosRutas from "./src/routes/Productos.js";
+import tramitesRutas from "./src/routes/Tramites.js";
+import stripeRutas from "./src/routes/Stripe.js";
+import adminRutas from "./src/routes/Admin.js";
 
-const ProteccionServer = require("./src/Middleware/ProteccionServer");
-const SuscripcionJobs = require("./src/jobs/GestionarSuscripcionJobs");
+import proteccionServer from "./src/Middleware/ProteccionServer.js";
+import SuscripcionJobs from "./src/jobs/GestionarSuscripcionJobs.js";
 
 const suscripcionJobs = new SuscripcionJobs();
 suscripcionJobs.init();
@@ -24,14 +24,14 @@ const app = express();
 /**
  * ¡¡Puerto en el cual se ejecutará el server!!
  */
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 /**
  * Middleware, por el cual pasarán las peticiones entrantes al servidor.
  */
 app.use(cors(corsConfigs));
 app.use(cookieParser());
-app.use(ProteccionServer.tasaMaxima());
+app.use(proteccionServer.tasaMaxima());
 
 /**
  * Prefijo para los correspondientes endpoints
@@ -40,7 +40,7 @@ app.use("/api/stripe", stripeRutas);
 
 // Como recordatorio, Stripe se comunicará a través de solicitudes "raw",
 // por lo que el modificador json no debe aplicarse a las rutas de Stripe.
-app.use(express.json());
+app.use(json());
 
 app.use("/api/usuarios", usuariosRutas);
 app.use("/api/negocios", negociosRutas);

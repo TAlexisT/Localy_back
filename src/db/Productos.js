@@ -1,5 +1,4 @@
-const { number, string } = require("joi");
-const { admin, db } = require("../../Configuraciones");
+import { admin, db } from "../../Configuraciones.js";
 
 class Productos {
   async crearProducto(
@@ -96,4 +95,4 @@ class Productos {
   }
 }
 
-module.exports = Productos;
+export default Productos;

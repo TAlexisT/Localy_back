@@ -1,11 +1,11 @@
-var express = require("express");
-var   router = express.Router();
+import express from "express";
+var router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Stripe = require("../Controllers/Stripe");
+import Controlador_Stripe from "../Controllers/Stripe.js";
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
  */
@@ -25,4 +25,4 @@ router.post(
   controladorStripe.webhookBase
 );
 
-module.exports = router;
+export default router;

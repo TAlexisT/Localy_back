@@ -1,4 +1,4 @@
-const joi = require("joi");
+import joi from "joi";
 
 const esquemaNegocio = joi.object({
   nombre: joi.string().min(1).max(100).required(),
@@ -263,7 +263,7 @@ const renovacion = joi.object({
   }),
 });
 
-module.exports = {
+export {
   esquemaNegocio,
   esquemaPropietario,
   paginacionParams,

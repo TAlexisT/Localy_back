@@ -1,4 +1,4 @@
-const { admin, db, back_URL } = require("../../Configuraciones");
+import { admin, db } from "../../Configuraciones.js";
 
 class Modelo_Usuario {
   #coleccion;
@@ -56,12 +56,10 @@ class Modelo_Usuario {
   }
 
   async patchUsuario(usuarioId, datos) {
-    await this.#coleccion
-      .doc(usuarioId)
-      .update({
-        actualizado: admin.firestore.FieldValue.serverTimestamp(),
-        ...datos,
-      });
+    await this.#coleccion.doc(usuarioId).update({
+      actualizado: admin.firestore.FieldValue.serverTimestamp(),
+      ...datos,
+    });
   }
 
   async borrarFavorito(usuarioId, favoritoId, esNegocio = true) {
@@ -85,4 +83,4 @@ class Modelo_Usuario {
   }
 }
 
-module.exports = Modelo_Usuario;
+export default Modelo_Usuario;

@@ -1,5 +1,5 @@
-const rateLimit = require("express-rate-limit");
-const multer = require("multer");
+import rateLimit from "express-rate-limit";
+import multer from "multer";
 
 class ProteccionServer {
   tasaMaxima = () => {
@@ -33,4 +33,4 @@ class ProteccionServer {
   };
 }
 
-module.exports = new ProteccionServer();
+export default new ProteccionServer();

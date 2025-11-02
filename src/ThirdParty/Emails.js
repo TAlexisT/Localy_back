@@ -239,4 +239,4 @@ class Emails {
   }
 }
 
-module.exports = Emails;
+export default Emails;

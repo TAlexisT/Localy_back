@@ -1,13 +1,13 @@
-var express = require("express");
+import express from "express";
 var router = express.Router();
 
 /**
  * {Inicio de Sección: Llamada a clases subyacentes}
  *  Estas clases serán utilizadas por parte del midleware para procesar las peticiones entrantes
  */
-const Controlador_Sugerencia = require("../Controllers/Sugerencias");
-const Sugerencias_Middleware = require("../Middleware/Sugerencias_Middleware");
-const MiddlewaresGenerales = require("../Middleware/MiddlewaresGenerales");
+import Controlador_Sugerencia from "../Controllers/Sugerencias.js";
+import Sugerencias_Middleware from "../Middleware/Sugerencias_Middleware.js";
+import MiddlewaresGenerales from "../Middleware/MiddlewaresGenerales.js";
 
 /**
  * {Fin de Sección: Llamada a clases subyacentes}
@@ -49,4 +49,4 @@ router.get(
   controladorSugerencias.mostrarSugerenciasNegocio
 );
 
-module.exports = router;
+export default router;

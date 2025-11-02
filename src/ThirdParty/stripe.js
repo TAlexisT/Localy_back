@@ -1,5 +1,4 @@
-const { stripe } = require("../../Configuraciones");
-require("dotenv").config();
+import { stripe, webhook } from "../../Configuraciones.js";
 
 class Interaccion_Stripe {
   async crearSession(
@@ -32,12 +31,8 @@ class Interaccion_Stripe {
   }
 
   eventConstructor = (body, sig) => {
-    return stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.TEST_WH_SECRET
-    );
+    return stripe.webhooks.constructEvent(body, sig, webhook);
   };
 }
 
-module.exports = Interaccion_Stripe;
+export default Interaccion_Stripe;

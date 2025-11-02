@@ -1,8 +1,8 @@
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Sugerencia = require("../db/Sugerencias");
+import Modelo_Negocio from "../db/Negocios.js";
+import Modelo_Sugerencia from "../db/Sugerencias.js";
 
-const { subirSugerencia } = require("../Schemas/Sugerencias");
-const { validador } = require("../Validators/Validador");
+import { subirSugerencia } from "../Schemas/Sugerencias.js";
+import { validador } from "../Validators/Validador.js";
 
 class Controlador_Sugerencia {
   /**
@@ -115,4 +115,4 @@ class Controlador_Sugerencia {
   };
 }
 
-module.exports = Controlador_Sugerencia;
+export default Controlador_Sugerencia;

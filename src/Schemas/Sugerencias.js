@@ -1,4 +1,4 @@
-const joi = require("joi");
+import joi from "joi";
 
 const subirSugerencia = joi.object({
   titulo: joi.string().min(1).max(100).required().messages({
@@ -19,4 +19,4 @@ const subirSugerencia = joi.object({
   // }),
 });
 
-module.exports = { subirSugerencia };
+export { subirSugerencia };
