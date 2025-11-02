@@ -1,5 +1,4 @@
-const { string } = require("joi");
-const { admin, db } = require("../../Configuraciones");
+import { admin, db } from "../../Configuraciones.js";
 
 class Modelo_Tramites_Pendientes {
   async crearTramitePendienteNegocios(
@@ -117,7 +116,7 @@ class Modelo_Tramites_Pendientes {
 
   // Este metodo funciona para los tramites pendientes, no para los tramites que ya se encuentran en proceso
   // Los tramites que ya se encuentran en proceso no contienen el nombre del usuario...
-  async existeTramiteUsuario(usuario = string) {
+  async existeTramiteUsuario(usuario) {
     const enTramite = await db
       .collection("tramites_pendientes")
       .where("usuario", "==", usuario)
@@ -128,4 +127,4 @@ class Modelo_Tramites_Pendientes {
   }
 }
 
-module.exports = Modelo_Tramites_Pendientes;
+export default Modelo_Tramites_Pendientes;

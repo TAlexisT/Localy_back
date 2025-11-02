@@ -1,8 +1,8 @@
-const Modelo_Usuario = require("../db/Usuarios");
-const Modelo_Negocio = require("../db/Negocios");
-const Modelo_Productos = require("../db/Productos");
-const Modelo_Tramites_Pendientes = require("../db/Tramites_Pendientes");
-const Interaccion_Stripe = require("../ThirdParty/Stripe");
+import Modelo_Usuario from "../db/Usuarios.js";
+import Modelo_Negocio from "../db/Negocios.js";
+import Modelo_Productos from "../db/Productos.js";
+import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
+import Interaccion_Stripe from "../ThirdParty/Stripe.js";
 
 class Controlador_Stripe {
   /**
@@ -142,4 +142,4 @@ class Controlador_Stripe {
   };
 }
 
-module.exports = Controlador_Stripe;
+export default Controlador_Stripe;
