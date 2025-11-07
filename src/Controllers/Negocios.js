@@ -136,7 +136,7 @@ class Controlador_Negocio {
         {
           nombre,
           descripcion,
-          borrar_logo,
+          borrar_logo: borrar_logo === "true",
           ubicacion: JSON.parse(ubicacion),
           horario: JSON.parse(horario),
           redes: JSON.parse(redes),

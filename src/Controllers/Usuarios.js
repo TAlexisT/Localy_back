@@ -202,8 +202,10 @@ class Controlador_Usuario {
   };
 
   logout = async (req, res) => {
+    const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
+
     res
-      .clearCookie("token_de_acceso")
+      .clearCookie("token_de_acceso", atConfigs)
       .json({ exito: true, mensaje: "Sesión cerrada" });
   };
 

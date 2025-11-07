@@ -1,4 +1,3 @@
-import functions from "firebase-functions";
 import express, { json } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";

@@ -1,6 +1,6 @@
-import Negocios_Modelo from "../db/Negocios.js";
 import multer from "multer";
 
+import Negocios_Modelo from "../db/Negocios.js";
 import servs from "../Services/ServiciosGenerales.js";
 
 class Negocios_Middleware {

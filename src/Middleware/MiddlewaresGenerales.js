@@ -1,3 +1,4 @@
+import busboy from "busboy";
 import ServiciosGenerales from "../Services/ServiciosGenerales.js";
 import Negocios_Modelo from "../db/Negocios.js";
 
@@ -63,6 +64,99 @@ class MiddlewaresGenerales {
         mensaje: "Error del servidor.",
       });
     }
+  };
+
+  // ✅ Configuración optimizada para Firebase Functions
+  manejadorArchivos = async (req, res, next) => {
+    if (!req.headers["content-type"]?.includes("multipart/form-data")) {
+      return next();
+    }
+
+    console.log("🛠️ Manual Form Processor - Starting...");
+
+    // Verificar que tenemos el buffer
+    if (!req.body || !Buffer.isBuffer(req.body)) {
+      console.log("❌ No buffer found in request");
+      return next(); // Continuar sin procesar
+    }
+
+    console.log(`📦 Processing buffer of ${req.body.length} bytes`);
+
+    const bb = busboy({
+      headers: {
+        "content-type": req.headers["content-type"],
+        "content-length": req.headers["content-length"],
+      },
+      limits: {
+        fileSize: 2 * 1024 * 1024,
+        fields: 100,
+      },
+    });
+
+    const fields = {};
+    let fileBuffer = null;
+    let fileInfo = null;
+
+    bb.on("field", (name, value) => {
+      console.log(
+        `📋 Field [${name}]:`,
+        value.length > 100 ? value.substring(0, 100) + "..." : value
+      );
+      fields[name] = value;
+    });
+
+    bb.on("file", (name, file, info) => {
+      console.log(`📁 File [${name}]:`, info);
+      fileInfo = { name, info };
+
+      const chunks = [];
+      file.on("data", (chunk) => {
+        chunks.push(chunk);
+      });
+
+      file.on("end", () => {
+        fileBuffer = Buffer.concat(chunks);
+        console.log(`✅ File [${name}] processed: ${fileBuffer.length} bytes`);
+      });
+
+      file.on("error", (err) => {
+        console.error(`❌ File [${name}] error:`, err);
+      });
+    });
+
+    bb.on("close", () => {
+      console.log("✅ Manual form processing completed");
+      console.log("📊 Fields found:", Object.keys(fields));
+      console.log("📊 File received:", !!fileBuffer);
+
+      // Asignar los campos procesados al request
+      req.body = fields;
+
+      // Si hay archivo, asignarlo
+      if (fileBuffer && fileInfo) {
+        req.file = {
+          fieldname: fileInfo.name,
+          originalname: fileInfo.info.filename,
+          mimetype: fileInfo.info.mimeType,
+          buffer: fileBuffer,
+          size: fileBuffer.length,
+        };
+      }
+
+      next();
+    });
+
+    bb.on("error", (err) => {
+      console.error("❌ Busboy error:", err);
+      res.status(400).json({
+        mensaje: "Error procesando el formulario",
+        error: err.message,
+      });
+    });
+
+    // Escribir el buffer a busboy
+    bb.write(req.body);
+    bb.end();
   };
 }
 

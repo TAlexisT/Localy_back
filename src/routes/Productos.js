@@ -24,14 +24,12 @@ const middlewaresGenerales = new MiddlewaresGenerales();
  * {Fin de Sección: Inisialización}
  */
 
-router.get(
-  "/obtener-producto/:id",
-  productosMiddleware.sesionUsuario,
-  controladorProductos.obtenerProducto
-);
-router.get(
-  "/obtener-productos/:negocio_id",
-  controladorProductos.obtenerProductosNegocio
+router.post(
+  "/crear/:negocio_id",
+  middlewaresGenerales.manejadorArchivos,
+  productosMiddleware.validarSesion,
+  middlewaresGenerales.validarUsuario,
+  controladorProductos.crearProducto
 );
 
 router.post("/mostrar", controladorProductos.paginacionProductos);
@@ -45,11 +43,23 @@ router.post(
 
 router.put(
   "/actualizar/:negocio_id/:id",
+  middlewaresGenerales.manejadorArchivos,
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  productosMiddleware.productoImagen.single("image"),
   controladorProductos.actualizarProducto
 );
+
+router.get(
+  "/obtener-producto/:id",
+  productosMiddleware.sesionUsuario,
+  controladorProductos.obtenerProducto
+);
+router.get(
+  "/obtener-productos/:negocio_id",
+  controladorProductos.obtenerProductosNegocio
+);
+
+router.post("/mostrar", controladorProductos.paginacionProductos);
 
 router.delete(
   "/eliminar/:negocio_id/:id",
