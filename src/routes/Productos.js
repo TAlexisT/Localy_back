@@ -26,24 +26,17 @@ const middlewaresGenerales = new MiddlewaresGenerales();
 
 router.post(
   "/crear/:negocio_id",
-  middlewaresGenerales.manejadorArchivos,
+  productosMiddleware.productoImagen.single("image"),
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
   controladorProductos.crearProducto
 );
 
 router.post("/mostrar", controladorProductos.paginacionProductos);
-router.post(
-  "/crear/:negocio_id",
-  productosMiddleware.validarSesion,
-  middlewaresGenerales.validarUsuario,
-  productosMiddleware.productoImagen.single("image"),
-  controladorProductos.crearProducto
-);
 
 router.put(
   "/actualizar/:negocio_id/:id",
-  middlewaresGenerales.manejadorArchivos,
+  productosMiddleware.productoImagen.single("image"),
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
   controladorProductos.actualizarProducto
