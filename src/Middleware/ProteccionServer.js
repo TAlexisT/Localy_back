@@ -13,6 +13,7 @@ class ProteccionServer {
       },
       standardHeaders: true, // Devuelve información de limitación en las cabeceras `RateLimit-*`
       legacyHeaders: false, // Deshabilita las cabeceras `X-RateLimit-*`
+      
     });
   };
 
