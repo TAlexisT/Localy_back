@@ -38,7 +38,7 @@ class MiddlewaresGenerales {
           .json({ exito: false, mensaje: "ID de negocio no proporcionado." });
 
       const negocio = await this.#modeloNegocio.negocioDeUsuario(
-        req.usuario.id
+        req.usuario.id,
       );
       if (
         negocio.empty ||
@@ -51,8 +51,8 @@ class MiddlewaresGenerales {
           mensaje: negocio.empty
             ? "No fue encontrado ningun negocio vinculado a la sesion del usuario."
             : negocio.docs[0].id !== negocio_id
-            ? "La sesion de usuario no es propietaria del negocio seleccionado (No tiene permisos de escritura)."
-            : "El negocio especificado NO se encuentra activo. Contacta a soporte en caso de dudas.",
+              ? "La sesion de usuario no es propietaria del negocio seleccionado (No tiene permisos de escritura)."
+              : "El negocio especificado NO se encuentra activo. Contacta a soporte en caso de dudas.",
         });
 
       req.negocio_id = negocio_id;
@@ -100,7 +100,7 @@ class MiddlewaresGenerales {
     bb.on("field", (name, value) => {
       console.log(
         `📋 Field [${name}]:`,
-        value.length > 100 ? value.substring(0, 100) + "..." : value
+        value.length > 100 ? value.substring(0, 100) + "..." : value,
       );
       fields[name] = value;
     });

@@ -9,12 +9,11 @@
     "express": "^5.1.0",
     "express-rate-limit": "^8.1.0",
     "firebase-admin": "^13.4.0",
-    "firebase-functions": "^6.6.0",
     "joi": "^18.0.1",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
-    "nodemailer": "^7.0.9",
+    "resend": "^6.4.2",
     "stripe": "^18.2.1"
   },
   "type": "module",

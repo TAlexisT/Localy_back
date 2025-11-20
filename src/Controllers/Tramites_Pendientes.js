@@ -1,7 +1,7 @@
 import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
 import Modelo_Usuarios from "../db/Usuarios.js";
-
 import ServiciosGenerales from "../Services/ServiciosGenerales.js";
+import { cookieParser_AccessTokenConfigs } from "../../Configuraciones.js"
 
 class Controlador_Tramites_Pendientes {
   /**
@@ -51,7 +51,7 @@ class Controlador_Tramites_Pendientes {
         });
 
       const usuarioSnap = await this.#modeloUsuario.obtenerUsuario(
-        datosTramite.usuario_id
+        datosTramite.usuario_id,
       );
 
       const datosUsuario = usuarioSnap.data();
@@ -66,7 +66,7 @@ class Controlador_Tramites_Pendientes {
       };
 
       const token = ServiciosGenerales.jwt_accessToken(datos);
-      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
+      const atConfigs = cookieParser_AccessTokenConfigs;
 
       res.cookie("token_de_acceso", token, atConfigs).status(200).json({
         exito: true,

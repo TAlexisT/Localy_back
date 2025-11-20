@@ -21,8 +21,8 @@ import { validador } from "../Validators/Validador.js";
 import {
   front_URL,
   hashSaltRounds,
-  transporter,
-  smtp,
+  resend,
+  origin,
 } from "../../Configuraciones.js";
 
 class Controlador_Negocio {
@@ -179,6 +179,18 @@ class Controlador_Negocio {
       // Limpiamos datos no deseados para la base de datos
       delete validacion.datos.borrar_logo;
       await this.#modeloNegocio.actualizarNegocio(negocio_id, validacion.datos);
+
+      const batchActualizarProductos = this.#modeloNegocio.batchActualizarProductos();
+
+      // Actualizamos el nombre del negocio en todos los productos asociados
+      const productosSnap =
+        await this.#modeloNegocio.obtenerProductosDeNegocio(negocio_id);
+      productosSnap.forEach((productoDoc) => {
+        batchActualizarProductos.update(productoDoc.ref, {
+          negocio_nombre: validacion.datos.nombre,
+        });
+      });
+
       res
         .status(200)
         .json({ exito: true, message: "Perfil guardado correctamente" });
@@ -255,7 +267,7 @@ class Controlador_Negocio {
       });
     } catch (error) {
       console.error("Error en paginación:", error);
-      res.status(500).json({ error: "Error del servidor" });
+      res.status(500).json({ exito: false, mensaje: "Error del servidor" });
     }
   };
 
@@ -310,13 +322,13 @@ class Controlador_Negocio {
       );
 
       const mailOptions = {
-        from: smtp,
+        from: origin,
         to: correo,
         subject: "Confirma tu correo en Localy MX",
         html: this.#emails.verificacionEmail(usuario, session.url),
       };
 
-      await transporter.sendMail(mailOptions);
+      await resend.emails.send(mailOptions);
 
       return res.status(202).json({
         exito: true,
@@ -328,8 +340,31 @@ class Controlador_Negocio {
         this.#modeloTramitesPendientes.tramiteConcluido(tramitePendienteRef.id);
       return res.status(500).json({
         exito: false,
-        error: "No se pudo concretar el tramite.",
+        mensaje: "No se pudo concretar el tramite.",
       });
+    }
+  };
+
+  negocioFacturacionPortal = async (req, res) => {
+    try {
+      const { negocio_id } = req.params;
+
+      const negocioSnap = await this.#modeloNegocio.obtenerNegocio(negocio_id);
+      if (!negocioSnap.exists)
+        return res.status(404).json({
+          exito: false,
+          mensaje: "El negocio que se referencio no fue encontrado.",
+        });
+
+      const negocioDatos = negocioSnap.data();
+
+      const session = await this.#interaccionStripe.facturacionPortal(
+        negocioDatos.stripe.customer_id
+      );
+      return res.status(200).json({ exito: true, datos: { url: session.url } });
+    } catch (err) {
+      console.error("Error al crear el portal de facturación:", err);
+      res.status(500).json({ exito: false, mensaje: "Error del servidor" });
     }
   };
 
@@ -385,7 +420,7 @@ class Controlador_Negocio {
       console.error("Error al renovar la subscripcion:", err);
       res
         .status(500)
-        .json({ exito: false, error: "Error al renovar la subscripcion" });
+        .json({ exito: false, mensaje: "Error al renovar la subscripcion" });
     }
   };
 

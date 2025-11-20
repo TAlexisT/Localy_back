@@ -1,13 +1,13 @@
 import { admin, db } from "../../Configuraciones.js";
 
-class Sugerencias {
+class Modelo_Sugerencias {
   async crearSugerencia(
     titulo,
     descripcion,
     negocioId,
     negocioNombre,
     propietarioCorreo,
-    propietarioNombre
+    propietarioNombre,
   ) {
     return db.collection("sugerencias").add({
       titulo,
@@ -47,4 +47,4 @@ class Sugerencias {
   }
 }
 
-export default Sugerencias;
+export default Modelo_Sugerencias;

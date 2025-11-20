@@ -10,7 +10,7 @@ class Productos {
     en_oferta,
     negocio_id,
     nombre_negocio,
-    negocio_ubicacion
+    negocio_ubicacion,
   ) {
     return db.collection("productos").add({
       nombre,
@@ -68,7 +68,7 @@ class Productos {
     porPrecio = false,
     orden = "desc",
     categoria = null,
-    precioRango = null
+    precioRango = null,
   ) {
     var consulta = db
       .collection("productos")

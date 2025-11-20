@@ -46,7 +46,7 @@ class Controlador_Productos {
 
     try {
       const negocioSnap = await this.#modeloNegocio.obtenerNegocio(
-        req.negocio_id
+        req.negocio_id,
       );
 
       const negocioDatos = negocioSnap.data();
@@ -61,14 +61,14 @@ class Controlador_Productos {
         en_oferta,
         req.negocio_id, // El objeto req.negocio_id es asignado por el middleware de validación de usuario y negocio
         negocioDatos.nombre,
-        negocioDatos.ubicacion
+        negocioDatos.ubicacion,
       );
 
       const estado = await this.#serviciosProducto.subirImagenProducto(
         req.file,
         productoId.id,
         req.negocio_id,
-        req.usuario.id
+        req.usuario.id,
       );
 
       // Actualizar el producto con la URL de la imagen subida
@@ -142,9 +142,8 @@ class Controlador_Productos {
         });
       }
 
-      const productosSnap = await this.#modeloProducto.obtenerProductosNegocio(
-        negocio_id
-      );
+      const productosSnap =
+        await this.#modeloProducto.obtenerProductosNegocio(negocio_id);
 
       if (productosSnap.empty) {
         return res.status(200).json({
@@ -186,7 +185,7 @@ class Controlador_Productos {
           cursor: req.body.cursor,
           direccion: req.body.direccion,
         },
-        paginacionParams
+        paginacionParams,
       );
 
       if (!pagParams.exito) return res.status(400).json(pagParams);
@@ -198,7 +197,7 @@ class Controlador_Productos {
           precio_orden: req.body.precio_orden,
           precio_rango: req.body.precio_rango,
         },
-        paginacionFiltros
+        paginacionFiltros,
       );
       if (!pagFiltros.exito) return res.status(400).json(pagParams);
 
@@ -215,7 +214,7 @@ class Controlador_Productos {
         general,
         categoria,
         precio_orden,
-        precio_rango
+        precio_rango,
       );
 
       return res.status(200).json({ exito: true, ...respuesta });
@@ -256,7 +255,7 @@ class Controlador_Productos {
         req.file,
         id,
         req.negocio_id,
-        req.usuario.id
+        req.usuario.id,
       );
 
       if (estado.exito) {
@@ -266,7 +265,7 @@ class Controlador_Productos {
         if (productoDatos.imagen_URL?.ruta)
           await ServiciosGenerales.borrarRuta(
             productoDatos.imagen_URL?.ruta,
-            false
+            false,
           );
 
         await this.#modeloProducto.patchProducto(id, {
@@ -301,7 +300,7 @@ class Controlador_Productos {
       if (productoDatos.imagen_URL?.ruta)
         await ServiciosGenerales.borrarRuta(
           productoDatos.imagen_URL?.ruta,
-          false
+          false,
         );
 
       await this.#modeloProducto.eliminarProducto(id);

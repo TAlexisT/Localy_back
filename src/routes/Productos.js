@@ -29,7 +29,7 @@ router.post(
   productosMiddleware.productoImagen.single("image"),
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorProductos.crearProducto
+  controladorProductos.crearProducto,
 );
 
 router.post("/mostrar", controladorProductos.paginacionProductos);
@@ -39,17 +39,17 @@ router.put(
   productosMiddleware.productoImagen.single("image"),
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorProductos.actualizarProducto
+  controladorProductos.actualizarProducto,
 );
 
 router.get(
   "/obtener-producto/:id",
   productosMiddleware.sesionUsuario,
-  controladorProductos.obtenerProducto
+  controladorProductos.obtenerProducto,
 );
 router.get(
   "/obtener-productos/:negocio_id",
-  controladorProductos.obtenerProductosNegocio
+  controladorProductos.obtenerProductosNegocio,
 );
 
 router.post("/mostrar", controladorProductos.paginacionProductos);
@@ -58,7 +58,7 @@ router.delete(
   "/eliminar/:negocio_id/:id",
   productosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorProductos.eliminarProducto
+  controladorProductos.eliminarProducto,
 );
 
 router.use(Proteccion_Server.multerError);

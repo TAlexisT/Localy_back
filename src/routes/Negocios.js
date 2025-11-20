@@ -34,6 +34,12 @@ router.get(
   middlewaresGenerales.validarAdministrador,
   controladorNegocio.obtenerCadaNegocio
 );
+router.get(
+  "/mostrar-facturacion-portal/:negocio_id",
+  middlewareNegocio.validarSesion,
+  middlewaresGenerales.validarUsuario,
+  controladorNegocio.negocioFacturacionPortal
+);
 
 router.put(
   "/perfil/:negocio_id",

@@ -6,7 +6,6 @@ import {
   bucket,
   pricesIdAmbulante,
   pricesIdRestaurante,
-  entorno,
 } from "../../Configuraciones.js";
 
 class ServiciosGenerales {
@@ -27,16 +26,6 @@ class ServiciosGenerales {
 
       return { exito: false, error: "El contenido del token es inexacto" };
     }
-  }
-
-  static cookieParser_AccessTokenConfigs() {
-    return {
-      httpOnly: true, // Accesible solo en el servidor
-      secure: entorno === "produccion", // Se activará dependiendo de la variable de entorno "entorno"
-      sameSite: entorno === "produccion" ? "none" : "lax", // Restringe la cookie solo a nuestro dominio
-      maxAge: 1000 * 60 * 60, // Al generarse, solo tiene una validez en un lapso de una hora
-      path: "/", // Nos aseguramos de que el alcance sea global
-    };
   }
 
   static accessTokenValidation(token, idUsuario) {

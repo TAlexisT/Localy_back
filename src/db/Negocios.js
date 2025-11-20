@@ -103,14 +103,14 @@ class Modelo_Negocio {
   async renovarSubscripcion(
     negocioId,
     price_id,
-    customerId,
+    customer_id,
     recurrente,
-    membresia
+    membresia,
   ) {
     await db.collection("negocios").doc(negocioId).update({
       activo: true,
       stripe: {
-        customerId,
+        customer_id,
         price_id,
         recurrente,
       },
@@ -120,10 +120,10 @@ class Modelo_Negocio {
     });
   }
 
-  async refrescarSubscripcion(customerId) {
+  async refrescarSubscripcion(customer_id) {
     const negocioSnap = await db
       .collection("negocios")
-      .where("stripe.customerId", "==", customerId)
+      .where("stripe.customer_id", "==", customer_id)
       .limit(1)
       .get();
     if (negocioSnap.empty) return;
@@ -135,10 +135,10 @@ class Modelo_Negocio {
     });
   }
 
-  async desactivarSubscripcion(customerId) {
+  async desactivarSubscripcion(customer_id) {
     const negocioSnap = await db
       .collection("negocios")
-      .where("stripe.customerId", "==", customerId)
+      .where("stripe.customer_id", "==", customer_id)
       .limit(1)
       .get();
     if (negocioSnap.empty) return;
@@ -156,7 +156,7 @@ class Modelo_Negocio {
     price_id,
     customer_id,
     recurrente = false,
-    membresia
+    membresia,
   ) {
     return await db.collection("negocios").add({
       usuarioId,

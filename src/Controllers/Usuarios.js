@@ -6,8 +6,6 @@ import Modelo_Negocio from "../db/Negocios.js";
 import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
 
 import Emails_ThirdParty from "../ThirdParty/Emails.js";
-
-import { smtp } from "../../Configuraciones.js";
 import {
   esquemaUsuario,
   favoritoTipo,
@@ -23,9 +21,11 @@ import servicios_negocio from "../Services/ServiciosNegocios.js";
 
 import {
   hashSaltRounds,
-  transporter,
+  cookieParser_AccessTokenConfigs,
+  origin,
   front_URL,
   back_URL,
+  resend,
 } from "../../Configuraciones.js";
 
 class Controlador_Usuario {
@@ -87,7 +87,7 @@ class Controlador_Usuario {
         );
 
       const mailOptions = {
-        from: smtp,
+        from: origin,
         to: correo,
         subject: "Confirma tu correo en Localy MX",
         html: this.#emails.verificacionEmail(
@@ -96,11 +96,11 @@ class Controlador_Usuario {
         ),
       };
 
-      await transporter.sendMail(mailOptions);
+      await resend.emails.send(mailOptions);
 
       return res.status(200).json({
         exito: true,
-        mensaje: "Usuario registrado. Se envió un correo de verificación.",
+        mensaje: `Se envió un correo de confirmación a tu dirección de correo electrónico: ${correo} desde ${origin}`,
       });
     } catch (error) {
       console.error("Error al registrar usuario:", error);
@@ -182,7 +182,7 @@ class Controlador_Usuario {
       };
 
       const token = ServiciosGenerales.jwt_accessToken(datos);
-      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
+      const atConfigs = cookieParser_AccessTokenConfigs;
 
       res
         .cookie("token_de_acceso", token, atConfigs)
@@ -202,7 +202,7 @@ class Controlador_Usuario {
   };
 
   logout = async (req, res) => {
-    const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
+    const atConfigs = cookieParser_AccessTokenConfigs;
 
     res
       .clearCookie("token_de_acceso", atConfigs)
@@ -402,7 +402,7 @@ class Controlador_Usuario {
         negocioId: info.negocioId,
         negocioActivo: info.negocioActivo,
       });
-      const atConfigs = ServiciosGenerales.cookieParser_AccessTokenConfigs();
+      const atConfigs = cookieParser_AccessTokenConfigs;
 
       return res
         .cookie("token_de_acceso", JWToken, atConfigs)
@@ -439,7 +439,7 @@ class Controlador_Usuario {
         );
 
       const mailOptions = {
-        from: smtp,
+        from: origin,
         to: correo,
         subject: "Confirma el cambio de contraseña",
         html: this.#emails.verificacionCambioContrasena(
@@ -448,12 +448,11 @@ class Controlador_Usuario {
         ),
       };
 
-      await transporter.sendMail(mailOptions);
+      await resend.emails.send(mailOptions);
 
       return res.status(200).json({
         exito: true,
-        mensaje:
-          "Se envió un correo de confirmación a tu dirección de correo electrónico.",
+        mensaje: `Se envió un correo de confirmación a tu dirección de correo electrónico: ${correo} desde ${origin}`,
       });
     } catch (err) {
       console.error(

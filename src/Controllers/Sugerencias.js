@@ -34,7 +34,7 @@ class Controlador_Sugerencia {
         req.negocio_id,
         negocio.nombre,
         req.usuario.correo,
-        req.usuario.usuario
+        req.usuario.usuario,
       );
 
       res.status(200).json({
@@ -94,7 +94,7 @@ class Controlador_Sugerencia {
     try {
       const snapshot = await this.#modeloSugerencia.obtenerSugerencias(
         false,
-        req.negocio_id
+        req.negocio_id,
       );
       const sugerencias = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -105,7 +105,7 @@ class Controlador_Sugerencia {
     } catch (err) {
       console.error(
         "Ocurrió un error al mostrar las sugerencias de negocio:",
-        err
+        err,
       );
       res.status(500).json({
         exito: false,

@@ -12,7 +12,6 @@ class ServiciosStripe {
   static #modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
   static #interaccionStripe = new Interaccion_Stripe();
 
-
   static async;
 }
 

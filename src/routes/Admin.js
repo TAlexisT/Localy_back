@@ -24,7 +24,7 @@ const middlewaresGenerales = new MiddlewaresGenerales();
 router.get(
   "/disparar-subscripcion-jobs",
   middlewaresGenerales.validarAdministrador,
-  controladorAdmin.dispararSubscripcionJobs
+  controladorAdmin.dispararSubscripcionJobs,
 );
 
 export default router;

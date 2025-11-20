@@ -28,25 +28,25 @@ router.post(
   "/crear-sugerencia/:negocio_id",
   sugerenciasMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorSugerencias.crearSugerencia
+  controladorSugerencias.crearSugerencia,
 );
 
 router.delete(
   "/borrar-sugerencia/:sugerencia_id",
   middlewaresGenerales.validarAdministrador,
-  controladorSugerencias.borrarSugerencia
+  controladorSugerencias.borrarSugerencia,
 );
 
 router.get(
   "/obtener-toda-sugerencia",
   middlewaresGenerales.validarAdministrador,
-  controladorSugerencias.mostrarCadaSugerencia
+  controladorSugerencias.mostrarCadaSugerencia,
 );
 router.get(
   "/obtener-sugerencias/:negocio_id",
   sugerenciasMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorSugerencias.mostrarSugerenciasNegocio
+  controladorSugerencias.mostrarSugerenciasNegocio,
 );
 
 export default router;

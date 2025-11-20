@@ -25,7 +25,7 @@ class ServiciosNegocios {
     distancia_rango = null,
     membresia = null,
     cursor,
-    direccion
+    direccion,
   ) => {
     var consulta;
     var datos = [];
@@ -44,14 +44,14 @@ class ServiciosNegocios {
       distancia_orden,
       usuario_locacion,
       distancia_rango,
-      membresia
+      membresia,
     );
 
     if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
       consulta = consulta.where(
         "random_key",
         avanza ? "<" : ">",
-        !cursor ? seed : cursor
+        !cursor ? seed : cursor,
       );
 
       const snapshot = await consulta.get();
@@ -61,7 +61,7 @@ class ServiciosNegocios {
       if (datos.length < tamano) {
         consulta = await this.#modeloNegocio.tamanoConsultaOrdenada(
           tamano - datos.length,
-          avanza
+          avanza,
         );
 
         consulta = consulta.where("random_key", avanza ? ">" : "<", seed);
@@ -71,7 +71,7 @@ class ServiciosNegocios {
           distancia_orden,
           usuario_locacion,
           distancia_rango,
-          membresia
+          membresia,
         );
 
         const snapshotDespues = await consulta.get();
@@ -175,7 +175,7 @@ class ServiciosNegocios {
           item.ubicacion.latitude,
           item.ubicacion.longitude,
           usuarioUbicacion.latitude,
-          usuarioUbicacion.longitude
+          usuarioUbicacion.longitude,
         );
       item.logo = servs.soloURL(item.logo);
       return item;
@@ -225,7 +225,7 @@ class ServiciosNegocios {
           usuario_locacion.latitude,
           usuario_locacion.longitude,
           negocio.ubicacion.latitude,
-          negocio.ubicacion.longitude
+          negocio.ubicacion.longitude,
         );
         negocio.distancia = distance;
       }
@@ -233,7 +233,7 @@ class ServiciosNegocios {
     });
 
     negocios.sort((a, b) =>
-      orden == "DESC" ? b.distancia - a.distancia : a.distancia - b.distancia
+      orden == "DESC" ? b.distancia - a.distancia : a.distancia - b.distancia,
     );
 
     return negocios;
@@ -264,12 +264,12 @@ class ServiciosNegocios {
     distancia_orden = null,
     usuario_locacion = null,
     distancia_rango = null,
-    membresia = null
+    membresia = null,
   ) => {
     if (usuario_locacion && distancia_orden && distancia_rango) {
       const delimitacion = this.#cuadroDelimitador(
         usuario_locacion,
-        distancia_rango
+        distancia_rango,
       );
 
       consulta = consulta

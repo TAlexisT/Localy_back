@@ -36,7 +36,7 @@ class Negocios_Middleware {
         .json({ exito: false, mensaje: "ID de negocio no proporcionado." });
     try {
       const negocio = await this.#modeloNegocio.negocioDeUsuario(
-        req.usuario.id
+        req.usuario.id,
       );
       if (
         negocio.empty ||
@@ -48,8 +48,8 @@ class Negocios_Middleware {
           mensaje: negocio.empty
             ? "No fue encontrado ningun negocio vinculado a la sesion del usuario."
             : negocio.docs[0].id !== negocio_id
-            ? "La sesion de usuario no es propietaria del negocio seleccionado."
-            : "El negocio especificado ya se encuentra activo. Contacta a soporte en caso de dudas.",
+              ? "La sesion de usuario no es propietaria del negocio seleccionado."
+              : "El negocio especificado ya se encuentra activo. Contacta a soporte en caso de dudas.",
         });
       next();
     } catch (err) {

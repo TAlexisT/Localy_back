@@ -1,4 +1,4 @@
-import SubscripcionJobs from "../jobs/GestionarSuscripcionJobs.js";
+import SubscripcionJobs from "../jobs/GestionarJobs.js";
 
 class Controlador_Admin {
   /**
@@ -22,7 +22,7 @@ class Controlador_Admin {
       });
     } catch (err) {
       console.error(
-        "Ocurrio un error al ejecutar manualmente los jobs referentes a las subscripciones."
+        "Ocurrio un error al ejecutar manualmente los jobs referentes a las subscripciones.",
       );
       res
         .status(500)

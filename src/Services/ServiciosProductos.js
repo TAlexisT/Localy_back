@@ -62,7 +62,7 @@ class ServiciosProductos {
     general,
     categoria,
     precio_orden,
-    precio_rango
+    precio_rango,
   ) => {
     const ordenPorPrecio = !(precio_orden == "" || precio_orden == null);
     const precioRango = precio_rango
@@ -82,7 +82,7 @@ class ServiciosProductos {
         true,
         precio_orden ? precio_orden.toLowerCase() : "asc",
         categoria,
-        precioRango || null
+        precioRango || null,
       );
 
       if (cursor) {
@@ -123,14 +123,14 @@ class ServiciosProductos {
         false,
         avanza ? "desc" : "asc",
         categoria,
-        precioRango || null
+        precioRango || null,
       );
 
       if (!cursor || (cursor < seed && avanza) || (cursor > seed && !avanza)) {
         consulta = consulta.where(
           "random_key",
           avanza ? "<" : ">",
-          !cursor ? seed : cursor
+          !cursor ? seed : cursor,
         );
 
         const snapshot = await consulta.get();
@@ -143,7 +143,7 @@ class ServiciosProductos {
             false,
             avanza ? "desc" : "asc",
             categoria,
-            precioRango
+            precioRango,
           );
 
           consulta = consulta.where("random_key", avanza ? ">" : "<", seed);
@@ -178,7 +178,7 @@ class ServiciosProductos {
         (prod) =>
           prod.nombre.toLowerCase().includes(general.toLowerCase()) ||
           prod.descripcion.toLowerCase().includes(general.toLowerCase()) ||
-          prod.categoria.toLowerCase().includes(general.toLowerCase())
+          prod.categoria.toLowerCase().includes(general.toLowerCase()),
       );
 
     for (var i = 0; i < datos.length; i++) {
@@ -194,9 +194,8 @@ class ServiciosProductos {
   };
 
   obtenerMultiplesProductos = async (productosRefs = []) => {
-    const productosSnap = await this.#modeloProducto.obtenerLista(
-      productosRefs
-    );
+    const productosSnap =
+      await this.#modeloProducto.obtenerLista(productosRefs);
     if (!productosSnap) return [];
     var datos = this.#extraerDatos(productosSnap);
     return datos.map((item) => {

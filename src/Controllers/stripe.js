@@ -1,7 +1,11 @@
+// Interaccion con base de datos
 import Modelo_Usuario from "../db/Usuarios.js";
 import Modelo_Negocio from "../db/Negocios.js";
 import Modelo_Productos from "../db/Productos.js";
 import Modelo_Tramites_Pendientes from "../db/Tramites_Pendientes.js";
+import Modelo_Stripe from "../db/Stripe.js";
+
+// Interaccion con ThirdParty
 import Interaccion_Stripe from "../ThirdParty/Stripe.js";
 
 class Controlador_Stripe {
@@ -13,6 +17,7 @@ class Controlador_Stripe {
   #modeloProducto;
   #modeloTramitesPendientes;
   #interaccionStripe;
+  #modeloStripe;
 
   /**
    * Se inicializan todas las instancias de clases subyacentes
@@ -23,6 +28,7 @@ class Controlador_Stripe {
     this.#modeloProducto = new Modelo_Productos();
     this.#modeloTramitesPendientes = new Modelo_Tramites_Pendientes();
     this.#interaccionStripe = new Interaccion_Stripe();
+    this.#modeloStripe = new Modelo_Stripe();
   }
 
   webhookBase = async (req, res) => {
@@ -34,6 +40,11 @@ class Controlador_Stripe {
     } catch (err) {
       console.error("Falló la verificación del webhook:", err.message);
       return res.status(400).json({ received: true });
+    }
+
+    if (await this.#modeloStripe.eventAlreadyHandled(event.id)) {
+      console.warn("Evento duplicado ignorado:", event.id);
+      return res.status(200).json({ received: true });
     }
 
     try {
@@ -50,9 +61,16 @@ class Controlador_Stripe {
           await this.#desactivarSesion(event.data.object);
           break;
 
+        case "customer.subscription.deleted":
+          await this.#desactivarSesion(event.data.object);
+          break;
+
         default:
+          console.warn(`Evento no manejado: ${event.type}`);
           break;
       }
+
+      await this.#modeloStripe.saveEventId(event.id);
     } catch (err) {
       console.error("Error processing webhook:", err);
       return res.status(500).json({ error: "El proceso ha fallado" });
@@ -62,7 +80,7 @@ class Controlador_Stripe {
 
   // Metodos privados
   #pagoInicial = async (session) => {
-    const customerId = session.customer;
+    const customer_id = session.customer;
     const { tramiteId, recurrente } = session.metadata;
 
     const tramiteSnap =
@@ -91,7 +109,7 @@ class Controlador_Stripe {
       await this.#modeloNegocio.renovarSubscripcion(
         negocio_id,
         price_id,
-        customerId,
+        customer_id,
         JSON.parse(recurrente),
         membresia
       );
@@ -119,7 +137,7 @@ class Controlador_Stripe {
       correo,
       telefono,
       price_id,
-      customerId,
+      customer_id,
       JSON.parse(recurrente),
       membresia
     );
@@ -132,13 +150,13 @@ class Controlador_Stripe {
   };
 
   #refrescarSesion = async (session) => {
-    const customerId = session.customer;
-    await this.#modeloNegocio.refrescarSubscripcion(customerId);
+    const customer_id = session.customer;
+    await this.#modeloNegocio.refrescarSubscripcion(customer_id);
   };
 
   #desactivarSesion = async (session) => {
-    const customerId = session.customer;
-    await this.#modeloNegocio.desactivarSubscripcion(customerId);
+    const customer_id = session.customer;
+    await this.#modeloNegocio.desactivarSubscripcion(customer_id);
   };
 }
 

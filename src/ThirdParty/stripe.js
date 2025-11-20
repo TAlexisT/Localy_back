@@ -1,4 +1,4 @@
-import { stripe, webhook } from "../../Configuraciones.js";
+import { stripe, webhook, front_URL } from "../../Configuraciones.js";
 
 class Interaccion_Stripe {
   async crearSession(
@@ -32,6 +32,13 @@ class Interaccion_Stripe {
 
   eventConstructor = (body, sig) => {
     return stripe.webhooks.constructEvent(body, sig, webhook);
+  };
+
+  facturacionPortal = async (customer_id) => {
+    return await stripe.billingPortal.sessions.create({
+      customer: customer_id,
+      return_url: front_URL,
+    });
   };
 }
 

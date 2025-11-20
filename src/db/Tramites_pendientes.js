@@ -9,7 +9,7 @@ class Modelo_Tramites_Pendientes {
     usuario,
     token_verificacion,
     renovacion,
-    membresia
+    membresia,
   ) {
     return await db.collection("tramites_pendientes").add({
       usuario,
@@ -23,7 +23,7 @@ class Modelo_Tramites_Pendientes {
       token_verificacion,
       creado: admin.firestore.FieldValue.serverTimestamp(),
       expira_en: admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() + 24 * 60 * 60 * 1000)
+        new Date(Date.now() + 24 * 60 * 60 * 1000),
       ),
     });
   }
@@ -32,7 +32,7 @@ class Modelo_Tramites_Pendientes {
     correo,
     contrasena,
     usuario,
-    token_verificacion
+    token_verificacion,
   ) {
     return await db.collection("tramites_pendientes").add({
       correo,
@@ -42,7 +42,7 @@ class Modelo_Tramites_Pendientes {
       token_verificacion,
       creado: admin.firestore.FieldValue.serverTimestamp(),
       expira_en: admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() + 24 * 60 * 60 * 1000)
+        new Date(Date.now() + 24 * 60 * 60 * 1000),
       ),
     });
   }
@@ -50,7 +50,7 @@ class Modelo_Tramites_Pendientes {
   async crearTramitePendienteContrasena(
     usuario_id,
     correo,
-    token_verificacion
+    token_verificacion,
   ) {
     return await db.collection("tramites_pendientes").add({
       usuario_id,
@@ -58,7 +58,7 @@ class Modelo_Tramites_Pendientes {
       token_verificacion,
       creado: admin.firestore.FieldValue.serverTimestamp(),
       expira_en: admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() + 1 * 60 * 60 * 1000)
+        new Date(Date.now() + 1 * 60 * 60 * 1000),
       ),
     });
   }
@@ -75,7 +75,7 @@ class Modelo_Tramites_Pendientes {
     usuario_id,
     negocio_id,
     price_id,
-    membresia
+    membresia,
   ) {
     return await db.collection("tramites_pendientes").add({
       usuario_id,

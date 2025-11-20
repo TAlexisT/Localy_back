@@ -22,7 +22,7 @@ const controladorStripe = new Controlador_Stripe();
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  controladorStripe.webhookBase
+  controladorStripe.webhookBase,
 );
 
 export default router;

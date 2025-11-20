@@ -30,29 +30,29 @@ router.post("/logout", controladorUsuario.logout);
 router.post(
   "/autenticar-sesion",
   usuariosMiddleware.validarSesion,
-  controladorUsuario.autenticarSecion
+  controladorUsuario.autenticarSecion,
 );
 router.post(
   "/autenticar-negocio/:negocio_id",
   usuariosMiddleware.validarSesion,
   middlewaresGenerales.validarUsuario,
-  controladorUsuario.autenticarNegocio
+  controladorUsuario.autenticarNegocio,
 );
 router.post(
   "/favoritos/:usuario_id",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
-  controladorUsuario.mostrarFavoritos
+  controladorUsuario.mostrarFavoritos,
 );
 router.post(
   "/crear-favorito/:usuario_id",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
-  controladorUsuario.crearFavorito
+  controladorUsuario.crearFavorito,
 );
 router.post(
   "/peticion-cambiar-contrasena",
-  controladorUsuario.peticionCambiarContrasena
+  controladorUsuario.peticionCambiarContrasena,
 );
 router.post("/cambiar-contrasena", controladorUsuario.cambiarContrasena);
 
@@ -60,7 +60,7 @@ router.delete(
   "/borrar-favorito/:usuario_id/:favorito_id/:tipo",
   usuariosMiddleware.validarSesion,
   usuariosMiddleware.validarUsuario,
-  controladorUsuario.borrarFavorito
+  controladorUsuario.borrarFavorito,
 );
 
 router.get("/verificar-email", controladorUsuario.verificarEmail);
