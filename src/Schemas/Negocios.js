@@ -153,7 +153,7 @@ const esquemaPropietario = joi.object({
     .string()
     .pattern(
       new RegExp(
-        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]",
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()\\-_=+\\[\\]{}|\\\\:;\"'<>,.?/~`])[A-Za-z\\d!@#$%^&*()\\-_=+\\[\\]{}|\\\\:;\"'<>,.?/~`]{8,30}$",
       ),
     )
     .min(8)
@@ -161,10 +161,10 @@ const esquemaPropietario = joi.object({
     .required()
     .messages({
       "string.pattern.base":
-        "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character",
-      "string.min": "Password must be at least 8 characters long",
-      "string.max": "Password cannot exceed 30 characters",
-      "any.required": "Password is required",
+        "La contraseña debe contener al menos una letra minúscula, una mayúscula, un número y un carácter especial",
+      "string.min": "La contraseña debe tener al menos 8 caracteres",
+      "string.max": "La contraseña no puede exceder 30 caracteres",
+      "any.required": "La contraseña es requerida",
     }),
 
   correo: joi
@@ -175,13 +175,13 @@ const esquemaPropietario = joi.object({
     })
     .required()
     .messages({
-      "string.email": "Please provide a valid email address",
-      "any.required": "Email is required",
+      "string.email": "Por favor proporciona una dirección de correo electrónico válida",
+      "any.required": "El correo electrónico es obligatorio",
     }),
 
   telefono: joi.string().pattern(new RegExp("^[+]?[0-9]{8,15}$")).messages({
     "string.pattern.base":
-      "Please provide a valid phone number with 8-15 digits",
+      "Por favor proporciona un número de teléfono válido de 8 a 15 dígitos",
   }),
 
   price_id: joi
@@ -253,8 +253,8 @@ const renovacion = joi.object({
     .required()
     .messages({
       "string.pattern.base":
-        "Price ID must be a valid Stripe price ID format (price_ followed by 24 alphanumeric characters)",
-      "any.required": "Price ID is required",
+        "El ID de precio debe tener el formato válido de Stripe (price_ seguido de 24 caracteres alfanuméricos)",
+      "any.required": "El ID de precio es obligatorio",
     }),
 
   recurrente: joi.boolean().required().messages({
